@@ -7,6 +7,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
+import kotlinx.serialization.Serializable
+
+@Serializable
+private data class NotificationData(
+    val voicepack_name: String,
+    val created_by: Long,
+    val event_type: String
+)
 
 @Service
 class NotificationService(
@@ -17,9 +25,10 @@ class NotificationService(
     fun notifyVoicepackComplete(voicepack: Voicepack) {
         coroutineScope.launch {
             supabaseClient.postgrest["voicepack_notifications"].insert(
-                mapOf(
-                    "voicepack_id" to voicepack.id,
-                    "event_type" to "voicepack_complete"
+                NotificationData(
+                    voicepack_name = voicepack.packName,
+                    created_by = voicepack.author.id,
+                    event_type = "voicepack_complete"
                 )
             )
         }
@@ -28,9 +37,10 @@ class NotificationService(
     fun notifyVoicepackFailed(voicepack: Voicepack) {
         coroutineScope.launch {
             supabaseClient.postgrest["voicepack_notifications"].insert(
-                mapOf(
-                    "voicepack_id" to voicepack.id,
-                    "event_type" to "voicepack_failed"
+                NotificationData(
+                    voicepack_name = voicepack.packName,
+                    created_by = voicepack.author.id,
+                    event_type = "voicepack_failed"
                 )
             )
         }
