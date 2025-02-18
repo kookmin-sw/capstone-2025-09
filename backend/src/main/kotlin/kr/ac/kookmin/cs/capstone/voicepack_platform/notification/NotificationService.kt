@@ -2,22 +2,37 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.notification
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.Voicepack
 import org.springframework.stereotype.Service
-import org.springframework.jdbc.core.JdbcTemplate
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.postgrest.postgrest
 
 @Service
 class NotificationService(
-    private val jdbcTemplate: JdbcTemplate
+    private val supabaseClient: SupabaseClient
 ) {
-    // TODO 실제로 동작하는지 모름, Supabase는 Dependency 다를 수 있음.
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     fun notifyVoicepackComplete(voicepack: Voicepack) {
-        jdbcTemplate.execute(
-            "NOTIFY voicepack_complete, '${voicepack.id}'"
-        )
+        coroutineScope.launch {
+            supabaseClient.postgrest["voicepack_notifications"].insert(
+                mapOf(
+                    "voicepack_id" to voicepack.id,
+                    "event_type" to "voicepack_complete"
+                )
+            )
+        }
     }
-    
+
     fun notifyVoicepackFailed(voicepack: Voicepack) {
-        jdbcTemplate.execute(
-            "NOTIFY voicepack_failed, '${voicepack.id}'"
-        )
+        coroutineScope.launch {
+            supabaseClient.postgrest["voicepack_notifications"].insert(
+                mapOf(
+                    "voicepack_id" to voicepack.id,
+                    "event_type" to "voicepack_failed"
+                )
+            )
+        }
     }
 } 
