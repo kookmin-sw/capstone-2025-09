@@ -11,7 +11,7 @@ const LoginPage = () => {
       alert('회원가입이 완료되었습니다!'); 
       setIsSignUp(false); // 회원가입 후 다시 로그인 화면으로 이동
     } else {
-      navigate('/landingpage');
+      navigate('/landingpage', { replace: true }); // replace 옵션을 사용하여 히스토리 업데이트
     }
   };
 
