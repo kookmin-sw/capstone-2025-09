@@ -3,15 +3,43 @@ import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false); // 회원가입 모드인지 확인하는 상태
+  const [isSignUp, setIsSignUp] = useState(false); // 로그인 모드인지 회원가입 모드인지 확인하는 상태
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLoginOrSignUp = () => {
+  const handleLoginOrSignUp = async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+
     if (isSignUp) {
-      // 회원가입 시 처리 로직 (실제 회원가입 API 호출 추가 가능)
-      alert('회원가입이 완료되었습니다!'); 
-      setIsSignUp(false); // 회원가입 후 다시 로그인 화면으로 이동
+      // 회원가입 요청
+      try {
+        const response = await fetch(process.env.REACT_APP_SIGNUP_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json(); // 응답 데이터 파싱
+        console.log('Sign Up Response:', data); // 응답 데이터 콘솔 출력
+
+        if (response.ok) {
+          alert('회원가입이 완료되었습니다!');
+          setEmail('');
+          setPassword('');
+          setIsSignUp(false); // 회원가입 후 다시 로그인 화면으로 이동
+        } else {
+          alert(`회원가입에 실패했습니다: ${data.message || 'Unknown error'}`);
+        }
+      } catch (error) {
+        console.error('Error during sign up:', error);
+        alert('회원가입 중 오류가 발생했습니다.');
+      }
     } else {
-      navigate('/landingpage', { replace: true }); // replace 옵션을 사용하여 히스토리 업데이트
+      // 로그인 모드일 때 랜딩 페이지로 네비게이트
+      navigate('/landingpage', { replace: true });
     }
   };
 
@@ -33,6 +61,8 @@ const LoginPage = () => {
             className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="email"
             type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="mb-6">
@@ -47,12 +77,16 @@ const LoginPage = () => {
               className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-4 mb-2">
-          {isSignUp ? ("") : (
+          {isSignUp ? (
+            ''
+          ) : (
             <>
               계정이 없으신가요?{' '}
               <button

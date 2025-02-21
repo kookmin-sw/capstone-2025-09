@@ -2,15 +2,15 @@ import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function CreateVoice() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioUrls, setAudioUrls] = useState([null, null]);
+  const [isRecording, setIsRecording] = useState(false); //녹음 중인지 여부 확인
+  const [audioUrls, setAudioUrls] = useState([null, null]); //녹음된 오디오 파일의 URL 저장
   const [recordingIndex, setRecordingIndex] = useState(null);
   const [timer, setTimer] = useState(0);
   const [voicePackName, setVoicePackName] = useState('');
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const timerRef = useRef(null);
-  const navigate = useNavigate();
+  const mediaRecorderRef = useRef(null); //미디어 녹음기 참조
+  const audioChunksRef = useRef([]); //오디오 청크 저장
+  const timerRef = useRef(null); //타이머 참조
+  const navigate = useNavigate(); //네비게이트 함수 참조
 
   const handleStartRecording = async (index) => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
