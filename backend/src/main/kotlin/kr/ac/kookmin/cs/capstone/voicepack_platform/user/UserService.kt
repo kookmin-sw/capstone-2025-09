@@ -10,14 +10,13 @@ class UserService(
 ) {
     @Transactional
     fun signup(request: UserSignupRequest): Long {
-        if (userRepository.findByUsername(request.username) != null) {
-            throw IllegalArgumentException("이미 존재하는 사용자 이름입니다")
+        if (userRepository.findByEmail(request.email) != null) {
+            throw IllegalArgumentException("이미 존재하는 이메일입니다")
         }
 
         val user = User(
-            username = request.username,
-            password = request.password, // 실제 구현시 암호화 필요
-            email = request.email
+            email = request.email,
+            password = request.password // 실제 구현시 암호화 필요
         )
         
         return userRepository.save(user).id
