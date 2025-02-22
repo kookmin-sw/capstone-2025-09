@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 function CreateVoice() {
   const [isRecording, setIsRecording] = useState(false); //녹음 중인지 여부 확인
   const [audioUrls, setAudioUrls] = useState([null, null]); //녹음된 오디오 파일의 URL 저장
-  const [recordingIndex, setRecordingIndex] = useState(null);
-  const [timer, setTimer] = useState(0);
-  const [voicePackName, setVoicePackName] = useState('');
+  const [recordingIndex, setRecordingIndex] = useState(null); //현재 녹음 중인 인덱스
+  const [timer, setTimer] = useState(0); //녹음 시간 측정
+  const [voicePackName, setVoicePackName] = useState('');//보이스팩 이름
   const mediaRecorderRef = useRef(null); //미디어 녹음기 참조
   const audioChunksRef = useRef([]); //오디오 청크 저장
   const timerRef = useRef(null); //타이머 참조
