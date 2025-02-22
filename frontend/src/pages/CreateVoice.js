@@ -10,7 +10,7 @@ function CreateVoice() {
   const mediaRecorderRef = useRef(null); //미디어 녹음기 참조
   const audioChunksRef = useRef([]); //오디오 청크 저장
   const timerRef = useRef(null); //타이머 참조
-  const navigate = useNavigate(); //네비게이트 함수 참조
+  const navigate = useNavigate(); //네비게이트 함수 참조.
 
   const handleStartRecording = async (index) => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
