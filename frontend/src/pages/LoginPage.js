@@ -1,45 +1,32 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false); // 로그인 모드인지 회원가입 모드인지 확인하는 상태
+  const location = useLocation();
+  const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup'); // URL 기반 초기값 설정
+
+  // ✅ 추가: 이메일과 비밀번호 상태
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLoginOrSignUp = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
+  // isSignUp 상태 변경 시 URL 업데이트
+  useEffect(() => {
     if (isSignUp) {
-      // 회원가입 요청
-      try {
-        const response = await fetch(process.env.REACT_APP_SIGNUP_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json(); // 응답 데이터 파싱
-        console.log('Sign Up Response:', data); // 응답 데이터 콘솔 출력
-
-        if (response.ok) {
-          alert('회원가입이 완료되었습니다!');
-          setEmail('');
-          setPassword('');
-          setIsSignUp(false); // 회원가입 후 다시 로그인 화면으로 이동
-        } else {
-          alert(`회원가입에 실패했습니다: ${data.message || 'Unknown error'}`);
-        }
-      } catch (error) {
-        console.error('Error during sign up:', error);
-        alert('회원가입 중 오류가 발생했습니다.');
-      }
+      navigate('/signup', { replace: true });
     } else {
-      // 로그인 모드일 때 랜딩 페이지로 네비게이트
-      navigate('/landingpage', { replace: true });
+      navigate('/login', { replace: true });
+    }
+  }, [isSignUp, navigate]);
+
+  const handleLoginOrSignUp = () => {
+    if (isSignUp) {
+      alert('회원가입이 완료되었습니다!');
+      setIsSignUp(false); // 회원가입 후 로그인 화면으로 변경
+      setEmail(''); // ✅ 이메일 초기화
+      setPassword(''); // ✅ 비밀번호 초기화
+    } else {
+      navigate('/landingpage'); // 로그인 성공 시 이동할 페이지
     }
   };
 
@@ -51,25 +38,19 @@ const LoginPage = () => {
 
       <form className="w-full max-w-sm">
         <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
             이메일
           </label>
           <input
             className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={email} // ✅ 상태와 연결
+            onChange={(e) => setEmail(e.target.value)} // ✅ 입력값 업데이트
           />
         </div>
         <div className="mb-6">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="password"
-          >
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
             비밀번호
           </label>
           <div className="relative">
@@ -77,16 +58,14 @@ const LoginPage = () => {
               className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              value={password} // ✅ 상태와 연결
+              onChange={(e) => setPassword(e.target.value)} // ✅ 입력값 업데이트
             />
           </div>
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-4 mb-2">
-          {isSignUp ? (
-            ''
-          ) : (
+          {!isSignUp && (
             <>
               계정이 없으신가요?{' '}
               <button
