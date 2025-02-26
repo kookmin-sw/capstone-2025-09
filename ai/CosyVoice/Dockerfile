@@ -16,4 +16,4 @@ COPY . .
 EXPOSE 8080
 
 # FastAPI 서버 실행
-CMD ["uvicorn", "ai.CosyVoice.tts_service:app", "--host", "0.0.0.0", "--port", "8080"] 
+CMD ["uvicorn", "tts_service:app", "--host", "0.0.0.0", "--port", "8080"] 

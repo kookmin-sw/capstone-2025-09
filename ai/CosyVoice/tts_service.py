@@ -11,7 +11,8 @@ from cosyvoice.utils.speaker_manager import SpeakerManager
 import logging
 import io
 import time
-from downloadModel import downloadFolder
+from modelscope import snapshot_download
+import os
 
 
 # 로깅 설정
@@ -101,10 +102,9 @@ class TtsService:
 
 # 전역 서비스 인스턴스 생성
 modelPath = "./pretrained_models/CosyVoice2-0.5B"
-bucketName = '20259_pretrained_models'  # GCS 버킷 이름
-folderName = 'CosyVoice2.0.5B/'  # GCS에서의 폴더 경로 (슬래시 포함)
 
-downloadFolder(bucketName, folderName, modelPath)  # 폴더 다운로드 함수 호출
+if not os.path.exists(modelPath):
+    snapshot_download('iic/CosyVoice2-0.5B', local_dir=modelPath)
 
 tts_service = TtsService(modelPath)
 
