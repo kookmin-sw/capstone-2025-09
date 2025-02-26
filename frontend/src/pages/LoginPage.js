@@ -6,7 +6,7 @@ const LoginPage = () => {
   const location = useLocation();
   const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup'); // URL 기반 초기값 설정
 
-  // ✅ 추가: 이메일과 비밀번호 상태
+  // ✅ 이메일과 비밀번호 상태
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
@@ -19,13 +19,35 @@ const LoginPage = () => {
     }
   }, [isSignUp, navigate]);
 
-  const handleLoginOrSignUp = () => {
+  const handleLoginOrSignUp = async () => {
     if (isSignUp) {
-      alert('회원가입이 완료되었습니다!');
-      setIsSignUp(false); // 회원가입 후 로그인 화면으로 변경
-      setEmail(''); // ✅ 이메일 초기화
-      setPassword(''); // ✅ 비밀번호 초기화
+      try {
+        // ✅ 회원가입 API 요청
+        const response = await fetch(process.env.REACT_APP_SIGNUP_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await response.json(); // 🔹 서버 응답 JSON 변환
+        console.log('회원가입 응답:', data); // ✅ 서버 응답 콘솔 출력
+
+        if (response.ok) {
+          alert('회원가입이 완료되었습니다!');
+          setIsSignUp(false); // 회원가입 후 로그인 화면으로 변경
+          setEmail(''); // ✅ 이메일 초기화
+          setPassword(''); // ✅ 비밀번호 초기화
+        } else {
+          alert(`회원가입 실패: ${data.message || '알 수 없는 오류 발생'}`);
+        }
+      } catch (error) {
+        console.error('회원가입 오류:', error);
+        alert('회원가입 중 오류가 발생했습니다.');
+      }
     } else {
+      // ✅ 로그인 로직 (필요하면 API 요청 추가 가능)
       navigate('/landingpage'); // 로그인 성공 시 이동할 페이지
     }
   };
@@ -45,8 +67,8 @@ const LoginPage = () => {
             className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="email"
             type="email"
-            value={email} // ✅ 상태와 연결
-            onChange={(e) => setEmail(e.target.value)} // ✅ 입력값 업데이트
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
         </div>
         <div className="mb-6">
@@ -58,8 +80,8 @@ const LoginPage = () => {
               className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
-              value={password} // ✅ 상태와 연결
-              onChange={(e) => setPassword(e.target.value)} // ✅ 입력값 업데이트
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
         </div>
