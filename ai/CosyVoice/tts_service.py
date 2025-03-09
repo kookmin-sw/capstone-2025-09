@@ -83,18 +83,38 @@ class TtsService:
             )
             
             # 4. 결과 처리
-            audio_data = next(outputs)['tts_speech']
+            all_audio_data = []
             
-            # 5. WAV 파일로 변환 및 저장
+            # outputs를 순회하면서 오디오 데이터 수집 및 개별 저장
+            for idx, output in enumerate(outputs):
+                audio_data = output['tts_speech']
+                all_audio_data.append(audio_data)
+            
+            # 모든 오디오 데이터를 시간 축으로 연결
+            combined_audio = torch.cat(all_audio_data, dim=1)
+            
+            # 통합된 WAV 파일명 생성
+            wav_filename = f"combined_speech_{time.strftime('%Y%m%d_%H%M%S')}.wav"
+            
+            # 버퍼에 저장
             buffer = io.BytesIO()
-            torchaudio.save(buffer, audio_data, self.model.sample_rate, format="wav")
+            torchaudio.save(buffer, combined_audio, self.model.sample_rate, format="wav")
             
-            # WAV 파일 저장
-            wav_filename = f"synthesized_speech_{time.strftime('%Y%m%d_%H%M%S')}.wav"
-            torchaudio.save(wav_filename, audio_data, self.model.sample_rate, format="wav")
-            logger.info(f"WAV 파일 저장 완료: {wav_filename}")
-            
-            return buffer.getvalue()
+            # 오디오 정보 로깅
+            buffer_size = buffer.tell()
+            total_duration = combined_audio.shape[1] / self.sample_rate
+            logger.info(f"생성된 통합 오디오 크기: {buffer_size / 1024:.2f} KB")
+            logger.info(f"총 재생 시간: {total_duration:.2f}초")
+            del all_audio_data
+
+            return Response(
+                content=buffer.getvalue(),
+                media_type="audio/wav",
+                headers={
+                    "Content-Disposition": f"attachment; filename={wav_filename}"
+                }
+            )
+
             
         except Exception as e:
             logger.error(f"음성 합성 실패: {str(e)}")
@@ -135,19 +155,15 @@ async def synthesize_endpoint(
 ):
     """음성 합성 API 엔드포인트"""
     try:
+        logger.info(f"Received text: {text}")
+        
         audio_bytes = await tts_service.generate_speech(
             text=text,
             speaker_id=speaker_id,
             speed=speed
         )
         
-        return Response(
-            content=audio_bytes,
-            media_type="audio/wav",
-            headers={
-                "Content-Disposition": "attachment; filename=synthesized_speech.wav"
-            }
-        )
+        return audio_bytes
         
     except HTTPException as e:
         raise e
