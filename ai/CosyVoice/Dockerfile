@@ -25,4 +25,4 @@ ENV UVICORN_BUFFER_SIZE=16777216
 ENV TZ=Asia/Seoul      
 
 # FastAPI 서버 실행
-CMD ["uvicorn", "tts_service:app", "--host", "0.0.0.0", "--port", "8080"] 
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"] 

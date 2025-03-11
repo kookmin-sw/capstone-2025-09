@@ -40,4 +40,5 @@ WeTextProcessing==1.0.3
 python-multipart
 numpy
 git+https://github.com/shivammehta25/Matcha-TTS.git
-google-cloud-storage
+boto3
+dotenv
