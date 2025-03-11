@@ -31,7 +31,7 @@ class TtsService:
         self.model = CosyVoice2(model_path, load_jit=False, load_trt=False, fp16=False)
         logger.info("모델 로딩 완료")
 
-    def extract_speaker_features(
+    async def extract_speaker_features(
         self,
         speaker_id: str,
         prompt_text: str,

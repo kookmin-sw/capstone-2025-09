@@ -39,3 +39,7 @@ async def synthesize_endpoint(
 def health_check():
     """서비스 상태 확인"""
     return {"status": "healthy"} 
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8080)
