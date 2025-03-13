@@ -4,9 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class VoicepackConvertRequest(
-    val packName: String,
-    val audioFiles: List<String>, // S3에 임시로 업로드된 오디오 파일들의 경로
-    val options: Map<String, String> // AI 모델에 전달할 옵션들
+    val name: String,
+    val voiceFile: String
 )
 
 @Serializable
@@ -18,8 +17,7 @@ data class VoicepackConvertResponse(
 @Serializable
 data class AIModelRequest(
     val voicepackId: Long,
-    val audioFiles: List<String>,
-    val options: Map<String, String>
+    val voiceFile: String
 )
 
 @Serializable

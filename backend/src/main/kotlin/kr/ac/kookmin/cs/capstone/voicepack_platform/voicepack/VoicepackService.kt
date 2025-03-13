@@ -14,18 +14,24 @@ import io.ktor.client.plugins.logging.LogLevel
 import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.OffsetDateTime
 
 @Service
 class VoicepackService(
         private val voicepackRepository: VoicepackRepository,
+        private val voicepackRequestRepository: VoicepackRequestRepository,
         private val userRepository: UserRepository,
         private val notificationService: NotificationService,
         @Value("\${ai.model.service.url}") private val aiModelServiceUrl: String
 ) {
+    
     private val httpClient = HttpClient(Java) {
         install(ContentNegotiation) { json() }
         
@@ -37,65 +43,105 @@ class VoicepackService(
     }
     private val logger = LoggerFactory.getLogger(this::class.java)
 
+    // 1. 보이스팩 변환 요청
+    @Transactional
     suspend fun convertVoicepack(
             userId: Long,
             request: VoicepackConvertRequest
     ): VoicepackConvertResponse {
+        logger.info("보이스팩 변환 요청: userId={}, request={}", userId, request)
         val user = findUser(userId)
-        validatePackName(request.packName, user.id)
+        validatePackName(request.name, user.id)
 
-        val voicepack =
-                Voicepack(
-                        packName = request.packName,
-                        author = user,
-                        s3Path = "",
-                        status = VoicepackStatus.PROCESSING
-                )
+        // 2. 보이스팩 요청 엔티티 생성
+        val voicepackRequest = VoicepackRequest(
+            name = request.name,
+            author = user,
+            status = VoicepackRequestStatus.PROCESSING
+        )
+        voicepackRequestRepository.save(voicepackRequest)
 
         return try {
-            processVoicepackConversion(voicepack, request)
-            notificationService.notifyVoicepackComplete(voicepack)
-            VoicepackConvertResponse(voicepack.id, VoicepackStatus.COMPLETED.name)
+            processVoicepackConversion(voicepackRequest, request)
+            notificationService.notifyVoicepackComplete(voicepackRequest)
+            VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.COMPLETED.name)
         } catch (e: Exception) {
-            notificationService.notifyVoicepackFailed(voicepack)
-            VoicepackConvertResponse(voicepack.id, VoicepackStatus.FAILED.name)
+            voicepackRequest.status = VoicepackRequestStatus.FAILED
+            voicepackRequestRepository.save(voicepackRequest)
+            notificationService.notifyVoicepackFailed(voicepackRequest)
+            VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.FAILED.name)
         }
     }
 
+    // 보이스팩 변환 처리
     @Transactional
     private suspend fun processVoicepackConversion(
-            voicepack: Voicepack,
+            voicepackRequest: VoicepackRequest,
             request: VoicepackConvertRequest
     ): VoicepackConvertResponse {
         try {
-            voicepackRepository.save(voicepack)
-
             val aiModelRequest = AIModelRequest(
-                    voicepackId = voicepack.id,
-                    audioFiles = request.audioFiles,
-                    options = request.options
+                    voicepackId = voicepackRequest.id,
+                    voiceFile = request.voiceFile
             )
             
-            logger.info("AI 모델 요청: voicepackId={}, request={}", voicepack.id, aiModelRequest)
+            logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
             
             val response = httpClient.post("$aiModelServiceUrl/process") {
                 contentType(ContentType.Application.Json)
                 setBody(aiModelRequest)
             }
+
             val aiModelResponse: AIModelResponse = response.body()
             
-            logger.info("AI 모델 응답: voicepackId={}, response={}", voicepack.id, aiModelResponse)
+            logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
 
-            voicepack.status = VoicepackStatus.COMPLETED
-            voicepack.s3Path = aiModelResponse.outputPath
+            // 변환 성공 시 Voicepack 엔티티 생성
+            voicepackRequest.status = VoicepackRequestStatus.COMPLETED
+            voicepackRequest.s3Path = aiModelResponse.outputPath
+            voicepackRequest.completedAt = OffsetDateTime.now()
+            voicepackRequestRepository.save(voicepackRequest)
+
+            // 완성된 보이스팩 생성
+            val voicepack = Voicepack(
+                name = voicepackRequest.name,
+                author = voicepackRequest.author,
+                s3Path = aiModelResponse.outputPath
+            )
             voicepackRepository.save(voicepack)
+
         } catch (e: Exception) {
-            logger.error("AI 모델 처리 실패: voicepackId={}, error={}", voicepack.id, e.message)
-            voicepackRepository.delete(voicepack)
+            logger.error("AI 모델 처리 실패: requestId={}, error={}", voicepackRequest.id, e.message)
             throw e
         }
 
-        return VoicepackConvertResponse(voicepack.id, voicepack.status.name)
+        return VoicepackConvertResponse(voicepackRequest.id, voicepackRequest.status.name)
+    }
+
+    // 보이스팩 요청 목록 조회
+    fun getVoicepackRequests(userId: Long): List<VoicepackRequestDto> {
+        val requests = voicepackRequestRepository.findByAuthorId(userId)
+        return requests.map { VoicepackRequestDto.fromEntity(it) }
+    }
+
+    // 보이스팩 요청 상태 조회
+    fun getVoicepackRequestStatus(userId: Long, requestId: Long): VoicepackRequestDto {
+        val request = voicepackRequestRepository.findByIdAndAuthorId(requestId, userId)
+            ?: throw IllegalArgumentException("요청을 찾을 수 없습니다")
+        return VoicepackRequestDto.fromEntity(request)
+    }
+
+    // 완성된 보이스팩 목록 조회
+    fun getVoicepacks(userId: Long): List<VoicepackDto> {
+        val voicepacks = voicepackRepository.findByAuthorId(userId)
+        return voicepacks.map { VoicepackDto.fromEntity(it) }
+    }
+
+    // 완성된 보이스팩 조회
+    fun getVoicepack(userId: Long, voicepackId: Long): VoicepackDto {
+        val voicepack = voicepackRepository.findByIdAndAuthorId(voicepackId, userId)
+            ?: throw IllegalArgumentException("보이스팩을 찾을 수 없습니다")
+        return VoicepackDto.fromEntity(voicepack)
     }
 
     private fun findUser(userId: Long) =
@@ -104,7 +150,8 @@ class VoicepackService(
             }
 
     private fun validatePackName(packName: String, userId: Long) {
-        if (voicepackRepository.existsByPackNameAndAuthorId(packName, userId)) {
+        if (voicepackRepository.existsByNameAndAuthorId(packName, userId)) {
+            logger.error("이미 같은 이름의 보이스팩이 존재합니다: packName={}, userId={}", packName, userId)
             throw IllegalArgumentException("이미 같은 이름의 보이스팩이 존재합니다")
         }
     }

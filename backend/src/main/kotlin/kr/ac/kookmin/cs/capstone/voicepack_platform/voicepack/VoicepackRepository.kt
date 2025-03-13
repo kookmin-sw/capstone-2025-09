@@ -5,5 +5,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface VoicepackRepository : JpaRepository<Voicepack, Long> {
-    fun existsByPackNameAndAuthorId(packName: String, authorId: Long): Boolean
+    fun findByAuthorId(authorId: Long): List<Voicepack>
+    fun existsByNameAndAuthorId(name: String, authorId: Long): Boolean
+    fun findByIdAndAuthorId(id: Long, authorId: Long): Voicepack?
 } 

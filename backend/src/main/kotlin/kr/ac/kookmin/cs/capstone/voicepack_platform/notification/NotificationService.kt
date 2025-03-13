@@ -1,6 +1,6 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.notification
 
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.Voicepack
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
 import org.springframework.stereotype.Service
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,24 +22,24 @@ class NotificationService(
 ) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    fun notifyVoicepackComplete(voicepack: Voicepack) {
+    fun notifyVoicepackComplete(voicepackRequest: VoicepackRequest) {
         coroutineScope.launch {
             supabaseClient.postgrest["voicepack_notifications"].insert(
                 NotificationData(
-                    voicepack_name = voicepack.packName,
-                    created_by = voicepack.author.id,
+                    voicepack_name = voicepackRequest.name,
+                    created_by = voicepackRequest.author.id,
                     event_type = "voicepack_complete"
                 )
             )
         }
     }
 
-    fun notifyVoicepackFailed(voicepack: Voicepack) {
+    fun notifyVoicepackFailed(voicepackRequest: VoicepackRequest) {
         coroutineScope.launch {
             supabaseClient.postgrest["voicepack_notifications"].insert(
                 NotificationData(
-                    voicepack_name = voicepack.packName,
-                    created_by = voicepack.author.id,
+                    voicepack_name = voicepackRequest.name,
+                    created_by = voicepackRequest.author.id,
                     event_type = "voicepack_failed"
                 )
             )
