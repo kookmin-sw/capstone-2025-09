@@ -1,5 +1,7 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
+import jakarta.servlet.http.HttpSession
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,5 +22,16 @@ class UserService(
         )
         
         return userRepository.save(user).id
+    }
+
+    fun login(request: UserLoginRequest, session: HttpSession) {
+        val user = userRepository.findByEmail(request.email)
+            ?: throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
+
+        if(user.password != request.password) {
+            throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다")
+        }
+
+        session.setAttribute("userId", user.id)
     }
 } 
