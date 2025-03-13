@@ -5,7 +5,7 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import java.time.OffsetDateTime
 
 @Entity
-@Table(name = "voicepacks")
+@Table(name = "voicepack")
 data class Voicepack(
     @Id
     @Column(name = "voicepack_id")
