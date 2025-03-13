@@ -9,10 +9,10 @@ class WebConfig : WebMvcConfigurer{
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**") // 모든 경로에 대해 CORS 설정 (추후 변경)
-            .allowedOrigins("*")
+            .allowedOrigins("http://localhost:3000")
             .allowedMethods("*")
             .allowedMethods("*")
             .allowedHeaders("*")
-            .allowCredentials(false)
+            .allowCredentials(true)
     }
 }
