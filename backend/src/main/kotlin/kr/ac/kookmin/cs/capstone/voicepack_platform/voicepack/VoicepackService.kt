@@ -5,6 +5,8 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.logging.*
@@ -66,10 +68,10 @@ class VoicepackService(
         val voicepackRequest = createVoicepackRequest(user, request.name)
         try {
             // AI 모델 서비스 호출 및 결과 처리
-            val aiModelResponse = callAiModelService(voicepackRequest, request.voiceFile)
+            callAiModelService(voicepackRequest, request.voiceFile)
             
             // 변환 성공 시 처리
-            handleSuccessfulConversion(voicepackRequest, aiModelResponse)
+            handleSuccessfulConversion(voicepackRequest)
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.COMPLETED.name)
             
         } catch (e: Exception) {
@@ -91,39 +93,56 @@ class VoicepackService(
     }
 
     // AI 모델 서비스 호출
-    private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile): AIModelResponse {
+    private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
         val aiModelRequest = AIModelRequest(
-            voicepackId = voicepackRequest.id,
-            voiceFile = voiceFile
+            speaker_id = voicepackRequest.name,
+            prompt_text = "동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라 만세",
+            prompt_audio = voiceFile
         )
         
         logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
         
-        val response = httpClient.post("$voicepackCreationEndpoint") {
-            contentType(ContentType.Application.Json)
-            setBody(aiModelRequest)
+        try {
+            val response = httpClient.post("$voicepackCreationEndpoint") {
+                contentType(ContentType.MultiPart.FormData)
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("speaker_id", aiModelRequest.speaker_id)
+                            append("prompt_text", aiModelRequest.prompt_text)
+                            append("prompt_audio", aiModelRequest.prompt_audio.bytes, Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"prompt_audio\"; filename=\"audio.mp3\"")
+                                append(HttpHeaders.ContentType, "audio/mp3") // 필요 시 파일 확장자 변경 가능
+                })}))
+            }
+            
+            // 응답 상태 코드 확인
+            if (!response.status.isSuccess()) {
+                val errorBody = response.body<String>()
+                logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
+                throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
+            }
+            
+            // 성공 시 응답 파싱
+            val aiModelResponse: String = response.body()
+            logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
+            
+        } catch (e: Exception) {
+            logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
+            throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)
         }
-        
-        val aiModelResponse: AIModelResponse = response.body()
-
-        if (!response.status.value.toString().startsWith("2")) {
-            throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}")
-        }
-
-        logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
-        
-        return aiModelResponse
     }
 
     // 변환 성공 시 처리
     @Transactional
-    private fun handleSuccessfulConversion(voicepackRequest: VoicepackRequest, aiModelResponse: AIModelResponse) {
+    private fun handleSuccessfulConversion(voicepackRequest: VoicepackRequest) {
+        
+        val outputPath = "speakers/${voicepackRequest.name}/feature.json"
+        val finishedTime = OffsetDateTime.now(); // 완료 시각 일관성 유지
+        
         // 요청 상태 업데이트
         voicepackRequest.status = VoicepackRequestStatus.COMPLETED
-        voicepackRequest.s3Path = aiModelResponse.outputPath
-
-        // 완료 시각 일관성 유지
-        val finishedTime = OffsetDateTime.now();
+        voicepackRequest.s3Path = outputPath
         voicepackRequest.completedAt = finishedTime
         voicepackRequestRepository.save(voicepackRequest)
         
@@ -131,7 +150,7 @@ class VoicepackService(
         val voicepack = Voicepack(
             name = voicepackRequest.name,
             author = voicepackRequest.author,
-            s3Path = aiModelResponse.outputPath,
+            s3Path = outputPath,
             createdAt = finishedTime
         )
         voicepackRepository.save(voicepack)
