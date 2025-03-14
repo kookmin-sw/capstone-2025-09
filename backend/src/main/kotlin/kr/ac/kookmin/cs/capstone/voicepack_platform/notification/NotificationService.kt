@@ -8,12 +8,16 @@ import kotlinx.coroutines.launch
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.serialization.Serializable
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 @Serializable
 private data class NotificationData(
     val voicepack_name: String,
     val created_by: Long,
-    val event_type: String
+    val event_type: String,
+    val created_at: String
 )
 
 @Service
@@ -28,7 +32,8 @@ class NotificationService(
                 NotificationData(
                     voicepack_name = voicepackRequest.name,
                     created_by = voicepackRequest.author.id,
-                    event_type = "voicepack_complete"
+                    event_type = "voicepack_complete",
+                    created_at = voicepackRequest.completedAt!!.toInstant().toString()
                 )
             )
         }
@@ -40,7 +45,8 @@ class NotificationService(
                 NotificationData(
                     voicepack_name = voicepackRequest.name,
                     created_by = voicepackRequest.author.id,
-                    event_type = "voicepack_failed"
+                    event_type = "voicepack_failed",
+                    created_at = voicepackRequest.completedAt!!.toInstant().toString()
                 )
             )
         }
