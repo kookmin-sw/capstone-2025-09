@@ -28,10 +28,13 @@ class UserService(
         val user = userRepository.findByEmail(request.email)
             ?: throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
 
-        if(user.password != request.password) {
-            throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다")
+        if (user.password != request.password) {
+            throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
         }
 
+        session.invalidate()  // 기존 세션을 무효화
         session.setAttribute("userId", user.id)
     }
+
+
 } 
