@@ -33,4 +33,13 @@ class UserController(
 
         return ResponseEntity.ok("로그인 완료")
     }
+
+    @GetMapping("/test2")
+    fun test2(request: HttpServletRequest): ResponseEntity<String> {
+        val sessionCookie = request.cookies?.find { it.name == "JSESSIONID" }?.value
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키 없음")
+
+        return ResponseEntity.ok("현재 쿠키 값: $sessionCookie")
+    }
+
 } 
