@@ -16,7 +16,6 @@ data class VoicepackConvertResponse(
 
 @Serializable
 data class AIModelRequest(
-    val speaker_id: String,
-    val prompt_text: String,
-    val prompt_audio: MultipartFile
+    val voicepackId: String,
+    val voiceFile: MultipartFile
 )

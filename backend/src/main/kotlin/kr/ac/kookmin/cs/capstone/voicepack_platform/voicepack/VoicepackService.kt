@@ -95,9 +95,8 @@ class VoicepackService(
     // AI 모델 서비스 호출
     private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
         val aiModelRequest = AIModelRequest(
-            speaker_id = voicepackRequest.name,
-            prompt_text = "동해물과 백두산이 마르고 닳도록 하느님이 보우하사 우리나라 만세",
-            prompt_audio = voiceFile
+            voicepackId = voicepackRequest.name,
+            voiceFile = voiceFile
         )
         
         logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
@@ -108,10 +107,9 @@ class VoicepackService(
                 setBody(
                     MultiPartFormDataContent(
                         formData {
-                            append("speaker_id", aiModelRequest.speaker_id)
-                            append("prompt_text", aiModelRequest.prompt_text)
-                            append("prompt_audio", aiModelRequest.prompt_audio.bytes, Headers.build {
-                                append(HttpHeaders.ContentDisposition, "form-data; name=\"prompt_audio\"; filename=\"audio.mp3\"")
+                            append("voicepackId", aiModelRequest.voicepackId)
+                            append("voiceFile", aiModelRequest.voiceFile.bytes, Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.mp3\"")
                                 append(HttpHeaders.ContentType, "audio/mp3") // 필요 시 파일 확장자 변경 가능
                 })}))
             }
