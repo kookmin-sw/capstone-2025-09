@@ -33,24 +33,20 @@ class TtsService:
 
     async def extract_speaker_features(
         self,
-        speaker_id: str,
-        prompt_text: str,
-        prompt_audio: UploadFile,
+        voicepackId: str,
+        voiceFile: UploadFile
     ) -> str:
         """화자의 음성에서 특징을 추출하고 S3에 저장"""
         try:
-            prompt_speech = load_wav(prompt_audio.file, self.sample_rate)
-            prompt_text = self.model.frontend.text_normalize(prompt_text, split=False)
-            
+            prompt_speech = load_wav(voiceFile.file, self.sample_rate)
+
             features = self.model.frontend.frontend_zero_shot(
-                tts_text="",
-                prompt_text=prompt_text,
                 prompt_speech_16k=prompt_speech,
                 resample_rate=self.model.sample_rate
             )
             
-            if self.s3_service.save_speaker_features(speaker_id, features):
-                return speaker_id
+            if self.s3_service.save_speaker_features(voicepackId, features):
+                return voicepackId
             else:
                 raise HTTPException(status_code=500, detail="Failed to save speaker features")
             
@@ -60,21 +56,22 @@ class TtsService:
 
     async def generate_speech(
         self,
-        text: str,
-        speaker_id: str,
-        speed: float = 1.0
+        prompt: str,
+        voicepackId: str,
+        userId: int,
+        speed: float = 1.0,
     ) -> dict:
         """음성 합성 및 S3 저장"""
         try:
-            if not self.s3_service.speaker_exists(speaker_id):
+            if not self.s3_service.speaker_exists(voicepackId):
                 raise HTTPException(status_code=404, detail="Speaker not found")
             
-            features = self.s3_service.get_speaker_features(speaker_id)
+            features = self.s3_service.get_speaker_features(voicepackId)
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
             outputs = self.model.inference_zero_shot(
-                tts_text=text,
+                tts_text=prompt,
                 features=features,
                 speed=speed,
                 stream=False
@@ -95,9 +92,10 @@ class TtsService:
             
             # S3에 저장
             audio_url = self.s3_service.save_generated_audio(
-                speaker_id=speaker_id,
+                voicepackId=voicepackId,
                 audio_data=buffer.getvalue(),
-                filename=filename
+                filename=filename,
+                userId=userId
             )
             
             if not audio_url:

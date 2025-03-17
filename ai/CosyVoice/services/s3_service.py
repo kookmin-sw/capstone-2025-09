@@ -41,29 +41,29 @@ class S3Service:
                 return [self._convert_list_to_tensor(item, device) for item in obj]
         return obj
 
-    def save_speaker_features(self, speaker_id: str, features: dict) -> bool:
+    def save_speaker_features(self, voicepackId: str, features: dict) -> bool:
         """화자의 특징을 S3에 저장"""
         try:
             json_features = self._convert_tensor_to_list(features)
             features_json = json.dumps(json_features)
             
-            key = f"speakers/{speaker_id}/features.json"
+            key = f"speakers/{voicepackId}/features.json"
             
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
                 Key=key,
                 Body=features_json
             )
-            logger.info(f"화자 특징 저장 완료: {speaker_id}")
+            logger.info(f"화자 특징 저장 완료: {voicepackId}")
             return True
         except Exception as e:
             logger.error(f"화자 특징 저장 실패: {str(e)}")
             return False
 
-    def get_speaker_features(self, speaker_id: str) -> dict:
+    def get_speaker_features(self, voicepackId: str) -> dict:
         """S3에서 화자의 특징 불러오기"""
         try:
-            key = f"speakers/{speaker_id}/features.json"
+            key = f"speakers/{voicepackId}/features.json"
             response = self.s3_client.get_object(
                 Bucket=self.bucket_name,
                 Key=key
@@ -77,10 +77,14 @@ class S3Service:
             logger.error(f"화자 특징 로드 실패: {str(e)}")
             return None
 
-    def save_generated_audio(self, speaker_id: str, audio_data: bytes, filename: str) -> str:
+    def save_generated_audio(self, 
+                             voicepackId: str, 
+                             audio_data: bytes, 
+                             filename: str,
+                             userId: int) -> str:
         """생성된 음성을 S3에 저장"""
         try:
-            key = f"generated_audio/{speaker_id}/{filename}"
+            key = f"generated_audio/{userId}/{voicepackId}/{filename}"
             
             self.s3_client.put_object(
                 Bucket=self.bucket_name,
@@ -96,10 +100,10 @@ class S3Service:
             logger.error(f"생성된 음성 저장 실패: {str(e)}")
             return None
 
-    def speaker_exists(self, speaker_id: str) -> bool:
+    def speaker_exists(self, voicepackId: str) -> bool:
         """화자 존재 여부 확인"""
         try:
-            key = f"speakers/{speaker_id}/features.json"
+            key = f"speakers/{voicepackId}/features.json"
             self.s3_client.head_object(
                 Bucket=self.bucket_name,
                 Key=key

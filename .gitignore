@@ -13,3 +13,12 @@ __pycache__/
 venv/
 env/
 .env
+
+# Docker
+.dockerignore
+
+# feature
+speaker_embeddings/
+
+# 음성 합성 결과
+synthesized_speech_*.wav

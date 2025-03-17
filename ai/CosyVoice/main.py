@@ -10,28 +10,28 @@ tts_service = TtsService()
 
 @app.post("/register_speaker")
 async def register_speaker_endpoint(
-    speaker_id: str = Form(...),
-    prompt_text: str = Form(...),
-    prompt_audio: UploadFile = File(...)
+    voicepackId: str = Form(...),
+    voiceFile: UploadFile = File(...)
 ):
     """화자 등록 API 엔드포인트"""
-    return {"speaker_id": await tts_service.extract_speaker_features(
-        speaker_id=speaker_id,
-        prompt_text=prompt_text,
-        prompt_audio=prompt_audio
+    return {"voicepackId": await tts_service.extract_speaker_features(
+        voicepackId=voicepackId,
+        voiceFile=voiceFile
     )}
 
 @app.post("/synthesize")
 async def synthesize_endpoint(
-    text: str = Form(...),
-    speaker_id: str = Form(...),
-    speed: float = Form(1.0)
+    prompt: str = Form(...),
+    voicepackId: str = Form(...),
+    speed: float = Form(1.0),
+    userId: int = Form(...)
 ):
     """음성 합성 API 엔드포인트"""
     result = await tts_service.generate_speech(
-        text=text,
-        speaker_id=speaker_id,
-        speed=speed
+        prompt=prompt,
+        voicepackId=voicepackId,
+        speed=speed,
+        userId=userId
     )
     return result
 
