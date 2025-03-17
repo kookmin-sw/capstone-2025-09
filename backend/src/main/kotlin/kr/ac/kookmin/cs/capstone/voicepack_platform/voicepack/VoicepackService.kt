@@ -51,6 +51,7 @@ class VoicepackService(
      * 보이스팩 변환 요청 및 처리
      * =========== START ===========
      */
+    @Transactional
     suspend fun convertVoicepack(
             userId: Long,
             request: VoicepackConvertRequest
@@ -158,6 +159,7 @@ class VoicepackService(
     }
 
     // 변환 실패 시 처리
+    @Transactional
     private fun handleFailedConversion(voicepackRequest: VoicepackRequest, exception: Exception) {
         logger.error("AI 모델 처리 실패: requestId={}, error={}", voicepackRequest.id, exception.message)
         
