@@ -1,0 +1,8 @@
+spring.application.name=VoicepackPlatform
+
+# AI Model Service Configuration
+ai.model.service.voicepack_creation=https://your-cloudrun-url
+
+supabase.url=your-supabase-url
+supabase.key=your-supabase-anon-key
+
