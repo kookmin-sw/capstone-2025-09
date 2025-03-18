@@ -7,6 +7,7 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.FormDataContent
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.logging.*
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 
 @Service
 class VoicepackService(
@@ -33,7 +35,9 @@ class VoicepackService(
         private val voicepackRequestRepository: VoicepackRequestRepository,
         private val userRepository: UserRepository,
         private val notificationService: NotificationService,
-        @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String
+        @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
+        @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
+        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     
     private val httpClient = HttpClient(Java) {
@@ -209,4 +213,63 @@ class VoicepackService(
      * 보이스팩 변환 요청 및 처리
      * =========== END ===========
      */
+
+    /**
+     * 보이스팩 합성 요청 및 처리
+     * =========== START ===========
+     */
+    
+    @Transactional
+    suspend fun synthesisVoicepack(userId: Long, request: VoicepackSynthesisRequest): VoicepackSynthesisResponse {
+        logger.info("보이스팩 합성 요청 시작: userId={}, request={}", userId, request)  
+        
+        logger.info("사용자 정보 조회 중...")
+        findUser(userId)
+        
+        logger.info("보이스팩 정보 조회 중: voicepackId={}", request.voicepackId)
+        val voicepack = findVoicepack(request.voicepackId)
+        // TODO: 보유한 보이스팩인지 확인
+        
+        logger.info("AI 모델 서비스 요청 준비 중...")
+        val aiModelRequest = VoicepackSynthesisAIModelRequest(
+            userId = userId,
+            voicepackId = voicepack.name,
+            prompt = request.prompt
+        )
+
+        logger.info("AI 모델 서비스 호출 중: endpoint={}", voicepackSynthesisEndpoint)
+        val response = httpClient.post(voicepackSynthesisEndpoint) {
+            contentType(ContentType.Application.FormUrlEncoded)
+            setBody(FormDataContent(Parameters.build {
+                append("userId", aiModelRequest.userId.toString())
+                append("voicepackId", aiModelRequest.voicepackId)
+                append("prompt", aiModelRequest.prompt)
+            }))
+        }.body<VoicepackSynthesisAIModelResponse>()
+        logger.info("AI 모델 서비스 응답 수신 완료: {}", response)
+
+        logger.info("S3 객체 키 생성 중...")
+        val s3ObjectKey = try {
+            val uri = java.net.URI(response.audio_url)
+            val path = uri.path
+            if (path.startsWith("/")) path.substring(1) else path
+        } catch (e: Exception) {
+            logger.error("S3 URL 파싱 실패: {}", response.audio_url, e)
+            throw IllegalStateException("잘못된 S3 URL 형식입니다: ${response.audio_url}")
+        }
+        
+        logger.info("S3 Presigned URL 생성 중: objectKey={}", s3ObjectKey)
+        val presignedUrl = s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
+        
+        logger.info("보이스팩 합성 요청 완료")
+        return VoicepackSynthesisResponse(
+            synthesis_result = presignedUrl
+        )
+    }
+
+    private fun findVoicepack(voicepackId: Long) =
+        voicepackRepository.findById(voicepackId).orElseThrow {
+            IllegalArgumentException("Voicepack not found")
+        }
+
 }

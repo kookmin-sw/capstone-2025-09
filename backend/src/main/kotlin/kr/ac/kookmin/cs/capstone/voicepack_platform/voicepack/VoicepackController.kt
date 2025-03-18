@@ -47,4 +47,31 @@ class VoicepackController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(
+        summary = "보이스팩 합성",
+        description = "사용자가 보이스팩을 합성합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "합성 성공",
+                content = [Content(schema = Schema(implementation = VoicepackSynthesisResponse::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "잘못된 요청"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]       
+    )
+    @PostMapping("/synthesis")
+    suspend fun synthesisVoicepack(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
+        @RequestBody request: VoicepackSynthesisRequest
+    ): ResponseEntity<VoicepackSynthesisResponse> {
+        val response = voicepackService.synthesisVoicepack(userId, request)
+        return ResponseEntity.ok(response)
+    }
 } 

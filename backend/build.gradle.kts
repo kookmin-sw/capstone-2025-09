@@ -67,6 +67,10 @@ dependencies {
 	implementation("org.springdoc:springdoc-openapi-starter-common:2.3.0")
 	implementation("org.springdoc:springdoc-openapi-starter-webmvc-api:2.3.0")
 
+	// AWS S3 SDK 의존성 추가
+	implementation("software.amazon.awssdk:s3:2.21.42")
+	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
+
 }
 
 kotlin {
