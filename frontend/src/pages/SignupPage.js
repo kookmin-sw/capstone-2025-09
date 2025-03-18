@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const SignUpPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async () => {
+  // ✅ 뒤로가기하면 로그인 페이지로 이동
+  useEffect(() => {
+    const handlePopState = () => {
+      navigate('/login', { replace: true });
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigate]);
+
+  const handleSignUp = async () => {
     const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
-    const endpoint = `${apiUrl}/login`;
+    const endpoint = `${apiUrl}/signup`;
 
     try {
       const response = await fetch(endpoint, {
@@ -29,25 +41,25 @@ const LoginPage = () => {
         data = { message: textData };
       }
 
-      console.log('로그인 응답:', data);
+      console.log('회원가입 응답:', data);
 
       if (response.ok) {
-        alert(data.message || '로그인 성공!');
-        navigate('/landingpage');
+        alert('회원가입이 완료되었습니다! 로그인해주세요.');
+        navigate('/login');
         setEmail('');
         setPassword('');
       } else {
-        alert(`로그인 실패: ${data.message || '알 수 없는 오류 발생'}`);
+        alert(`회원가입 실패: ${data.message || '알 수 없는 오류 발생'}`);
       }
     } catch (error) {
-      console.error('로그인 오류:', error);
-      alert('로그인 중 오류가 발생했습니다.');
+      console.error('회원가입 오류:', error);
+      alert('회원가입 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-3xl font-bold absolute top-40">로그인</h1>
+      <h1 className="text-3xl font-bold absolute top-40">회원가입</h1>
 
       <form className="w-full max-w-sm">
         <div className="mb-4">
@@ -78,13 +90,13 @@ const LoginPage = () => {
         </div>
 
         <p className="text-center text-gray-500 text-xs mt-4 mb-2">
-          계정이 없으신가요?{' '}
+          이미 계정이 있으신가요?{' '}
           <button
             type="button"
             className="text-blue-500 underline"
-            onClick={() => navigate('/signup')}
+            onClick={() => navigate('/login')}
           >
-            회원가입하기
+            로그인하기
           </button>
         </p>
 
@@ -92,9 +104,9 @@ const LoginPage = () => {
           <button
             className="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-2xl focus:outline-none focus:shadow-outline w-1/2"
             type="button"
-            onClick={handleLogin}
+            onClick={handleSignUp}
           >
-            로그인
+            회원가입
           </button>
         </div>
       </form>
@@ -102,4 +114,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignUpPage;
