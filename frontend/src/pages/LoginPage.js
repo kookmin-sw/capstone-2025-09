@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup'); // URL 기반 초기값 설정
+  const [isSignUp, setIsSignUp] = useState(location.pathname === '/signup');
 
   // ✅ 이메일과 비밀번호 상태
   const [email, setEmail] = useState('');
@@ -12,43 +12,51 @@ const LoginPage = () => {
 
   // isSignUp 상태 변경 시 URL 업데이트
   useEffect(() => {
-    if (isSignUp) {
-      navigate('/signup', { replace: true });
-    } else {
-      navigate('/login', { replace: true });
-    }
+    navigate(isSignUp ? '/signup' : '/login', { replace: true });
   }, [isSignUp, navigate]);
 
   const handleLoginOrSignUp = async () => {
-    if (isSignUp) {
+    const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
+    const endpoint = isSignUp ? `${apiUrl}/signup` : `${apiUrl}/login`;
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include', // ✅ 세션 쿠키 포함
+      });
+      const textData = await response.text(); // 🔹 서버 응답을 우선 text로 읽음
+
+      let data;
       try {
-        // ✅ 회원가입 API 요청
-        const response = await fetch(process.env.REACT_APP_SIGNUP_API_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json(); // 🔹 서버 응답 JSON 변환
-        console.log('회원가입 응답:', data); // ✅ 서버 응답 콘솔 출력
-
-        if (response.ok) {
-          alert('회원가입이 완료되었습니다!');
-          setIsSignUp(false); // 회원가입 후 로그인 화면으로 변경
-          setEmail(''); // ✅ 이메일 초기화
-          setPassword(''); // ✅ 비밀번호 초기화
-        } else {
-          alert(`회원가입 실패: ${data.message || '알 수 없는 오류 발생'}`);
-        }
+        data = JSON.parse(textData); // 🔹 JSON으로 변환 가능하면 파싱
       } catch (error) {
-        console.error('회원가입 오류:', error);
-        alert('회원가입 중 오류가 발생했습니다.');
+        console.warn('JSON 변환 실패, 원본 응답:', textData);
+        data = { message: textData }; // 🔹 JSON이 아니면 그대로 사용
       }
-    } else {
-      // ✅ 로그인 로직 (필요하면 API 요청 추가 가능)
-      navigate('/landingpage'); // 로그인 성공 시 이동할 페이지
+
+      console.log(isSignUp ? '회원가입 응답:' : '로그인 응답:', data);
+
+      if (response.ok) {
+        if (isSignUp) {
+          alert('회원가입이 완료되었습니다! 로그인해주세요.');
+          setIsSignUp(false);
+        } else {
+          alert(data.message || '로그인 성공!');
+          navigate('/landingpage');
+        }
+
+        setEmail('');
+        setPassword('');
+      } else {
+        alert(`${isSignUp ? '회원가입' : '로그인'} 실패: ${data.message || '알 수 없는 오류 발생'}`);
+      }
+    } catch (error) {
+      console.error(`${isSignUp ? '회원가입' : '로그인'} 오류:`, error);
+      alert(`${isSignUp ? '회원가입' : '로그인'} 중 오류가 발생했습니다.`);
     }
   };
 
