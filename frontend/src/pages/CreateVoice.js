@@ -58,11 +58,10 @@ function CreateVoice() {
     formData.append('voicePackName', voicePackName); // 보이스팩 이름 추가
     formData.append('voiceFile', audioBlob, 'voice.wav'); // ✅ 백엔드 요구사항에 맞게 수정
 
-    try {
-      const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-      const endpoint = `${apiUrl}/convert`;
+    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
+    const endpoint = `${apiUrl}/convert`;
 
-      // API URL 확인 로그
+    try {      // API URL 확인 로그
       console.log("API 요청 URL:", endpoint);
 
       // 백엔드로 POST 요청 보내기
