@@ -66,7 +66,7 @@ function CreateVoice() {
 
       // ✅ FormData 생성 및 데이터 추가 (백엔드 요구사항 반영)
       const formData = new FormData();
-      formData.append('userId', "26"); // 사용자 ID
+      formData.append('userId', "27"); // 사용자 ID
       formData.append('name', voicePackName); // 보이스팩 이름
       formData.append('voiceFile', audioFile); // 오디오 파일 추가
 
