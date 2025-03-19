@@ -1,0 +1,44 @@
+name: Deploy to EC2 with pm2 (bootRun)
+
+on:
+  push:
+    branches:
+      - backend/main  # backend/main 브랜치에 push 시 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 저장소의 소스 코드를 체크아웃
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. 소스 코드를 EC2 서버로 전송 (전체 코드 복사)
+      - name: Copy source code to EC2
+        uses: appleboy/scp-action@v0.1.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: "."
+          target: "/home/${{ secrets.EC2_USER }}/deploy/"
+
+      # 3. EC2 서버에서 pm2를 사용하여 ./gradlew bootRun 명령어 실행
+      - name: Execute deployment script on EC2 using pm2 with bootRun
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/${{ secrets.EC2_USER }}/deploy
+            # gradlew에 실행 권한 부여
+            chmod +x gradlew
+            # 기존 pm2 프로세스 종료 및 삭제 (프로세스 이름은 'app'으로 지정)
+            pm2 stop app || true
+            pm2 delete app || true
+            # pm2를 통해 ./gradlew bootRun 명령어 실행
+            pm2 start ./gradlew --name "app" -- bootRun
