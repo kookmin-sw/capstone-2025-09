@@ -55,14 +55,18 @@ function CreateVoice() {
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
-
+    const userId = localStorage.getItem("userId"); // ✅ localStorage에서 가져오기
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
     try {
       // ✅ Blob을 파일 객체로 변환
       const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
 
       // ✅ FormData 생성 및 데이터 추가 (백엔드 요구사항 반영)
       const formData = new FormData();
-      formData.append('userId', '1'); // 사용자 ID
+      formData.append('userId', userId); // 사용자 ID
       formData.append('name', voicePackName); // 보이스팩 이름
       formData.append('voiceFile', audioFile); // 오디오 파일 추가
 
