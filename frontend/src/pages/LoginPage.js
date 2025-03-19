@@ -18,8 +18,17 @@ const LoginPage = () => {
         },
         body: JSON.stringify({ email, password }),
         credentials: 'include',
-      });      
+      });
+      const textData = await response.text();
+      
       let data;
+      try {
+        data = JSON.parse(textData);
+      } catch (error) {
+        console.warn('JSON 변환 실패, 원본 응답:', textData);
+        data = { message: textData };
+      }
+
       console.log('로그인 응답:', data);
 
       if (response.ok) {
