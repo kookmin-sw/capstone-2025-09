@@ -1,20 +1,29 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function CreateVoice() {
-  const [isRecording, setIsRecording] = useState(false); // 녹음 중인지 여부 확인
-  const [voicePackName, setVoicePackName] = useState(''); // 보이스팩 이름
-  const [timer, setTimer] = useState(0); // 녹음 시간 측정
-  const [audioBlob, setAudioBlob] = useState(null); // 녹음된 오디오 Blob 저장
-  const mediaRecorderRef = useRef(null); // 미디어 녹음기 참조
-  const audioChunksRef = useRef([]); // 오디오 청크 저장
-  const timerRef = useRef(null); // 타이머 참조
-  const navigate = useNavigate(); // 네비게이트 함수 참조.
+  const [isRecording, setIsRecording] = useState(false);
+  const [voicePackName, setVoicePackName] = useState('');
+  const [timer, setTimer] = useState(0);
+  const [audioBlob, setAudioBlob] = useState(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const timerRef = useRef(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (audioBlob) {
+      console.log("✅ 녹음된 오디오 타입:", audioBlob.type);
+      console.log("✅ 녹음된 오디오 크기:", audioBlob.size, "bytes");
+    }
+  }, [audioBlob]);
 
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
+      console.log("🎤 MediaRecorder 지원 코덱:", mediaRecorderRef.current.mimeType);
+
       audioChunksRef.current = [];
       setTimer(0);
 
@@ -23,24 +32,20 @@ function CreateVoice() {
       };
 
       mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         setAudioBlob(audioBlob);
-        
-        // 🚀 녹음된 오디오의 MIME 타입 확인
-        console.log("녹음된 오디오 타입:", audioBlob.type);
-        console.log("녹음된 오디오 크기:", audioBlob.size, "bytes");
-        
+        console.log("🎵 녹음 완료! Blob 타입:", audioBlob.type);
+
         clearInterval(timerRef.current);
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
-
       timerRef.current = setInterval(() => {
         setTimer((prev) => prev + 1);
       }, 1000);
     } catch (error) {
-      console.error('오디오 녹음 오류:', error);
+      console.error('❌ 오디오 녹음 오류:', error);
       alert('오디오 녹음 중 오류가 발생했습니다.');
     }
   };
@@ -60,28 +65,26 @@ function CreateVoice() {
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
-    // const userId = sessionStorage.getItem("userId"); // 세션에서 가져오기
-    // if (!userId) {
-    //   alert("로그인이 필요합니다.");
-    //   return;
-    // }
+
     try {
-      // ✅ Blob을 파일 객체로 변환
-      const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
+      const audioFile = new File([audioBlob], 'voice.webm', { type: 'audio/webm' });
 
-      // ✅ FormData 생성 및 데이터 추가 (백엔드 요구사항 반영)
+      console.log("📤 서버로 보낼 파일 타입:", audioFile.type);
+      console.log("📤 서버로 보낼 파일 크기:", audioFile.size, "bytes");
+
       const formData = new FormData();
-      formData.append('userId', "27"); // 사용자 ID
-      formData.append('name', voicePackName); // 보이스팩 이름
-      formData.append('voiceFile', audioFile); // 오디오 파일 추가
+      formData.append('userId', "27");
+      formData.append('name', voicePackName);
+      formData.append('voiceFile', audioFile);
 
-      console.log("보낼 FormData:", formData);
+      for (let pair of formData.entries()) {
+        console.log("📦 FormData:", pair[0], pair[1]);
+      }
 
-      // 백엔드로 POST 요청 보내기
       const response = await fetch(endpoint, {
         method: 'POST',
         body: formData,
-        credentials: 'include', // 필요시 쿠키 포함
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -90,15 +93,12 @@ function CreateVoice() {
 
       const data = await response.json();
       alert(`보이스팩 생성 성공: ${JSON.stringify(data)}`);
-
-      // 성공하면 보이스 마켓으로 이동
       navigate('/voicemarket');
     } catch (error) {
-      console.error('보이스팩 생성 오류:', error);
+      console.error('❌ 보이스팩 생성 오류:', error);
       alert('보이스팩 생성 중 오류가 발생했습니다.');
     }
   };
-  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
@@ -135,9 +135,7 @@ function CreateVoice() {
               onClick={isRecording ? handleStopRecording : handleStartRecording}
               className={`bg-gray-200 p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500' : ''}`}
             >
-              <span role="img" aria-label="microphone">
-                🎤
-              </span>
+              <span role="img" aria-label="microphone">🎤</span>
             </button>
             {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
             {isRecording && <span className="text-sm">{timer}s</span>}
