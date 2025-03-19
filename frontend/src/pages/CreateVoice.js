@@ -12,6 +12,11 @@ function CreateVoice() {
   const navigate = useNavigate(); // 네비게이트 함수 참조.
 
   const handleStartRecording = async () => {
+    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
+    const endpoint = `${apiUrl}/convert`;
+    console.log("API 요청 URL:", endpoint);
+    console.log("ENV API URL:", process.env.REACT_APP_VOICEPACK_API_URL);
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream);
@@ -58,12 +63,8 @@ function CreateVoice() {
     formData.append('voicePackName', voicePackName); // 보이스팩 이름 추가
     formData.append('voiceFile', audioBlob, 'voice.wav'); // ✅ 백엔드 요구사항에 맞게 수정
 
-    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const endpoint = `${apiUrl}/convert`;
-
+    
     try {      // API URL 확인 로그
-      console.log("API 요청 URL:", endpoint);
-      console.log("ENV API URL:", process.env.REACT_APP_VOICEPACK_API_URL);
 
       // 백엔드로 POST 요청 보내기
       const response = await fetch(endpoint, {
