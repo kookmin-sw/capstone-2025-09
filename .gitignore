@@ -1,0 +1,24 @@
+# Pretrained model files
+pretrained_models/
+
+# VS Code settings
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# Docker
+.dockerignore
+
+# feature
+speaker_embeddings/
+
+# 음성 합성 결과
+synthesized_speech_*.wav
