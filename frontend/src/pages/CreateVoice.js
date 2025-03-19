@@ -53,22 +53,20 @@ function CreateVoice() {
       return;
     }
 
-    // FormData에 보이스팩 이름과 오디오 파일 추가
-    const formData = new FormData();
-    formData.append('voicePackName', voicePackName); // 보이스팩 이름 추가
-    formData.append('voiceFile', audioBlob, 'voice.wav'); // ✅ 백엔드 요구사항에 맞게 수정
-
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
 
-    try {      // API URL 확인 로그
-      console.log("API 요청 URL:", endpoint);
-      console.log("ENV API URL:", process.env.REACT_APP_VOICEPACK_API_URL);
+    try {
+      // ✅ Blob을 ArrayBuffer로 변환 (바이너리 데이터로 전송하기 위해)
+      const arrayBuffer = await audioBlob.arrayBuffer();
 
-      // 백엔드로 POST 요청 보내기
+      // 백엔드로 바이너리 데이터 전송
       const response = await fetch(endpoint, {
         method: 'POST',
-        body: formData,
+        body: arrayBuffer, // 바이너리 데이터 전송
+        headers: {
+          'Content-Type': 'audio/wav', // 바이너리 파일 형식 명시
+        },
         credentials: 'include', // 필요시 쿠키 포함
       });
 
