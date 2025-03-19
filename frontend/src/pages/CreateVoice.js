@@ -55,11 +55,11 @@ function CreateVoice() {
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
-    const userId = sessionStorage.getItem("userId"); // 세션에서 가져오기
-    if (!userId) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    // const userId = sessionStorage.getItem("userId"); // 세션에서 가져오기
+    // if (!userId) {
+    //   alert("로그인이 필요합니다.");
+    //   return;
+    // }
     try {
       // ✅ Blob을 파일 객체로 변환
       const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
