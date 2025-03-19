@@ -24,7 +24,7 @@ const LandingPage = () => {
 
   const handleCreateVoice = async () => {
     try {
-      const response = await fetch(`${apiUrl}/test2`, {
+      const response = await fetch(`${apiUrl}/test`, {
         method: 'GET',
         credentials: 'include',
         mode: 'cors'
