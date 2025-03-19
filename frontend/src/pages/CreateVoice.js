@@ -63,6 +63,7 @@ function CreateVoice() {
 
     try {      // API URL 확인 로그
       console.log("API 요청 URL:", endpoint);
+      console.log("ENV API URL:", process.env.REACT_APP_VOICEPACK_API_URL);
 
       // 백엔드로 POST 요청 보내기
       const response = await fetch(endpoint, {
