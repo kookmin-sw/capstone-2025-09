@@ -3,9 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const [voiceData, setVoiceData] = useState(null);
-
-  const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
 
   // ✅ 뒤로가기 방지 로직 추가
   useEffect(() => {
@@ -22,30 +19,8 @@ const LandingPage = () => {
     };
   }, []);
 
-  const handleCreateVoice = async () => {
-    try {
-      const response = await fetch(`${apiUrl}/test`, {
-        method: 'GET',
-        credentials: 'include',
-        mode: 'cors'
-      });
-  
-      const textData = await response.text();
-  
-      let data;
-      try {
-        data = JSON.parse(textData);
-      } catch (error) {
-        console.warn('JSON 변환 실패, 원본 응답:', textData);
-        data = { message: textData };
-      }
-  
-      setVoiceData(data);
-      alert(`보이스팩 생성 응답: ${JSON.stringify(data, null, 2)}`);
-    } catch (error) {
-      console.error('보이스팩 생성 오류:', error);
-      alert('보이스팩 생성 중 오류가 발생했습니다.');
-    }
+  const handleCreateVoice = () => {
+    navigate('/createVoice');
   };
 
   return (
@@ -67,13 +42,6 @@ const LandingPage = () => {
           보이스팩 사용처(챗봇)
         </button>
       </div>
-
-      {voiceData && (
-        <div className="mt-6 p-4 bg-gray-100 rounded-md w-80">
-          <h2 className="text-lg font-semibold">서버 응답:</h2>
-          <pre className="text-sm text-gray-700">{JSON.stringify(voiceData, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 };
