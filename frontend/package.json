@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "cra-template": "1.2.0",
+    "lamejs": "^1.2.1",
     "prettier": "^3.5.1",
     "react": "^19.0.0",
     "react-cookie": "^8.0.0",
