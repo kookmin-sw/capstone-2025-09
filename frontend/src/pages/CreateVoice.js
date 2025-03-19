@@ -57,16 +57,21 @@ function CreateVoice() {
     const endpoint = `${apiUrl}/convert`;
 
     try {
-      // ✅ Blob을 ArrayBuffer로 변환 (바이너리 데이터로 전송하기 위해)
-      const arrayBuffer = await audioBlob.arrayBuffer();
+      // ✅ Blob을 파일 객체로 변환
+      const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
 
-      // 백엔드로 바이너리 데이터 전송
+      // ✅ FormData 생성 및 데이터 추가 (백엔드 요구사항 반영)
+      const formData = new FormData();
+      formData.append('userId', '123'); // 사용자 ID
+      formData.append('name', voicePackName); // 보이스팩 이름
+      formData.append('voiceFile', audioFile); // 오디오 파일 추가
+
+      console.log("보낼 FormData:", formData);
+
+      // 백엔드로 POST 요청 보내기
       const response = await fetch(endpoint, {
         method: 'POST',
-        body: arrayBuffer, // 바이너리 데이터 전송
-        headers: {
-          'Content-Type': 'audio/wav', // 바이너리 파일 형식 명시
-        },
+        body: formData,
         credentials: 'include', // 필요시 쿠키 포함
       });
 
