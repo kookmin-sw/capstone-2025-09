@@ -42,6 +42,5 @@
   "devDependencies": {
     "autoprefixer": "^10.4.20",
     "postcss": "^8.5.2"
-  },
-  "proxy": "http://43.201.27.215:8080"
+  }
 }
