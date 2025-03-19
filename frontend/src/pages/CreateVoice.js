@@ -25,6 +25,11 @@ function CreateVoice() {
       mediaRecorderRef.current.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/wav' });
         setAudioBlob(audioBlob);
+        
+        // 🚀 녹음된 오디오의 MIME 타입 확인
+        console.log("녹음된 오디오 타입:", audioBlob.type);
+        console.log("녹음된 오디오 크기:", audioBlob.size, "bytes");
+        
         clearInterval(timerRef.current);
       };
 
@@ -93,6 +98,7 @@ function CreateVoice() {
       alert('보이스팩 생성 중 오류가 발생했습니다.');
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
