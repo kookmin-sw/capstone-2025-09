@@ -1,17 +1,32 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'; // ✅ FFmpeg 라이브러리 추가
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
 function CreateVoice() {
   const [isRecording, setIsRecording] = useState(false);
   const [voicePackName, setVoicePackName] = useState('');
   const [timer, setTimer] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
+  const [ffmpeg, setFFmpeg] = useState(null);
+  const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
+
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const navigate = useNavigate();
-  const ffmpeg = createFFmpeg({ log: true }); // ✅ FFmpeg 인스턴스 생성
+
+  useEffect(() => {
+    // FFmpeg 동적 로드
+    const loadFFmpeg = async () => {
+      const ffmpegInstance = createFFmpeg({ log: true });
+      await ffmpegInstance.load();
+      setFFmpeg(ffmpegInstance);
+      setIsFFmpegLoaded(true);
+      console.log("✅ FFmpeg 로드 완료!");
+    };
+
+    loadFFmpeg();
+  }, []);
 
   useEffect(() => {
     if (audioBlob) {
@@ -39,11 +54,14 @@ function CreateVoice() {
         console.log("🎵 녹음 완료! 변환 전 파일 타입:", webmBlob.type);
         console.log("🎵 변환 전 파일 크기:", webmBlob.size, "bytes");
 
+        if (!isFFmpegLoaded) {
+          console.error("❌ FFmpeg가 로드되지 않음. WAV 변환 불가능.");
+          alert("FFmpeg 로드가 완료되지 않았습니다. 잠시 후 다시 시도해주세요.");
+          return;
+        }
+
         // ✅ WebM → WAV 변환
         try {
-          if (!ffmpeg.isLoaded()) {
-            await ffmpeg.load(); // FFmpeg 로드
-          }
           const webmFile = new File([webmBlob], 'audio.webm', { type: 'audio/webm' });
 
           ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmFile));
@@ -89,7 +107,6 @@ function CreateVoice() {
     const endpoint = `${apiUrl}/convert`;
 
     try {
-      // ✅ 변환된 WAV 파일을 서버로 전송
       const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
 
       console.log("📤 서버로 보낼 파일 타입:", audioFile.type);
@@ -99,10 +116,6 @@ function CreateVoice() {
       formData.append('userId', "27");
       formData.append('name', voicePackName);
       formData.append('voiceFile', audioFile);
-
-      for (let pair of formData.entries()) {
-        console.log("📦 FormData:", pair[0], pair[1]);
-      }
 
       const response = await fetch(endpoint, {
         method: 'POST',
@@ -150,26 +163,18 @@ function CreateVoice() {
         </p>
 
         <div className="mb-4">
-          <p className="mb-2">
-            안녕하세요. 목소리를 제공합니다. 잘 들리시나요? 감사합니다.
-          </p>
-          <div className="flex items-center">
-            <button
-              onClick={isRecording ? handleStopRecording : handleStartRecording}
-              className={`bg-gray-200 p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500' : ''}`}
-            >
-              <span role="img" aria-label="microphone">🎤</span>
-            </button>
-            {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
-            {isRecording && <span className="text-sm">{timer}s</span>}
-          </div>
+          <button
+            onClick={isRecording ? handleStopRecording : handleStartRecording}
+            className={`bg-gray-200 p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500' : ''}`}
+          >
+            🎤
+          </button>
+          {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
+          {isRecording && <span className="text-sm">{timer}s</span>}
         </div>
       </div>
 
-      <button
-        onClick={handleCreateVoicePack}
-        className="bg-purple-500 text-white font-bold py-2 px-4 rounded mt-6"
-      >
+      <button onClick={handleCreateVoicePack} className="bg-purple-500 text-white font-bold py-2 px-4 rounded mt-6">
         생성
       </button>
     </div>
