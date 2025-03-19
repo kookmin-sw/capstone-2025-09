@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ffmpeg/ffmpeg": "^0.11.6",
+    "@ffmpeg/ffmpeg": "^0.12.15",
     "cra-template": "1.2.0",
     "lamejs": "^1.2.1",
     "prettier": "^3.5.1",
