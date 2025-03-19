@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg'; // ✅ FFmpeg 라이브러리 추가
 
 function CreateVoice() {
   const [isRecording, setIsRecording] = useState(false);
@@ -10,18 +11,19 @@ function CreateVoice() {
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const navigate = useNavigate();
+  const ffmpeg = createFFmpeg({ log: true }); // ✅ FFmpeg 인스턴스 생성
 
   useEffect(() => {
     if (audioBlob) {
-      console.log("✅ 녹음된 오디오 타입:", audioBlob.type);
-      console.log("✅ 녹음된 오디오 크기:", audioBlob.size, "bytes");
+      console.log("✅ 변환된 WAV 오디오 타입:", audioBlob.type);
+      console.log("✅ 변환된 WAV 오디오 크기:", audioBlob.size, "bytes");
     }
   }, [audioBlob]);
 
   const handleStartRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
+      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
       console.log("🎤 MediaRecorder 지원 코덱:", mediaRecorderRef.current.mimeType);
 
       audioChunksRef.current = [];
@@ -31,10 +33,30 @@ function CreateVoice() {
         audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorderRef.current.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setAudioBlob(audioBlob);
-        console.log("🎵 녹음 완료! Blob 타입:", audioBlob.type);
+      mediaRecorderRef.current.onstop = async () => {
+        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+
+        console.log("🎵 녹음 완료! 변환 전 파일 타입:", webmBlob.type);
+        console.log("🎵 변환 전 파일 크기:", webmBlob.size, "bytes");
+
+        // ✅ WebM → WAV 변환
+        try {
+          if (!ffmpeg.isLoaded()) {
+            await ffmpeg.load(); // FFmpeg 로드
+          }
+          const webmFile = new File([webmBlob], 'audio.webm', { type: 'audio/webm' });
+
+          ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmFile));
+          await ffmpeg.run('-i', 'input.webm', 'output.wav');
+          const wavData = ffmpeg.FS('readFile', 'output.wav');
+
+          const wavBlob = new Blob([wavData.buffer], { type: 'audio/wav' });
+          setAudioBlob(wavBlob);
+          console.log("✅ WAV 변환 완료!");
+        } catch (error) {
+          console.error("❌ WAV 변환 실패:", error);
+          alert("녹음 파일을 WAV로 변환하는 중 오류가 발생했습니다.");
+        }
 
         clearInterval(timerRef.current);
       };
@@ -67,7 +89,8 @@ function CreateVoice() {
     const endpoint = `${apiUrl}/convert`;
 
     try {
-      const audioFile = new File([audioBlob], 'voice.webm', { type: 'audio/webm' });
+      // ✅ 변환된 WAV 파일을 서버로 전송
+      const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
 
       console.log("📤 서버로 보낼 파일 타입:", audioFile.type);
       console.log("📤 서버로 보낼 파일 크기:", audioFile.size, "bytes");
