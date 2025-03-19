@@ -9,10 +9,9 @@ class WebConfig : WebMvcConfigurer{
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**") // 모든 경로에 대해 CORS 설정 (추후 변경)
-            .allowedOrigins("*")
-            .allowedMethods("*")
+            .allowedOrigins("https://capstone-2025-09.vercel.app")
             .allowedMethods("*")
             .allowedHeaders("*")
-            .allowCredentials(false)
+            .allowCredentials(true)
     }
 }
