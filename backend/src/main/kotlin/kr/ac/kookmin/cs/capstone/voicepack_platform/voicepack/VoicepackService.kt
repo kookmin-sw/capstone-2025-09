@@ -27,12 +27,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
-import java.net.URL
-import java.net.HttpURLConnection
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.File
-import java.io.FileInputStream
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 
 @Service
@@ -104,99 +98,41 @@ class VoicepackService(
     }
 
     // AI 모델 서비스 호출
-    private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: String) {
-
-        // S3 Presigned URL에서 파일 다운로드
-        logger.info("S3 Presigned URL에서 파일 다운로드 시작: {}", voiceFile)
-        val tempFile = kotlin.io.path.createTempFile(prefix = "voicepack_${voicepackRequest.id}_", suffix = ".wav").toFile()
+    private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
+        val aiModelRequest = AIModelRequest(
+            voicepackId = voicepackRequest.name,
+            voiceFile = voiceFile
+        )
+        
+        logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
         
         try {
-            val url = URL(voiceFile)
-            val connection = url.openConnection() as HttpURLConnection
-            connection.requestMethod = "GET"
-            connection.connectTimeout = 10000 // 10초 타임아웃 설정
-            connection.readTimeout = 30000 // 30초 읽기 타임아웃 설정
-            
-            val inputStream = connection.inputStream
-            val outputStream = FileOutputStream(tempFile)
-            
-            inputStream.use { input ->
-                outputStream.use { output ->
-                    input.copyTo(output)
-                }
+            val response = httpClient.post("$voicepackCreationEndpoint") {
+                contentType(ContentType.MultiPart.FormData)
+                setBody(
+                    MultiPartFormDataContent(
+                        formData {
+                            append("voicepackId", aiModelRequest.voicepackId)
+                            append("voiceFile", aiModelRequest.voiceFile.bytes, Headers.build {
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
+                                append(HttpHeaders.ContentType, "audio/wav") // 필요 시 파일 확장자 변경 가능
+                })}))
             }
             
-            logger.info("파일 다운로드 완료: {}, 크기: {} bytes", tempFile.absolutePath, tempFile.length())
-            
-            if (tempFile.length() == 0L) {
-                throw RuntimeException("다운로드된 파일이 비어 있습니다")
+            // 응답 상태 코드 확인
+            if (!response.status.isSuccess()) {
+                val errorBody = response.body<String>()
+                logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
+                throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
             }
             
-            // MultipartFile로 변환
-            val multipartFile = object : MultipartFile {
-                override fun getName(): String = "voiceFile"
-                override fun getOriginalFilename(): String = "audio.wav"
-                override fun getContentType(): String = "audio/wav"
-                override fun isEmpty(): Boolean = tempFile.length() == 0L
-                override fun getSize(): Long = tempFile.length()
-                override fun getBytes(): ByteArray = tempFile.readBytes()
-                override fun getInputStream(): InputStream = FileInputStream(tempFile)
-                override fun transferTo(dest: File): Unit {
-                    tempFile.copyTo(dest, overwrite = true)
-                }
-            }
+            // 성공 시 응답 파싱
+            val aiModelResponse: String = response.body()
+            logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
             
-            val aiModelRequest = AIModelRequest(
-                voicepackId = voicepackRequest.name,
-                voiceFile = multipartFile
-            )
-            
-            logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
-            
-            try {
-                val response = httpClient.post("$voicepackCreationEndpoint") {
-                    contentType(ContentType.MultiPart.FormData)
-                    setBody(
-                        MultiPartFormDataContent(
-                            formData {
-                                append("voicepackId", aiModelRequest.voicepackId)
-                                append("voiceFile", multipartFile.bytes, Headers.build {
-                                    append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
-                                    append(HttpHeaders.ContentType, "audio/wav")
-                                })
-                            }
-                        )
-                    )
-                }
-                
-                // 응답 상태 코드 확인
-                if (!response.status.isSuccess()) {
-                    val errorBody = response.body<String>()
-                    logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
-                    throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
-                }
-                
-                // 성공 시 응답 파싱
-                val aiModelResponse: String = response.body()
-                logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
-                
-            } catch (e: Exception) {
-                logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
-                throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)
-            }
         } catch (e: Exception) {
-            logger.error("S3 Presigned URL에서 파일 다운로드 중 예외 발생: {}", e.message, e)
-            throw RuntimeException("S3 Presigned URL에서 파일 다운로드 중 오류 발생: ${e.message}", e)
-        } finally {
-            // 임시 파일 정리
-            if (tempFile.exists()) {
-                try {
-                    tempFile.delete()
-                    logger.debug("임시 파일 삭제: {}", tempFile.absolutePath)
-                } catch (e: Exception) {
-                    logger.warn("임시 파일 삭제 실패: {}, 오류: {}", tempFile.absolutePath, e.message)
-                }
-            }
+            logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
+            throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)
         }
     }
 
