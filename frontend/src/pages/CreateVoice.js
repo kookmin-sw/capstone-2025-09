@@ -7,20 +7,19 @@ function CreateVoice() {
   const [voicePackName, setVoicePackName] = useState('');
   const [timer, setTimer] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
-  const [ffmpeg, setFFmpeg] = useState(null);
   const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
 
+  const ffmpegRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // FFmpeg 동적 로드
     const loadFFmpeg = async () => {
       const ffmpegInstance = createFFmpeg({ log: true });
       await ffmpegInstance.load();
-      setFFmpeg(ffmpegInstance);
+      ffmpegRef.current = ffmpegInstance;
       setIsFFmpegLoaded(true);
       console.log("✅ FFmpeg 로드 완료!");
     };
@@ -54,14 +53,14 @@ function CreateVoice() {
         console.log("🎵 녹음 완료! 변환 전 파일 타입:", webmBlob.type);
         console.log("🎵 변환 전 파일 크기:", webmBlob.size, "bytes");
 
-        if (!isFFmpegLoaded) {
+        if (!isFFmpegLoaded || !ffmpegRef.current) {
           console.error("❌ FFmpeg가 로드되지 않음. WAV 변환 불가능.");
           alert("FFmpeg 로드가 완료되지 않았습니다. 잠시 후 다시 시도해주세요.");
           return;
         }
 
-        // ✅ WebM → WAV 변환
         try {
+          const ffmpeg = ffmpegRef.current;
           const webmFile = new File([webmBlob], 'audio.webm', { type: 'audio/webm' });
 
           ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmFile));
