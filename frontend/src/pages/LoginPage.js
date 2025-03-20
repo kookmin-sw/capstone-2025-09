@@ -32,7 +32,7 @@ const LoginPage = () => {
       console.log('로그인 응답:', data);
 
       if (response.ok) {
-        alert(data.message || '로그인 성공!');
+        alert(data.message || '로그인 성공');
         navigate('/landingpage');
         setEmail('');
         setPassword('');
