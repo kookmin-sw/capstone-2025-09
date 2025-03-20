@@ -113,7 +113,7 @@ function CreateVoice() {
       console.log("📤 서버로 보낼 파일 크기:", audioFile.size, "bytes");
 
       const formData = new FormData();
-      formData.append('userId', "27");
+      formData.append('userId', "28");
       formData.append('name', voicePackName);
       formData.append('voiceFile', audioFile);
 
