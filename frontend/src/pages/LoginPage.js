@@ -33,6 +33,11 @@ const LoginPage = () => {
 
       if (response.ok) {
         alert(data.message || '로그인 성공!');
+        if (data.userId) {
+          console.log('✅ 로그인 성공! userId:', data.userId);
+        } else {
+          console.warn('⚠ userId 없음: 서버 응답을 확인하세요.');
+        }
         navigate('/landingpage');
         setEmail('');
         setPassword('');

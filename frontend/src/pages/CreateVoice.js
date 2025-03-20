@@ -158,7 +158,7 @@ function CreateVoice() {
           보이스팩 샘플 녹음 <span className="text-red-500">*</span>
         </h2>
         <p className="text-sm text-gray-500 mb-4">
-          녹음 버튼을 누르고 문장을 따라 읽어주세요.
+          안녕하세요. 목소리를 녹음합니다. 잘 들리시나요? 감사합니다.
         </p>
 
         <div className="mb-4">
