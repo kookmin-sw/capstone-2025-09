@@ -5,7 +5,8 @@ import org.springframework.web.multipart.MultipartFile
 @Serializable
 data class VoicepackConvertRequest(
     val name: String,
-    val voiceFile: MultipartFile
+    // val voiceFile: MultipartFile
+    val voiceFile: String
 )
 
 @Serializable
