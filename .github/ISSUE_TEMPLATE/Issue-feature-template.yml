@@ -1,0 +1,47 @@
+name: "✨ Feature"
+description: "기능 추가, UI 개선, 문서 업데이트 요청을 위한 템플릿"
+title: "feat: "
+labels: ["feature"]
+body:
+  - type: input
+    attributes:
+      label: 🔗 관련 이슈
+      description: "이 기능이 관련된 기존 이슈가 있다면 추가해주세요. (ex: #123)"
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 📄 설명
+      description: 요청하신 새로운 기능에 대한 설명을 작성해 주세요.
+      placeholder: |
+        - 왜 이 기능이 필요한가요?
+        - 기존에 없던 점을 어떻게 개선할 수 있을까요?
+        - 어떤 방식으로 구현되었으면 좋겠나요?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: ✅ 작업할 내용
+      description: 수행해야 할 작업을 체크박스 형태로 작성해주세요.
+      placeholder: |
+        - [ ] UI 디자인 개선
+        - [ ] API 연동 추가
+        - [ ] 새로운 페이지 추가
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🙋🏻 참고 자료 (선택)
+      description: 관련 문서, 디자인 시안, 참고할 링크가 있다면 추가해주세요.
+      placeholder: "예: Figma 링크, API 문서, 기존 UI 캡처본 등"
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 🙋🏻 리뷰 요구사항 (선택)
+      description: 코드 리뷰 요청이 필요한 부분을 구체적으로 작성해주세요.
+      placeholder: |
+        - 특정 구현 방식에 대한 대안이 있을까요?
+        - 성능 최적화를 위해 고려할 점이 있을까요?
+    validations:
+      required: false

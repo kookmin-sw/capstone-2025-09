@@ -1,0 +1,42 @@
+name: "🐛 Bug Report"
+description: "버그를 제보하기 위한 템플릿"
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: input
+    attributes:
+      label: 🔗 관련 이슈
+      description: "이 버그가 관련된 기존 이슈가 있다면 추가해주세요. (ex. #123)"
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 🐞 버그 설명
+      description: 발생한 버그에 대한 설명을 작성해 주세요.
+      placeholder: 어떤 상황에서 발생했는지 자세히 적어주세요!
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: ✅ 재현 방법
+      description: 버그를 재현할 수 있는 단계를 설명해주세요.
+      placeholder: 1. ...을 실행한다. 2. ...을 클릭한다. 3. ... 문제가 발생한다.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 📸 스크린샷 / 로그 (선택)
+      description: 버그가 발생한 화면이 있다면 스크린샷을 첨부해주세요. (이미지는 드래그 앤 드롭으로 업로드 가능)
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: 🙋🏻 리뷰 요구사항 (선택)
+      description: 코드 리뷰 요청이 필요한 부분을 작성해주세요.
+      placeholder: |
+        - 특정 코드 블록에서 더 나은 방식이 있을까요?
+        - 성능 최적화를 위해 개선할 점이 있을까요?
+        - 이 로직이 가독성이 좋은지 확인해 주세요.
+        - 예외 처리 방식이 적절한지 리뷰 부탁드립니다.
+    validations:
+      required: false
