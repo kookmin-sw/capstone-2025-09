@@ -15,6 +15,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -26,6 +27,11 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x backend/gradlew
+
+      - name: Create application.yml from GitHub Secrets
+        run: |
+          mkdir -p backend/src/main/resources
+          echo "${{ secrets.APPLICATION }}" | base64 --decode > backend/src/main/resources/application.yml
 
       - name: Build with Gradle Wrapper
         working-directory: backend
