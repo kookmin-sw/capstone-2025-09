@@ -41,3 +41,4 @@ out/
 
 ### resources ###
 application.properties
+application.yaml
