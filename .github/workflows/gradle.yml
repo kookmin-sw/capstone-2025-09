@@ -28,4 +28,5 @@ jobs:
       run: chmod +x gradlew
     
     - name: Build with Gradle Wrapper
+      working-directory: backend
       run: ./gradlew build
