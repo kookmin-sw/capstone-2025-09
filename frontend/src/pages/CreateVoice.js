@@ -102,6 +102,9 @@ function CreateVoice() {
       return;
     }
 
+    navigate('/voicemarket');
+
+
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
 
@@ -128,7 +131,6 @@ function CreateVoice() {
 
       const data = await response.json();
       alert(`보이스팩 생성 성공: ${JSON.stringify(data)}`);
-      navigate('/voicemarket');
     } catch (error) {
       console.error('❌ 보이스팩 생성 오류:', error);
       alert('보이스팩 생성 중 오류가 발생했습니다.');
