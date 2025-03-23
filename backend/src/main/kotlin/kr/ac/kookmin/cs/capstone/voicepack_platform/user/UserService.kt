@@ -24,7 +24,7 @@ class UserService(
         return userRepository.save(user).id
     }
 
-    fun login(request: UserLoginRequest, session: HttpSession) {
+    fun login(request: UserLoginRequest, session: HttpSession): Long {
         val user = userRepository.findByEmail(request.email)
             ?: throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
 
@@ -32,9 +32,9 @@ class UserService(
             throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
         }
 
-        session.invalidate()  // 기존 세션을 무효화
+        session.removeAttribute("userId")
         session.setAttribute("userId", user.id)
+
+        return user.id;
     }
-
-
 } 
