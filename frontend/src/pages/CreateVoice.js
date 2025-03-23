@@ -15,6 +15,7 @@ function CreateVoice() {
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
+  // FFmpeg 로드
   useEffect(() => {
     const loadFFmpeg = async () => {
       const ffmpegInstance = createFFmpeg({ log: true });
@@ -35,6 +36,11 @@ function CreateVoice() {
   }, [audioBlob]);
 
   const handleStartRecording = async () => {
+    if (!isFFmpegLoaded) {
+      alert("FFmpeg가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
@@ -102,8 +108,8 @@ function CreateVoice() {
       return;
     }
 
+    // 바로 이동
     navigate('/voicemarket');
-
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
@@ -130,10 +136,9 @@ function CreateVoice() {
       }
 
       const data = await response.json();
-      alert(`보이스팩 생성 성공: ${JSON.stringify(data)}`);
+      console.log(`✅ 보이스팩 생성 성공:`, data);
     } catch (error) {
       console.error('❌ 보이스팩 생성 오류:', error);
-      alert('보이스팩 생성 중 오류가 발생했습니다.');
     }
   };
 
@@ -166,16 +171,24 @@ function CreateVoice() {
         <div className="mb-4">
           <button
             onClick={isRecording ? handleStopRecording : handleStartRecording}
-            className={`bg-gray-200 p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500' : ''}`}
+            className={`p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+            disabled={!isFFmpegLoaded}
           >
             🎤
           </button>
           {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
           {isRecording && <span className="text-sm">{timer}s</span>}
+          {!isFFmpegLoaded && (
+            <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>
+          )}
         </div>
       </div>
 
-      <button onClick={handleCreateVoicePack} className="bg-purple-500 text-white font-bold py-2 px-4 rounded mt-6">
+      <button
+        onClick={handleCreateVoicePack}
+        className="bg-purple-500 text-white font-bold py-2 px-4 rounded mt-6 disabled:opacity-50"
+        disabled={!voicePackName.trim() || !audioBlob}
+      >
         생성
       </button>
     </div>
