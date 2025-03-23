@@ -114,8 +114,8 @@ class VoicepackService(
                         formData {
                             append("voicepackId", aiModelRequest.voicepackId)
                             append("voiceFile", aiModelRequest.voiceFile.bytes, Headers.build {
-                                append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.mp3\"")
-                                append(HttpHeaders.ContentType, "audio/mp3") // 필요 시 파일 확장자 변경 가능
+                                append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
+                                append(HttpHeaders.ContentType, "audio/wav") // 필요 시 파일 확장자 변경 가능
                 })}))
             }
             
