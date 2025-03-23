@@ -16,14 +16,12 @@ class UserController(
 ) {
     @PostMapping("/signup")
     fun signup(@Valid @RequestBody request: UserSignupRequest): ResponseEntity<Long> {
-        val userId = userService.signup(request)
-        return ResponseEntity.ok(userId)
+        return ResponseEntity.ok(userService.signup(request))
     }
 
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession) : ResponseEntity<String> {
-        userService.login(request, session)
-        return ResponseEntity.ok("로그인 성공")
+    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession) : ResponseEntity<Long> {
+        return ResponseEntity.ok(userService.login(request, session))
     }
 
     @GetMapping("/test")
