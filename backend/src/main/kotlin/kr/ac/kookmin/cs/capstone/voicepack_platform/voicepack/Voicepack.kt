@@ -25,3 +25,25 @@ data class Voicepack(
     @Column(name = "created_at", nullable = false)
     val createdAt: OffsetDateTime = OffsetDateTime.now()
 ) 
+
+/**
+ * 보이스팩 DTO 클래스
+ * s3Path를 제외한 보이스팩 정보를 담는 데이터 클래스입니다.
+ */
+data class VoicepackDto(
+    val id: Long,
+    val name: String,
+    val authorId: Long,
+    val createdAt: OffsetDateTime
+) {
+    companion object {
+        fun fromEntity(voicepack: Voicepack): VoicepackDto {
+            return VoicepackDto(
+                id = voicepack.id,
+                name = voicepack.name,
+                authorId = voicepack.author.id,
+                createdAt = voicepack.createdAt
+            )
+        }
+    }
+}

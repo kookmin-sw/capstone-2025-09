@@ -272,4 +272,18 @@ class VoicepackService(
             IllegalArgumentException("Voicepack not found")
         }
 
+    /**
+     * 보이스팩 목록 조회
+     */
+    fun getVoicepacks(userId: Long?): List<Voicepack> {
+        logger.info("보이스팩 목록 조회: userId={}", userId)
+        
+        return if (userId != null) {
+            // 특정 사용자의 보이스팩만 조회
+            voicepackRepository.findByAuthorId(userId)
+        } else {
+            // 모든 보이스팩 조회
+            voicepackRepository.findAll()
+        }
+    }
 }

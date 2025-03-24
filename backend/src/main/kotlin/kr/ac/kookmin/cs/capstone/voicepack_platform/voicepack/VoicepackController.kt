@@ -74,4 +74,28 @@ class VoicepackController(
         val response = voicepackService.synthesisVoicepack(userId, request)
         return ResponseEntity.ok(response)
     }
+
+    @Operation(
+        summary = "보이스팩 목록 조회",
+        description = "시스템에 등록된 모든 보이스팩을 조회합니다. 선택적으로 특정 사용자의 보이스팩만 조회할 수 있습니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = List::class))]
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("")
+    fun getVoicepacks(
+        @Parameter(description = "사용자 ID (선택적)") @RequestParam(required = false) userId: Long?
+    ): ResponseEntity<List<VoicepackDto>> {
+        val voicepacks = voicepackService.getVoicepacks(userId)
+        return ResponseEntity.ok(voicepacks.map { VoicepackDto.fromEntity(it) })
+    }
+  
 } 
