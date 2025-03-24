@@ -19,22 +19,15 @@ const LoginPage = () => {
         body: JSON.stringify({ email, password }),
         credentials: 'include',
       });
-      const textData = await response.text();
       
       let data;
-      try {
-        data = JSON.parse(textData);
-      } catch (error) {
-        console.warn('JSON 변환 실패, 원본 응답:', textData);
-        data = { message: textData };
-      }
-
       console.log('로그인 응답:', data);
+      sessionStorage.setItem('userId', data);
 
       if (response.ok) {
         alert(data.message || '로그인 성공!');
-        if (data.userId) {
-          console.log('✅ 로그인 성공! userId:', data.userId);
+        if (data) {
+          console.log('✅ 로그인 성공!');
         } else {
           console.warn('⚠ userId 없음: 서버 응답을 확인하세요.');
         }
