@@ -2,6 +2,7 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import org.springframework.http.ResponseEntity
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import io.swagger.v3.oas.annotations.Operation
@@ -44,16 +45,16 @@ class VoicepackController(
     ): ResponseEntity<VoicepackConvertResponse> {
         val request = VoicepackConvertRequest(name, voiceFile)
         val response = voicepackService.convertVoicepack(userId, request)
-        return ResponseEntity.ok(response)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @Operation(
-        summary = "보이스팩 합성",
-        description = "사용자가 보이스팩을 합성합니다.",
+        summary = "보이스팩 기반 TTS 생성",
+        description = "사용자가 보이스팩을 기반으로 TTS 생성을 요청합니다.",
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "합성 성공",
+                description = "생성 성공",
                 content = [Content(schema = Schema(implementation = VoicepackSynthesisResponse::class))]
             ),
             ApiResponse(
@@ -72,7 +73,7 @@ class VoicepackController(
         @RequestBody request: VoicepackSynthesisRequest
     ): ResponseEntity<VoicepackSynthesisResponse> {
         val response = voicepackService.synthesisVoicepack(userId, request)
-        return ResponseEntity.ok(response)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
     }
 
     @Operation(
