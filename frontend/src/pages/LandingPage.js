@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 const LandingPage = () => {
   const navigate = useNavigate();
 
+  const userId = localStorage.getItem("userId"); // 혹은 sessionStorage.getItem("userId")
+  console.log("유저 아이디 : ", userId)
   // ✅ 뒤로가기 방지 로직 추가
   useEffect(() => {
     const handlePopState = (event) => {
