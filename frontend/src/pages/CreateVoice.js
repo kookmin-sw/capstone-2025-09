@@ -116,12 +116,13 @@ function CreateVoice() {
 
     try {
       const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
+      const userId = sessionStorage.getItem('userId'); 
 
       console.log("📤 서버로 보낼 파일 타입:", audioFile.type);
       console.log("📤 서버로 보낼 파일 크기:", audioFile.size, "bytes");
 
       const formData = new FormData();
-      formData.append('userId', "28");
+      formData.append('userId', userId);
       formData.append('name', voicePackName);
       formData.append('voiceFile', audioFile);
 

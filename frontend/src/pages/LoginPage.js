@@ -27,8 +27,6 @@ const LoginPage = () => {
         console.warn('JSON 변환 실패, 원본 응답:', textData);
         data = { message: textData };
       }
-
-      console.log('로그인 응답:', data);
       sessionStorage.setItem('userId', data);
 
       if (response.ok) {
