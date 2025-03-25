@@ -23,8 +23,8 @@ class VoicepackController(
         description = "사용자가 업로드한 음성 파일을 보이스팩으로 변환합니다.",
         responses = [
             ApiResponse(
-                responseCode = "200",
-                description = "변환 성공",
+                responseCode = "202",
+                description = "변환 요청 성공",
                 content = [Content(schema = Schema(implementation = VoicepackConvertResponse::class))]
             ),
             ApiResponse(
@@ -45,7 +45,7 @@ class VoicepackController(
     ): ResponseEntity<VoicepackConvertResponse> {
         val request = VoicepackConvertRequest(name, voiceFile)
         val response = voicepackService.convertVoicepack(userId, request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
     }
 
     @Operation(
@@ -53,8 +53,8 @@ class VoicepackController(
         description = "사용자가 보이스팩을 기반으로 TTS 생성을 요청합니다.",
         responses = [
             ApiResponse(
-                responseCode = "200",
-                description = "생성 성공",
+                responseCode = "202",
+                description = "생성 요청 성공",
                 content = [Content(schema = Schema(implementation = VoicepackSynthesisResponse::class))]
             ),
             ApiResponse(
@@ -73,7 +73,7 @@ class VoicepackController(
         @RequestBody request: VoicepackSynthesisRequest
     ): ResponseEntity<VoicepackSynthesisResponse> {
         val response = voicepackService.synthesisVoicepack(userId, request)
-        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
     }
 
     @Operation(
