@@ -4,13 +4,14 @@ import LoginPage from "./pages/LoginPage";
 import LandingPage from "./pages/LandingPage";
 import CreateVoice from "./pages/CreateVoice";
 import VoiceMarket from "./pages/VoiceMarket";
+import SignupPage from "./pages/SignupPage"
 
 function App() {
   return (
       <Router>
         <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage/>}/>
             <Route path="/landingpage" element={<LandingPage />} />
             <Route path="/createvoice" element={<CreateVoice />} />
             <Route path="/voicemarket" element={<VoiceMarket />} />
