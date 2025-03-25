@@ -12,8 +12,8 @@ class SwaggerConfig {
 
     @Bean
     fun openAPI(): OpenAPI = OpenAPI()
-        .addServersItem(Server().url("https://vocalab.kro.kr"))
-        .addServersItem(Server().url("http://localhost:8080"))
+        .addServersItem(Server().url("https://vocalab.kro.kr").description("Production Server"))
+        .addServersItem(Server().url("http://localhost:8080").description("Local Server"))
         .components(Components())
         .info(
             Info()
