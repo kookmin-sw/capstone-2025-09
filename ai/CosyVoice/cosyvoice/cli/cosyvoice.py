@@ -75,12 +75,10 @@ class CosyVoice:
                 start_time = time.time()
 
     def inference_zero_shot(self, tts_text, features, stream=False, speed=1.0, text_frontend=True):
-        features['prompt_text'] = torch.tensor([[126246, 144370, 91145, 1773, 87608, 43590, 133886, 130094, 60838, 1773, 144505, 129900, 28002, 29326, 60315, 35711, 129423, 55054, 60838, 1773]])
-        features['prompt_text_len'] = torch.tensor([20])
-        
+
         features['llm_embedding'] = features['flow_embedding'] = features['embedding']
-        features['llm_prompt_speech_token'] = features['flow_prompt_speech_token'] = features['speech_token']
-        features['llm_prompt_speech_token_len'] = features['flow_prompt_speech_token_len'] = features['speech_token_len']
+        features['flow_prompt_speech_token'] = features['speech_token']
+        features['flow_prompt_speech_token_len'] = features['speech_token_len']
         features['prompt_speech_feat'] = features['speech_feat']
         features['prompt_speech_feat_len'] = features['speech_feat_len']
         del features['embedding']
@@ -90,9 +88,6 @@ class CosyVoice:
         del features['speech_token_len']
 
         for i in tqdm(self.frontend.text_normalize(tts_text, split=True, text_frontend=text_frontend)):
-            # if (not isinstance(i, Generator)) and len(i) < 0.5 * len(prompt_text):
-            #     logging.warning('synthesis text {} too short than prompt text {}, this may lead to bad performance'.format(i, prompt_text))
-
             tts_text_token, tts_text_token_len = self.frontend._extract_text_token(i)
 
             features['text'] = tts_text_token

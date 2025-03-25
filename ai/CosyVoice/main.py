@@ -14,10 +14,12 @@ async def register_speaker_endpoint(
     voiceFile: UploadFile = File(...)
 ):
     """화자 등록 API 엔드포인트"""
-    return {"voicepackId": await tts_service.extract_speaker_features(
+    result = await tts_service.extract_speaker_features(
         voicepackId=voicepackId,
         voiceFile=voiceFile
-    )}
+    )
+    
+    return {"sample_audio_url": result}
 
 @app.post("/synthesize")
 async def synthesize_endpoint(

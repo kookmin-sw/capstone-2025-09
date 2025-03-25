@@ -41,6 +41,25 @@ class S3Service:
                 return [self._convert_list_to_tensor(item, device) for item in obj]
         return obj
 
+    def save_audio(self, 
+                  audio_data: bytes, 
+                  file_path: str) -> str:
+        """음성 파일을 S3에 저장"""
+        try:
+            self.s3_client.put_object(
+                Bucket=self.bucket_name,
+                Key=file_path,
+                Body=audio_data
+            )
+
+            url = f"https://{self.bucket_name}.s3.{AWS_CONFIG['region']}.amazonaws.com/{file_path}"
+            logger.info(f"음성 파일 저장 완료: {url}")
+            return url
+        
+        except Exception as e:
+            logger.error(f"음성 파일 저장 실패: {str(e)}")
+            return None
+
     def save_speaker_features(self, voicepackId: str, features: dict) -> bool:
         """화자의 특징을 S3에 저장"""
         try:
@@ -54,8 +73,10 @@ class S3Service:
                 Key=key,
                 Body=features_json
             )
+
             logger.info(f"화자 특징 저장 완료: {voicepackId}")
             return True
+        
         except Exception as e:
             logger.error(f"화자 특징 저장 실패: {str(e)}")
             return False
@@ -71,34 +92,30 @@ class S3Service:
             
             json_features = json.loads(response['Body'].read().decode('utf-8'))
             features = self._convert_list_to_tensor(json_features)
-            
             return features
+        
         except Exception as e:
             logger.error(f"화자 특징 로드 실패: {str(e)}")
             return None
 
     def save_generated_audio(self, 
-                             voicepackId: str, 
-                             audio_data: bytes, 
-                             filename: str,
-                             userId: int) -> str:
-        """생성된 음성을 S3에 저장"""
-        try:
-            key = f"generated_audio/{userId}/{voicepackId}/{filename}"
-            
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=key,
-                Body=audio_data
-            )
-            
-            # S3 URL 생성
-            url = f"https://{self.bucket_name}.s3.{AWS_CONFIG['region']}.amazonaws.com/{key}"
-            logger.info(f"생성된 음성 저장 완료: {url}")
-            return url
-        except Exception as e:
-            logger.error(f"생성된 음성 저장 실패: {str(e)}")
-            return None
+                            voicepackId: str, 
+                            audio_data: bytes, 
+                            filename: str,
+                            userId: int) -> str:
+        """기능 1: 베이직 기능"""
+        file_path = f"generated_audio/{userId}/{voicepackId}/{filename}"
+        url = self.save_audio(audio_data, file_path)
+        return url
+
+    def save_speaker_test_audio(self, 
+                              voicepackId: str, 
+                              audio_data: bytes, 
+                              filename: str) -> bool:
+        """보이스팩 샘플 음성을 s3에 저장"""
+        file_path = f"speakers/{voicepackId}/{filename}"
+        url = self.save_audio(audio_data, file_path)
+        return url is not None 
 
     def speaker_exists(self, voicepackId: str) -> bool:
         """화자 존재 여부 확인"""
@@ -110,4 +127,4 @@ class S3Service:
             )
             return True
         except ClientError:
-            return False 
+            return False
