@@ -110,6 +110,10 @@ class VoicepackController(
                 content = [Content(schema = Schema(implementation = VoicepackDto::class))]
             ),
             ApiResponse(
+                responseCode = "404",
+                description = "보이스팩 존재하지 않음"
+            ),
+            ApiResponse(
                 responseCode = "500",
                 description = "서버 오류"
             )
@@ -119,8 +123,12 @@ class VoicepackController(
     fun getVoicepack(
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
     ): ResponseEntity<VoicepackDto> {
-        val response = voicepackService.getVoicepack(voicepackId)
-        return ResponseEntity.ok(response)
+        try {
+            val response = voicepackService.getVoicepack(voicepackId)
+            return ResponseEntity.ok(response)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+        }
     }
     
     // 보이스팩 예시 음성 파일 조회
@@ -134,6 +142,10 @@ class VoicepackController(
                 content = [Content(schema = Schema(implementation = String::class))]
             ),
             ApiResponse(
+                responseCode = "404",
+                description = "보이스팩 존재하지 않음"
+            ),
+            ApiResponse(
                 responseCode = "500",   
                 description = "서버 오류"
             )
@@ -143,7 +155,11 @@ class VoicepackController(
     fun getExampleVoicepack(
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
     ): ResponseEntity<String> {
-        val response = voicepackService.getExampleVoice(voicepackId)
-        return ResponseEntity.ok(response)
+        try {
+            val response = voicepackService.getExampleVoice(voicepackId)
+            return ResponseEntity.ok(response)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
+        }
     }   
 } 

@@ -292,6 +292,9 @@ class VoicepackService(
     // 보이스팩 1개만 조회
     fun getVoicepack(voicepackId: Long): VoicepackDto {
         val voicepack = findVoicepack(voicepackId)
+        if (voicepack == null) {
+            throw IllegalArgumentException("Voicepack not found")
+        }
         return VoicepackDto.fromEntity(voicepack)
     }
 
