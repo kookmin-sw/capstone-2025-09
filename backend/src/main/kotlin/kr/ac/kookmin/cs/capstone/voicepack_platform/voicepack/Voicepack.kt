@@ -33,7 +33,7 @@ data class Voicepack(
 data class VoicepackDto(
     val id: Long,
     val name: String,
-    val authorId: Long,
+    val author: String,
     val createdAt: OffsetDateTime
 ) {
     companion object {
@@ -41,7 +41,7 @@ data class VoicepackDto(
             return VoicepackDto(
                 id = voicepack.id,
                 name = voicepack.name,
-                authorId = voicepack.author.id,
+                author = voicepack.author.email,
                 createdAt = voicepack.createdAt
             )
         }
