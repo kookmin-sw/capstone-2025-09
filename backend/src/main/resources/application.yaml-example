@@ -2,24 +2,22 @@ spring:
   application:
     name: VoicepackPlatform
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-
   datasource:
-    url: your-supabase-jdbc-url
+    url: your-jdbc-url
+    driver-class-name: your-driver-class-name
+    username: your-username
+    password: your-password
 
-server:
-  port: 8080
-
-# AI Model Service Configuration
 ai:
   model:
     service:
-      url: https://your-cloudrun-url
+      voicepack_creation: https://your-ai-service-url.com/voicepack_creation
+      voicepack_synthesis: https://your-ai-service-url.com/voicepack_synthesis
 
-# Supabase API
-supabase:
-  url: your-supabase-url
-  key: your-supabase-anon-key
+# AWS S3 설정
+aws:
+  s3:
+    access-key: YOUR_AWS_ACCESS_KEY_HERE
+    secret-key: YOUR_AWS_SECRET_KEY_HERE
+    region: your-aws-region
+    bucket-name: your-voicepack-bucket
