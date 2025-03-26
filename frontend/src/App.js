@@ -8,8 +8,8 @@ import {
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
+import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 import BasicVoice from './pages/BasicVoice';
 import AiAssistant from './pages/AiAssistant';
 import VoiceCreate from './pages/VoiceCreate';
@@ -18,7 +18,7 @@ import MyPage from './pages/MyPage';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const noLayoutPaths = ['/', '/login', '/register'];
+  const noLayoutPaths = ['/', '/sign-in', '/sign-up'];
   const isNoLayout = noLayoutPaths.includes(location.pathname);
 
   return (
@@ -42,8 +42,8 @@ function App() {
       <Layout>
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
           <Route path="/basic-voice" element={<BasicVoice />} />
           <Route path="/ai-assistant" element={<AiAssistant />} />
           <Route path="/voice-create" element={<VoiceCreate />} />

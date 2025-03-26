@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const SignIn = () => {
     const navigate = useNavigate();
 
     const handleLogin = () => {
@@ -31,4 +31,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default SignIn;

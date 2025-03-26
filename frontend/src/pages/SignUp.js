@@ -1,11 +1,11 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const Register = () => {
+const SignUp = () => {
     const navigate = useNavigate();
 
     const handleRegister = () => {
-        navigate("/login");
+        navigate("/sign-in");
     };
 
     return (
@@ -20,4 +20,4 @@ const Register = () => {
     );
 };
 
-export default Register;
+export default SignUp;

@@ -10,7 +10,7 @@ const Landing = () => {
       <header className="flex justify-between items-center p-6 bg-gray-100">
         <img src={logo} alt="COVOS" width="100" />
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/sign-in')}
           className="bg-blue-500 text-white px-4 py-2 rounded"
         >
           로그인
@@ -28,7 +28,7 @@ const Landing = () => {
           공유하거나 직접 활용하세요.
         </p>
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/sign-in')}
           className="bg-blue-500 text-white px-6 py-3 text-lg font-semibold rounded"
         >
           보이스팩 제작 시작하기
@@ -78,7 +78,7 @@ const Landing = () => {
           지금, 당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/sign-in')}
           className="bg-white text-blue-500 px-6 py-2 rounded font-semibold"
         >
           지금 시작하기
