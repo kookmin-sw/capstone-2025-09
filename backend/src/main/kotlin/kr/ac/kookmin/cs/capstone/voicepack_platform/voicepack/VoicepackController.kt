@@ -96,7 +96,7 @@ class VoicepackController(
         @Parameter(description = "사용자 ID (선택적)") @RequestParam(required = false) userId: Long?
     ): ResponseEntity<List<VoicepackDto>> {
         val voicepacks = voicepackService.getVoicepacks(userId)
-        return ResponseEntity.ok(voicepacks.map { VoicepackDto.fromEntity(it) })
+        return ResponseEntity.ok(voicepacks)
     }
   
 } 
