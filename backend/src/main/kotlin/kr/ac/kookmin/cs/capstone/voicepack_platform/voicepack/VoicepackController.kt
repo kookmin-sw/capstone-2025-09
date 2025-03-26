@@ -122,5 +122,28 @@ class VoicepackController(
         val response = voicepackService.getVoicepack(voicepackId)
         return ResponseEntity.ok(response)
     }
-
+    
+    // 보이스팩 예시 음성 파일 조회
+    @Operation(
+        summary = "보이스팩 예시 음성 파일 조회",
+        description = "보이스팩 예시 음성 파일을 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = String::class))]
+            ),
+            ApiResponse(
+                responseCode = "500",   
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/example/{voicepackId}")
+    fun getExampleVoicepack(
+        @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
+    ): ResponseEntity<String> {
+        val response = voicepackService.getExampleVoice(voicepackId)
+        return ResponseEntity.ok(response)
+    }   
 } 

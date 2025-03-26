@@ -295,4 +295,10 @@ class VoicepackService(
         return VoicepackDto.fromEntity(voicepack)
     }
 
+    // 보이스팩 예시 음성 파일 조회
+    fun getExampleVoice(voicepackId: Long): String {
+        val voicepack = findVoicepack(voicepackId)
+        val s3ObjectKey = "speakers/${voicepack.name}/sample_test.wav"
+        return s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
+    }
 }
