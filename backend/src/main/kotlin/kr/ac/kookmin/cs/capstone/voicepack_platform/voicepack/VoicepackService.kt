@@ -288,4 +288,11 @@ class VoicepackService(
         
         return voicepacks.map { VoicepackDto.fromEntity(it) }
     }
+
+    // 보이스팩 1개만 조회
+    fun getVoicepack(voicepackId: Long): VoicepackDto {
+        val voicepack = findVoicepack(voicepackId)
+        return VoicepackDto.fromEntity(voicepack)
+    }
+
 }

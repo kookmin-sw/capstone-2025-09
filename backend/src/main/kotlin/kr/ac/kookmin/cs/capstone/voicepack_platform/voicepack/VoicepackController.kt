@@ -99,4 +99,28 @@ class VoicepackController(
         return ResponseEntity.ok(voicepacks)
     }
   
+    // 보이스팩 1개만 조회
+    @Operation(
+        summary = "보이스팩 1개 조회",
+        description = "보이스팩 1개를 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",   
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = VoicepackDto::class))]
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/{voicepackId}")
+    fun getVoicepack(
+        @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
+    ): ResponseEntity<VoicepackDto> {
+        val response = voicepackService.getVoicepack(voicepackId)
+        return ResponseEntity.ok(response)
+    }
+
 } 
