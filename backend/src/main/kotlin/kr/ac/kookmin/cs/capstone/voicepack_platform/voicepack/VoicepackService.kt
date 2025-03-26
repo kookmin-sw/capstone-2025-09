@@ -64,7 +64,7 @@ class VoicepackService(
         val user = findUser(userId)
 
         // 패키지 이름 유효성 검사
-        validatePackName(request.name, user.id)
+        validatePackName(request.name)
         
         // 진행 중인 요청이 있는지 확인
         checkOngoingRequests(userId)
@@ -188,9 +188,9 @@ class VoicepackService(
 
 
     // 패키지 이름 유효성 검사
-    private fun validatePackName(packName: String, userId: Long) {
-        if (voicepackRepository.existsByNameAndAuthorId(packName, userId)) {
-            logger.error("이미 같은 이름의 보이스팩이 존재합니다: packName={}, userId={}", packName, userId)
+    private fun validatePackName(packName: String) {
+        if (voicepackRepository.existsByName(packName)) {
+            logger.error("이미 같은 이름의 보이스팩이 존재합니다: packName={}", packName)
             throw IllegalArgumentException("이미 같은 이름의 보이스팩이 존재합니다")
         }
     }
