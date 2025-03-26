@@ -1,38 +1,18 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function VoiceMarket() {
   const [voicePacks, setVoicePacks] = useState([]);
+  const [playingIndex, setPlayingIndex] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchVoicePacks = async () => {
+      const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
       try {
-        // ⚠️ 실제 API 요청 대신 더미 데이터 사용
-        // const response = await axios.get('/api/voice-packs');
-        // setVoicePacks(response.data);
-
-        const dummyData = [
-          {
-            id: 1,
-            name: '감정 보이스팩',
-            author: 'voice_creator1@example.com',
-            createdAt: '2024-03-26T12:00:00Z',
-          },
-          {
-            id: 2,
-            name: '캐릭터 보이스팩',
-            author: 'voice_creator2@example.com',
-            createdAt: '2024-03-25T14:30:00Z',
-          },
-          {
-            id: 3,
-            name: '게임 보이스팩',
-            author: 'voice_creator3@example.com',
-            createdAt: '2024-03-20T10:15:00Z',
-          },
-        ];
-        setVoicePacks(dummyData);
+        const response = await axios.get(apiUrl); // API URL을 직접 호출
+        setVoicePacks(response.data);
       } catch (err) {
         console.error('Error fetching voice packs:', err);
         setError('보이스팩을 불러오는 데 실패했습니다.');
@@ -44,6 +24,18 @@ function VoiceMarket() {
     fetchVoicePacks();
   }, []);
 
+  const handlePlayAudio = (audioUrl, index) => {
+    if (playingIndex !== index) {
+      const audio = new Audio(audioUrl);
+      audio.play();
+      setPlayingIndex(index);
+
+      audio.onended = () => {
+        setPlayingIndex(null);
+      };
+    }
+  };
+
   return (
     <div className="flex flex-col items-center min-h-screen bg-white p-4">
       <h1 className="text-3xl font-bold mb-8">보이스팩 구매</h1>
@@ -53,14 +45,25 @@ function VoiceMarket() {
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
-          {voicePacks.map((pack) => (
-            <div key={pack.id} className="bg-gray-800 text-white p-4 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold">{pack.name}</h2>
-              <p className="text-sm text-gray-300">제작자: {pack.author}</p>
-              <p className="text-sm text-gray-400">
-                생성일: {new Date(pack.createdAt).toLocaleDateString()}
-              </p>
+        <div className="grid grid-cols-4 gap-4">
+          {voicePacks.map((pack, index) => (
+            <div key={index} className="bg-gray-800 text-white p-4 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold mb-2">{pack.name}</h2>
+              <div className="flex flex-wrap gap-2">
+                {pack.audios.map((audioUrl, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handlePlayAudio(audioUrl, `${index}-${i}`)}
+                    className={`px-3 py-2 rounded-full focus:outline-none transition-all duration-200 ${
+                      playingIndex === `${index}-${i}`
+                        ? 'bg-green-500 text-white' // 활성화 상태
+                        : 'bg-gray-500 text-white hover:bg-gray-600'
+                    }`}
+                  >
+                    {playingIndex === `${index}-${i}` ? '⏸️ 정지' : '▶️ 재생'}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </div>
