@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
 function VoiceMarket() {
   const [voicePacks, setVoicePacks] = useState([]);
@@ -10,11 +9,18 @@ function VoiceMarket() {
   useEffect(() => {
     const fetchVoicePacks = async () => {
       const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
+      console.log('📡 API 요청 중:', apiUrl); // API URL 출력
+
       try {
-        const response = await axios.get(apiUrl); // API URL을 직접 호출
-        setVoicePacks(response.data);
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+          throw new Error(`HTTP 오류! 상태 코드: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log('📥 받아온 데이터:', data); // 데이터 콘솔 출력
+        setVoicePacks(data);
       } catch (err) {
-        console.error('Error fetching voice packs:', err);
+        console.error('❌ 보이스팩 불러오기 실패:', err);
         setError('보이스팩을 불러오는 데 실패했습니다.');
       } finally {
         setLoading(false);
@@ -23,6 +29,10 @@ function VoiceMarket() {
 
     fetchVoicePacks();
   }, []);
+
+  useEffect(() => {
+    console.log('🔍 렌더링된 보이스팩:', voicePacks); // 렌더링 후 상태 확인
+  }, [voicePacks]);
 
   const handlePlayAudio = (audioUrl, index) => {
     if (playingIndex !== index) {
