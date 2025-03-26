@@ -66,7 +66,9 @@ dependencies {
 	implementation("software.amazon.awssdk:s3:2.21.42")
 	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
 
-	implementation("com.mysql:mysql-connector-j:8.3.0")
+	// AWS RDS (MySQL)
+	implementation("mysql:mysql-connector-java:8.0.33")
+
 }
 
 kotlin {

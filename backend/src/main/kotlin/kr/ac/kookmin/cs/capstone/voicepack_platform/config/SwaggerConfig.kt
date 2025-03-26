@@ -3,6 +3,7 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.config
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.servers.Server
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -11,6 +12,8 @@ class SwaggerConfig {
 
     @Bean
     fun openAPI(): OpenAPI = OpenAPI()
+        .addServersItem(Server().url("https://vocalab.kro.kr").description("Production Server"))
+        .addServersItem(Server().url("http://localhost:8080").description("Local Server"))
         .components(Components())
         .info(
             Info()
