@@ -12,7 +12,7 @@ data class Voicepack(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, unique = true)
     val name: String,
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,3 +25,25 @@ data class Voicepack(
     @Column(name = "created_at", nullable = false)
     val createdAt: OffsetDateTime = OffsetDateTime.now()
 ) 
+
+/**
+ * 보이스팩 DTO 클래스
+ * s3Path를 제외한 보이스팩 정보를 담는 데이터 클래스입니다.
+ */
+data class VoicepackDto(
+    val id: Long,
+    val name: String,
+    val author: String,
+    val createdAt: OffsetDateTime
+) {
+    companion object {
+        fun fromEntity(voicepack: Voicepack): VoicepackDto {
+            return VoicepackDto(
+                id = voicepack.id,
+                name = voicepack.name,
+                author = voicepack.author.email,
+                createdAt = voicepack.createdAt
+            )
+        }
+    }
+}

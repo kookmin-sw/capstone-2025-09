@@ -64,7 +64,7 @@ class VoicepackService(
         val user = findUser(userId)
 
         // 패키지 이름 유효성 검사
-        validatePackName(request.name, user.id)
+        validatePackName(request.name)
         
         // 진행 중인 요청이 있는지 확인
         checkOngoingRequests(userId)
@@ -188,9 +188,9 @@ class VoicepackService(
 
 
     // 패키지 이름 유효성 검사
-    private fun validatePackName(packName: String, userId: Long) {
-        if (voicepackRepository.existsByNameAndAuthorId(packName, userId)) {
-            logger.error("이미 같은 이름의 보이스팩이 존재합니다: packName={}, userId={}", packName, userId)
+    private fun validatePackName(packName: String) {
+        if (voicepackRepository.existsByName(packName)) {
+            logger.error("이미 같은 이름의 보이스팩이 존재합니다: packName={}", packName)
             throw IllegalArgumentException("이미 같은 이름의 보이스팩이 존재합니다")
         }
     }
@@ -272,4 +272,36 @@ class VoicepackService(
             IllegalArgumentException("Voicepack not found")
         }
 
+    /**
+     * 보이스팩 목록 조회
+     */
+    fun getVoicepacks(userId: Long?): List<VoicepackDto> {
+        logger.info("보이스팩 목록 조회: userId={}", userId)
+        
+        val voicepacks = if (userId != null) {
+            // 특정 사용자의 보이스팩만 조회
+            voicepackRepository.findByAuthorId(userId)
+        } else {
+            // 모든 보이스팩 조회
+            voicepackRepository.findAll()
+        }
+        
+        return voicepacks.map { VoicepackDto.fromEntity(it) }
+    }
+
+    // 보이스팩 1개만 조회
+    fun getVoicepack(voicepackId: Long): VoicepackDto {
+        val voicepack = findVoicepack(voicepackId)
+        if (voicepack == null) {
+            throw IllegalArgumentException("Voicepack not found")
+        }
+        return VoicepackDto.fromEntity(voicepack)
+    }
+
+    // 보이스팩 예시 음성 파일 조회
+    fun getExampleVoice(voicepackId: Long): String {
+        val voicepack = findVoicepack(voicepackId)
+        val s3ObjectKey = "speakers/${voicepack.name}/sample_test.wav"
+        return s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
+    }
 }
