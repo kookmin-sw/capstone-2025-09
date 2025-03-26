@@ -1,0 +1,21 @@
+# Git
+.git
+.gitignore
+.gitattributes
+**/.git
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# VS Code
+.vscode/
+
+# Build files
+*.log
