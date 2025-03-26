@@ -21,6 +21,13 @@ const Sidebar = () => {
         <img src={logo} alt="COVOS" width="100" />
       </Link>
       <Link
+        to="/voice-create"
+        className={`flex items-center space-x-2 p-2 rounded ${isActive('/voice-create')}`}
+      >
+        <Mic size={20} />
+        <span>보이스팩 생성</span>
+      </Link>
+      <Link
         to="/voice-store"
         className={`flex items-center space-x-2 p-2 rounded ${isActive('/voice-store')}`}
       >
