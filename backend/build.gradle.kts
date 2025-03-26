@@ -38,7 +38,6 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 	runtimeOnly("com.h2database:h2")
-	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(module = "mockito-core")
@@ -52,10 +51,6 @@ dependencies {
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
 
 	implementation(kotlin("stdlib-jdk8"))
-	// testImplementation("org.jetbrains.kotlin:kotlin-test:1.9.22") <- supabase bom 내부 테스트 라이브러리와 충돌
-	implementation(platform("io.github.jan-tennert.supabase:bom:2.1.2"))
-	implementation("io.github.jan-tennert.supabase:postgrest-kt")
-	implementation("io.github.jan-tennert.supabase:realtime-kt")
 	implementation("io.ktor:ktor-client-java:2.3.7")
 	implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
 	implementation("io.ktor:ktor-client-logging-jvm:2.3.7")
@@ -71,6 +66,7 @@ dependencies {
 	implementation("software.amazon.awssdk:s3:2.21.42")
 	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
 
+	implementation("com.mysql:mysql-connector-j:8.3.0")
 }
 
 kotlin {

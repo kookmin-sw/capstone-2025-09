@@ -2,15 +2,17 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.notification
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
 import org.springframework.stereotype.Service
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+
+inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 
 @Serializable
 private data class NotificationData(
@@ -20,35 +22,19 @@ private data class NotificationData(
     val created_at: String
 )
 
+
 @Service
 class NotificationService(
-    private val supabaseClient: SupabaseClient
+
 ) {
+    private val log = logger()
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     fun notifyVoicepackComplete(voicepackRequest: VoicepackRequest) {
-        coroutineScope.launch {
-            supabaseClient.postgrest["voicepack_notifications"].insert(
-                NotificationData(
-                    voicepack_name = voicepackRequest.name,
-                    created_by = voicepackRequest.author.id,
-                    event_type = "voicepack_complete",
-                    created_at = voicepackRequest.completedAt!!.toInstant().toString()
-                )
-            )
-        }
+        log.info("보이스팩 변환 완료 알림 전송: voicepackRequest={}", voicepackRequest)
     }
 
     fun notifyVoicepackFailed(voicepackRequest: VoicepackRequest) {
-        coroutineScope.launch {
-            supabaseClient.postgrest["voicepack_notifications"].insert(
-                NotificationData(
-                    voicepack_name = voicepackRequest.name,
-                    created_by = voicepackRequest.author.id,
-                    event_type = "voicepack_failed",
-                    created_at = voicepackRequest.completedAt!!.toInstant().toString()
-                )
-            )
-        }
+        log.info("보이스팩 변환 실패 알림 전송: voicepackRequest={}", voicepackRequest)
     }
 } 
