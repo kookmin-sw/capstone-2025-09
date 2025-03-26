@@ -1,12 +1,12 @@
 from fastapi import FastAPI, UploadFile, File, Form
-from services.tts_service import TtsService
+from utils.voice_synthesizer import VoiceSynthesizer
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
-tts_service = TtsService()
+voice_synthesizer = VoiceSynthesizer()
 
 @app.post("/register_speaker")
 async def register_speaker_endpoint(
@@ -14,7 +14,7 @@ async def register_speaker_endpoint(
     voiceFile: UploadFile = File(...)
 ):
     """화자 등록 API 엔드포인트"""
-    result = await tts_service.extract_speaker_features(
+    result = await voice_synthesizer.extract_speaker_features(
         voicepackId=voicepackId,
         voiceFile=voiceFile
     )
@@ -29,7 +29,7 @@ async def synthesize_endpoint(
     userId: int = Form(...)
 ):
     """음성 합성 API 엔드포인트"""
-    result = await tts_service.generate_speech(
+    result = await voice_synthesizer.generate_speech(
         prompt=prompt,
         voicepackId=voicepackId,
         speed=speed,

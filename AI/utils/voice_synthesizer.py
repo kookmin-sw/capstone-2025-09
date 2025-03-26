@@ -11,15 +11,15 @@ from modelscope import snapshot_download
 import os
 from cosyvoice.cli.cosyvoice import CosyVoice2
 from cosyvoice.utils.file_utils import load_wav
-from .s3_service import S3Service
+from .storage_manager import StorageManager
 from config.settings import MODEL_CONFIG
 
 logger = logging.getLogger(__name__)
 
-class TtsService:
+class VoiceSynthesizer:
     def __init__(self):
         self._initialize_model()
-        self.s3_service = S3Service()
+        self.storage_manager = StorageManager()
         self.sample_rate = MODEL_CONFIG['sample_rate']
 
     def _initialize_model(self):
@@ -73,7 +73,7 @@ class TtsService:
             )
             
             # 특징 저장
-            if not self.s3_service.save_speaker_features(voicepackId, features):
+            if not self.storage_manager.save_speaker_features(voicepackId, features):
                 raise HTTPException(status_code=500, detail="Failed to save speaker features")
             
             logger.info(f"화자 특징 저장 완료: {voicepackId}")
@@ -90,7 +90,7 @@ class TtsService:
             # 테스트 음성 저장
             test_filename = "sample_test.wav"
             file_path = f"speakers/{voicepackId}/{test_filename}"
-            audio_url = self.s3_service.save_audio(audio_data, file_path)
+            audio_url = self.storage_manager.save_audio(audio_data, file_path)
             
             if not audio_url:
                 raise HTTPException(status_code=500, detail="Failed to save sample audio")
@@ -111,10 +111,10 @@ class TtsService:
     ) -> dict:
         """기능 1: 베이직 기능에 사용되는 음성 생성"""
         try:
-            if not self.s3_service.speaker_exists(voicepackId):
+            if not self.storage_manager.speaker_exists(voicepackId):
                 raise HTTPException(status_code=404, detail="Speaker not found")
             
-            features = self.s3_service.get_speaker_features(voicepackId)
+            features = self.storage_manager.get_speaker_features(voicepackId)
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
@@ -129,7 +129,7 @@ class TtsService:
             filename = f"speech_{timestamp}.wav"
             file_path = f"generated_audio/{userId}/{voicepackId}/{filename}"
             
-            audio_url = self.s3_service.save_audio(audio_data, file_path)
+            audio_url = self.storage_manager.save_audio(audio_data, file_path)
             
             if not audio_url:
                 raise HTTPException(status_code=500, detail="Failed to save generated audio")

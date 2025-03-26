@@ -9,7 +9,7 @@ import torch
 
 logger = logging.getLogger(__name__)
 
-class S3Service:
+class StorageManager:
     def __init__(self):
         """S3 서비스 초기화"""
         self.s3_client = boto3.client(
