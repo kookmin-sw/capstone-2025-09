@@ -46,9 +46,9 @@ function VoiceMarket() {
         <div className="grid grid-cols-4 gap-4">
           {voicePacks.map((pack) => (
             <div key={pack.id} className="bg-gray-800 text-white p-4 rounded-lg shadow-md w-48">
-              <h2 className="text-lg font-semibold mb-2 text-center">{pack.name}</h2>
-              <p className="text-gray-300 text-sm text-center">📧 {pack.author}</p>
-              <p className="text-gray-400 text-xs text-center">📅 {formatDate(pack.createdAt)}</p>
+              <h2 className="text-lg font-semibold mb-2 text-center">보이스팩 이름 : {pack.name}</h2>
+              <p className="text-gray-300 text-sm text-center"> 제작자 : {pack.author}</p>
+              <p className="text-gray-400 text-xs text-center"> 만든 날짜 : {formatDate(pack.createdAt)}</p>
             </div>
           ))}
         </div>
