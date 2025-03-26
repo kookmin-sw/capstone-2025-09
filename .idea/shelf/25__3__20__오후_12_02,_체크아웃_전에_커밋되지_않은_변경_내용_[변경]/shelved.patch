@@ -1,0 +1,288 @@
+Index: .github/ISSUE_TEMPLETE/Issue-fix-template.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.github/ISSUE_TEMPLETE/Issue-fix-template.yml b/.github/ISSUE_TEMPLETE/Issue-fix-template.yml
+new file mode 100644
+--- /dev/null	(date 1742438918837)
++++ b/.github/ISSUE_TEMPLETE/Issue-fix-template.yml	(date 1742438918837)
+@@ -0,0 +1,44 @@
++name: "🚀 Fix Report"
++description: "버그 수정이나 개선 사항을 기록하는 템플릿"
++title: "fix: "
++labels: ["fix"]
++body:
++  - type: input
++    attributes:
++      label: 🔗 관련 이슈
++      description: "이 Fix가 해결한 기존 이슈가 있다면 추가해주세요. (ex. #123)"
++    validations:
++      required: false
++  - type: textarea
++    attributes:
++      label: 🛠 수정 내용
++      description: 어떤 문제가 수정되었는지 설명해주세요.
++      placeholder: 어떤 버그를 해결했는지 적어주세요.
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: ✅ 작업 내역
++      description: 작업한 내용을 체크박스 형태로 정리해주세요.
++      placeholder: |
++        <ex. 예시 지문>
++        - [ ] <체크 1>
++        - [ ] <체크 2>
++      value: |
++        - [ ] <#이슈 1> <작업 내용>
++        - [ ] <#이슈 1> <작업 내용>
++        - [ ] <#이슈 1> <작업 내용>
++        - [ ] 더입력 ...
++      render: ''
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: 🙋🏻 리뷰 요구사항 (선택)
++      description: 코드 리뷰 요청이 필요한 부분을 작성해주세요.
++      placeholder: |
++        - 기존 코드와 비교해서 변경된 부분의 논리적 타당성을 봐주세요.
++        - 리팩토링할 수 있는 여지가 있는지 피드백 부탁드립니다.
++        - 테스트 커버리지가 충분한지 확인해 주세요.
++    validations:
++      required: false
+Index: .github/ISSUE_TEMPLETE/Issue-feature-template.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.github/ISSUE_TEMPLETE/Issue-feature-template.yml b/.github/ISSUE_TEMPLETE/Issue-feature-template.yml
+new file mode 100644
+--- /dev/null	(date 1742438889092)
++++ b/.github/ISSUE_TEMPLETE/Issue-feature-template.yml	(date 1742438889092)
+@@ -0,0 +1,47 @@
++name: "✨ Feature"
++description: "기능 추가, UI 개선, 문서 업데이트 요청을 위한 템플릿"
++title: "feat: "
++labels: ["feature"]
++body:
++  - type: input
++    attributes:
++      label: 🔗 관련 이슈
++      description: "이 기능이 관련된 기존 이슈가 있다면 추가해주세요. (ex: #123)"
++    validations:
++      required: false
++  - type: textarea
++    attributes:
++      label: 📄 설명
++      description: 요청하신 새로운 기능에 대한 설명을 작성해 주세요.
++      placeholder: |
++        - 왜 이 기능이 필요한가요?
++        - 기존에 없던 점을 어떻게 개선할 수 있을까요?
++        - 어떤 방식으로 구현되었으면 좋겠나요?
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: ✅ 작업할 내용
++      description: 수행해야 할 작업을 체크박스 형태로 작성해주세요.
++      placeholder: |
++        - [ ] UI 디자인 개선
++        - [ ] API 연동 추가
++        - [ ] 새로운 페이지 추가
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: 🙋🏻 참고 자료 (선택)
++      description: 관련 문서, 디자인 시안, 참고할 링크가 있다면 추가해주세요.
++      placeholder: "예: Figma 링크, API 문서, 기존 UI 캡처본 등"
++    validations:
++      required: false
++  - type: textarea
++    attributes:
++      label: 🙋🏻 리뷰 요구사항 (선택)
++      description: 코드 리뷰 요청이 필요한 부분을 구체적으로 작성해주세요.
++      placeholder: |
++        - 특정 구현 방식에 대한 대안이 있을까요?
++        - 성능 최적화를 위해 고려할 점이 있을까요?
++    validations:
++      required: false
+Index: .github/ISSUE_TEMPLETE/Issue-bug-template.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.github/ISSUE_TEMPLETE/Issue-bug-template.yml b/.github/ISSUE_TEMPLETE/Issue-bug-template.yml
+new file mode 100644
+--- /dev/null	(date 1742438881085)
++++ b/.github/ISSUE_TEMPLETE/Issue-bug-template.yml	(date 1742438881085)
+@@ -0,0 +1,42 @@
++name: "🐛 Bug Report"
++description: "버그를 제보하기 위한 템플릿"
++title: "bug: "
++labels: ["bug"]
++body:
++  - type: input
++    attributes:
++      label: 🔗 관련 이슈
++      description: "이 버그가 관련된 기존 이슈가 있다면 추가해주세요. (ex. #123)"
++    validations:
++      required: false
++  - type: textarea
++    attributes:
++      label: 🐞 버그 설명
++      description: 발생한 버그에 대한 설명을 작성해 주세요.
++      placeholder: 어떤 상황에서 발생했는지 자세히 적어주세요!
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: ✅ 재현 방법
++      description: 버그를 재현할 수 있는 단계를 설명해주세요.
++      placeholder: 1. ...을 실행한다. 2. ...을 클릭한다. 3. ... 문제가 발생한다.
++    validations:
++      required: true
++  - type: textarea
++    attributes:
++      label: 📸 스크린샷 / 로그 (선택)
++      description: 버그가 발생한 화면이 있다면 스크린샷을 첨부해주세요. (이미지는 드래그 앤 드롭으로 업로드 가능)
++    validations:
++      required: false
++  - type: textarea
++    attributes:
++      label: 🙋🏻 리뷰 요구사항 (선택)
++      description: 코드 리뷰 요청이 필요한 부분을 작성해주세요.
++      placeholder: |
++        - 특정 코드 블록에서 더 나은 방식이 있을까요?
++        - 성능 최적화를 위해 개선할 점이 있을까요?
++        - 이 로직이 가독성이 좋은지 확인해 주세요.
++        - 예외 처리 방식이 적절한지 리뷰 부탁드립니다.
++    validations:
++      required: false
+Index: .idea/.gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/.gitignore b/.idea/.gitignore
+new file mode 100644
+--- /dev/null	(date 1742397168129)
++++ b/.idea/.gitignore	(date 1742397168129)
+@@ -0,0 +1,8 @@
++# 디폴트 무시된 파일
++/shelf/
++/workspace.xml
++# 에디터 기반 HTTP 클라이언트 요청
++/httpRequests/
++# Datasource local storage ignored files
++/dataSources/
++/dataSources.local.xml
+Index: .idea/capstone.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/capstone.iml b/.idea/capstone.iml
+new file mode 100644
+--- /dev/null	(date 1742397205887)
++++ b/.idea/capstone.iml	(date 1742397205887)
+@@ -0,0 +1,12 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<module type="WEB_MODULE" version="4">
++  <component name="NewModuleRootManager">
++    <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/.tmp" />
++      <excludeFolder url="file://$MODULE_DIR$/temp" />
++      <excludeFolder url="file://$MODULE_DIR$/tmp" />
++    </content>
++    <orderEntry type="inheritedJdk" />
++    <orderEntry type="sourceFolder" forTests="false" />
++  </component>
++</module>
+\ No newline at end of file
+Index: .idea/modules.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/modules.xml b/.idea/modules.xml
+new file mode 100644
+--- /dev/null	(date 1742397205897)
++++ b/.idea/modules.xml	(date 1742397205897)
+@@ -0,0 +1,8 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="ProjectModuleManager">
++    <modules>
++      <module fileurl="file://$PROJECT_DIR$/.idea/capstone.iml" filepath="$PROJECT_DIR$/.idea/capstone.iml" />
++    </modules>
++  </component>
++</project>
+\ No newline at end of file
+Index: .github/PULL_REQUEST_TEMPLATE.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.github/PULL_REQUEST_TEMPLATE.md b/.github/PULL_REQUEST_TEMPLATE.md
+new file mode 100644
+--- /dev/null	(date 1742438743209)
++++ b/.github/PULL_REQUEST_TEMPLATE.md	(date 1742438743209)
+@@ -0,0 +1,36 @@
++# 🔗 관련 이슈
++<!-- 이 PR이 해결하는 이슈를 추가해주세요. (예: #123) 이슈 번호 앞에 Closes 작성하면 PR 머지할 때 자동으로 이슈가 닫힙니다.-->
++Closes #
++
++---
++
++# ✨ 작업 사항
++<!-- 이 PR에서 작업한 내용을 자유롭게 정리해주세요. -->
++
++
++---
++
++# 📸 스크린샷 (선택)
++<!-- 변경된 UI나 버그 수정 전후 비교 화면이 있다면 추가해주세요. -->
++<!-- 이미지는 이슈 제출 후 드래그 앤 드롭으로 업로드할 수 있습니다. -->
++
++---
++
++# 🔗 참고 자료 (선택)
++<!-- 관련 문서, 디자인 시안, API 문서 등이 있다면 추가해주세요. -->
++- 예: [Figma 디자인](https://www.figma.com/), [API 문서](https://api.docs.example.com/)
++
++---
++
++# 🙋🏻 리뷰 요구사항 (선택)
++<!-- 코드 리뷰 요청이 필요한 부분을 구체적으로 작성해주세요. -->
++- 이 PR의 주요 변경 사항이 적절한 방향인지 검토 부탁드립니다.
++- 사용한 디자인 패턴이 적절한지 확인해 주세요.
++- 코드 스타일 및 네이밍이 일관적인지 봐주세요.
++
++---
++
++# 🚀 PR 체크리스트
++- [ ] 내 코드가 정상적으로 동작하는지 테스트했나요?
++- [ ] 이 PR이 관련된 이슈와 연결되었나요?
++- [ ] 팀원들과 논의가 필요한 부분이 있나요?
+\ No newline at end of file
+Index: .idea/vcs.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/vcs.xml b/.idea/vcs.xml
+new file mode 100644
+--- /dev/null	(date 1742397205907)
++++ b/.idea/vcs.xml	(date 1742397205907)
+@@ -0,0 +1,7 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<project version="4">
++  <component name="VcsDirectoryMappings">
++    <mapping directory="" vcs="Git" />
++    <mapping directory="$PROJECT_DIR$/frontend" vcs="Git" />
++  </component>
++</project>
+\ No newline at end of file
