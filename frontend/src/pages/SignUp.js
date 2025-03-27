@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SignUpPage = () => {
+const SignUp = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -9,7 +9,7 @@ const SignUpPage = () => {
   // ✅ 뒤로가기하면 로그인 페이지로 이동
   useEffect(() => {
     const handlePopState = () => {
-      navigate('/login', { replace: true });
+      navigate('/signin', { replace: true });
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -19,7 +19,7 @@ const SignUpPage = () => {
   }, [navigate]);
 
   const handleSignUp = async () => {
-    const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
+    const apiUrl = process.env.REACT_APP_USER_API_URL;
     const endpoint = `${apiUrl}/signup`;
 
     try {
@@ -45,7 +45,7 @@ const SignUpPage = () => {
 
       if (response.ok) {
         alert('회원가입이 완료되었습니다! 로그인해주세요.');
-        navigate('/login');
+        navigate('/signin');
         setEmail('');
         setPassword('');
       } else {
@@ -94,7 +94,7 @@ const SignUpPage = () => {
           <button
             type="button"
             className="text-blue-500 underline"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/signin')}
           >
             로그인하기
           </button>
@@ -114,4 +114,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SignUp;
