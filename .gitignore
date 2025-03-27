@@ -14,3 +14,7 @@ __pycache__/
 venv/
 env/
 .env
+
+# IDE 설정
+.idea/
+*.iml
