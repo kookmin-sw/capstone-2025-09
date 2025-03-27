@@ -32,7 +32,7 @@ function VoiceMarket() {
 
   const handleCardClick = async (pack) => {
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const endpoint = `${apiUrl}/example/{voicepackId}`;
+    const endpoint = `${apiUrl}/example/${pack.id}`;
     setSelectedPack(pack);
     try {
       const response = await fetch(endpoint);
