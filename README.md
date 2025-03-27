@@ -22,9 +22,9 @@ Covos은 누구나 자신의 목소리를 디지털 자산으로 만들고, 이�
 | 영역              | 기술 및 도구                             |
 |------------------|------------------------------------------|
 | AI/ML            | Zero-shot Voice Cloning, PyTorch, HuggingFace |
-| Backend          | Python, FastAPI, Supabase                |
+| Backend          | Spring Boot                |
 | Frontend         | React, TypeScript                        |
-| 인프라           | AWS ECS Fargate, GCP Cloud Run           |
+| 인프라           | AWS EC2, GCP Cloud Run           |
 | DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
 ### 📈 로드맵
