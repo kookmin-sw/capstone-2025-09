@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: VoicepackPlatform
+
+  datasource:
+    url: your-jdbc-url
+    driver-class-name: your-driver-class-name
+    username: your-username
+    password: your-password
+
+ai:
+  model:
+    service:
+      voicepack_creation: https://your-ai-service-url.com/voicepack_creation
+      voicepack_synthesis: https://your-ai-service-url.com/voicepack_synthesis
+
+# AWS S3 설정
+aws:
+  s3:
+    access-key: YOUR_AWS_ACCESS_KEY_HERE
+    secret-key: YOUR_AWS_SECRET_KEY_HERE
+    region: your-aws-region
+    bucket-name: your-voicepack-bucket
