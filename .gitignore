@@ -1,0 +1,19 @@
+# Pretrained model files
+pretrained_models/
+
+# VS Code settings
+.vscode/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+env/
+.env
+
+# IDE 설정
+.idea/
+*.iml
