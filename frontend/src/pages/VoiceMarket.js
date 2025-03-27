@@ -10,7 +10,6 @@ function VoiceMarket() {
   useEffect(() => {
     const fetchVoicePacks = async () => {
       const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-      const endpoint = `${apiUrl}/example/{voicepackId}`;
 
       try {
         const response = await fetch(apiUrl);
@@ -40,8 +39,8 @@ function VoiceMarket() {
       if (!response.ok) {
         throw new Error('오디오를 불러오는 데 실패했습니다.');
       }
-      const blob = await response.blob();
-      setAudioUrl(URL.createObjectURL(blob));
+      const url = await response.text();
+      setAudioUrl(url);
     } catch (err) {
       console.error(err);
       setAudioUrl('');
