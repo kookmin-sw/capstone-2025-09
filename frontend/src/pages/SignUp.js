@@ -9,7 +9,7 @@ const SignUpPage = () => {
   // ✅ 뒤로가기하면 로그인 페이지로 이동
   useEffect(() => {
     const handlePopState = () => {
-      navigate('/login', { replace: true });
+      navigate('/signin', { replace: true });
     };
 
     window.addEventListener('popstate', handlePopState);
@@ -45,7 +45,7 @@ const SignUpPage = () => {
 
       if (response.ok) {
         alert('회원가입이 완료되었습니다! 로그인해주세요.');
-        navigate('/login');
+        navigate('/signin');
         setEmail('');
         setPassword('');
       } else {
@@ -94,7 +94,7 @@ const SignUpPage = () => {
           <button
             type="button"
             className="text-blue-500 underline"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/signin')}
           >
             로그인하기
           </button>

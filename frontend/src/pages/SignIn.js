@@ -36,7 +36,7 @@ const LoginPage = () => {
         } else {
           console.warn('⚠ userId 없음: 서버 응답을 확인하세요.');
         }
-        navigate('/landingpage');
+        navigate('/landing');
         setEmail('');
         setPassword('');
       } else {
