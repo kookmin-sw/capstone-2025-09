@@ -93,7 +93,7 @@ function VoiceMarket() {
             <h2 className="text-xl font-bold mb-4">{selectedPack.name} 미리듣기</h2>
             {audioUrl ? (
               <audio controls className="w-full">
-                <source src={audioUrl} type="audio/mpeg" />
+                <source src={audioUrl} type="audio/wav" />
                 브라우저가 오디오를 지원하지 않습니다.
               </audio>
             ) : (
