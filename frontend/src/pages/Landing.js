@@ -1,7 +1,7 @@
 import React, {useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LandingPage = () => {
+const Landing = () => {
   const navigate = useNavigate();
 
   const userId = sessionStorage.getItem("userId"); // 혹은 sessionStorage.getItem("userId")
@@ -48,4 +48,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default Landing;

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LoginPage = () => {
+const SignInPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
+    const apiUrl = process.env.REACT_APP_USER_API_URL;
     const endpoint = `${apiUrl}/login`;
 
     try {
@@ -105,4 +105,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default SignInPage;

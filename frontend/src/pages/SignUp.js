@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const SignUpPage = () => {
+const SignUp = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,7 +19,7 @@ const SignUpPage = () => {
   }, [navigate]);
 
   const handleSignUp = async () => {
-    const apiUrl = process.env.REACT_APP_SIGNUP_API_URL;
+    const apiUrl = process.env.REACT_APP_USER_API_URL;
     const endpoint = `${apiUrl}/signup`;
 
     try {
@@ -114,4 +114,4 @@ const SignUpPage = () => {
   );
 };
 
-export default SignUpPage;
+export default SignUp;

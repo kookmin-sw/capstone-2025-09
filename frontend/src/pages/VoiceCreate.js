@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
-function CreateVoice() {
+function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
   const [voicePackName, setVoicePackName] = useState('');
   const [timer, setTimer] = useState(0);
@@ -196,4 +196,4 @@ function CreateVoice() {
   );
 }
 
-export default CreateVoice;
+export default VoiceCreate;

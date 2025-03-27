@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-function VoiceMarket() {
+function VoiceStore() {
   const [voicePacks, setVoicePacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -106,4 +106,4 @@ function VoiceMarket() {
   );
 }
 
-export default VoiceMarket;
+export default VoiceStore;
