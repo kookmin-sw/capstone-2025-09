@@ -1,77 +1,65 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/gFPznrUY)
-# Welcome to GitHub
+## 🎙️ Covos - AI 보이스팩 거래 및 활용 플랫폼
 
-캡스톤 팀 생성을 축하합니다.
+<div align="center">
+  <img src="frontend/src/assets/logo.png" alt="대체 텍스트">
+</div>
 
-## 팀소개 및 페이지를 꾸며주세요.
+Covos은 누구나 자신의 목소리를 디지털 자산으로 만들고, 이를 수익화할 수 있는 AI 기반 음성 플랫폼입니다. 우리는 제로샷 인퍼런스 기반의 AI 음성합성 기술을 활용하여, 사용자의 음성을 빠르게 학습하고 개인화된 보이스팩을 생성합니다.
 
-- 프로젝트 소개
-  - 프로젝트 설치방법 및 데모, 사용방법, 프리뷰등을 readme.md에 작성.
-  - Api나 사용방법등 내용이 많을경우 wiki에 꾸미고 링크 추가.
+### 🚀 프로젝트 개요
+•	팀명: VocaLab
+•	플랫폼명: 코보스 (CozyVoice Studio)
+•	슬로건: 목소리의 가치를 재정의하다
+•	목표: AI 음성 기술의 민주화 및 개인 중심의 음성 생태계 조성
 
-- 팀페이지 꾸미기
-  - 프로젝트 소개 및 팀원 소개
-  - index.md 예시보고 수정.
+### 💡 핵심 기능
+•	🔊 AI 보이스팩 생성
+사용자가 음성을 업로드하면 AI가 해당 음색·억양을 학습하여 보이스팩 생성  
 
-- GitHub Pages 리파지토리 Settings > Options > GitHub Pages 
-  - Source를 marster branch
-  - Theme Chooser에서 태마선택
-  - 수정후 팀페이지 확인하여 점검.
+•	💱 보이스 마켓플레이스
+생성한 보이스팩을 크레딧 기반으로 자유롭게 판매·구매 가능
 
-**팀페이지 주소** -> https://kookmin-sw.github.io/ '{{자신의 리파지토리 아이디}}'
+•	🛠️ 크리에이터 도구 제공 예정
+보이스팩을 콘텐츠에 쉽게 삽입할 수 있는 플러그인 및 API 연동
 
-**예시)** 2023년 0조  https://kookmin-sw.github.io/capstone-2023-00/
+### 🧠 기술 스택
 
+| 영역              | 기술 및 도구                             |
+|------------------|------------------------------------------|
+| AI/ML            | Zero-shot Voice Cloning, PyTorch, HuggingFace |
+| Backend          | Python, FastAPI, Supabase                |
+| Frontend         | React, TypeScript                        |
+| 인프라           | AWS ECS Fargate, GCP Cloud Run           |
+| DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
-## 내용에 아래와 같은 내용들을 추가하세요.
+### 📈 로드맵
 
-### 1. 프로잭트 소개
+| 기간     | 주요 목표                            |
+|----------|-------------------------------------|
+| 2025.03  | MVP 개발 및 테스트 환경 구축         |
+| 2025.04  | 시제품 제작 및 베타 서비스 준비      |
+| 2025.05  | MVP 핵심 기능 구현 완료              |
+| 2025.06  | 내부 테스트 및 UI/UX 개선            |
+| 2025.07  | 정식 출시, 크리에이터 대상 마케팅 시작 |
+| 2025.08  | 사용자 유입 확대 및 거래 생태계 구축   |
 
-프로젝트
+### 🧩 비즈니스 모델
+•	🧾 B2C 거래 수수료: 보이스팩 거래 시 일정 수수료 부과
+•	🔁 프리미엄 구독: 고품질 보이스팩 무제한 사용 등
+•	👥 B2B API 판매: 보이스팩을 외부 서비스와 연동
+•	🎤 유명인 보이스팩 판매: 성우/인플루언서와 제휴한 프리미엄 콘텐츠 제공
 
-### 2. 소개 영상
+### 👥 팀 소개
 
-프로젝트 소개하는 영상을 추가하세요
+| 이름     | 역할             | 특이사항                    |
+|----------|------------------|-----------------------------|
+| 김종민 | 팀장 / AI 개발     | AI 전문성, AWS AIF 자격 보유 |
+| 정성원 | 백엔드 개발        | 다양한 기술 스택, AWS AIF    |
+| 한준교 | 인프라 개발        | 빅데이터 동아리 보드진, AWS SAA |
+| 정찬우 | 프론트엔드 개발    | SW융합대 학생회장, 리더십 강점 |
+| 박수연 | UI/UX 디자인      | 디자인 감각 탁월, UX 역량 보유 |
 
-### 3. 팀 소개
-
-팀을 소개하세요.
-
-팀원정보 및 담당이나 사진 및 SNS를 이용하여 소개하세요.
-
-### 4. 사용법
-
-소스코드제출시 설치법이나 사용법을 작성하세요.
-
-### 5. 기타
-
-추가적인 내용은 자유롭게 작성하세요.
-
-
-## Markdown을 사용하여 내용꾸미기
-
-Markdown은 작문을 스타일링하기위한 가볍고 사용하기 쉬운 구문입니다. 여기에는 다음을위한 규칙이 포함됩니다.
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-자세한 내용은 [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Support or Contact
-
-readme 파일 생성에 추가적인 도움이 필요하면 [도움말](https://help.github.com/articles/about-readmes/) 이나 [contact support](https://github.com/contact) 을 이용하세요.
+### 🔗 주요 링크
+•	공식 웹사이트 (출시 예정)
+•	데모 영상 (업로드 예정)
+•	백엔드 API 문서 (작성 예정)
