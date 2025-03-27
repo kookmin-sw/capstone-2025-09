@@ -73,7 +73,7 @@ function VoiceMarket() {
               className="bg-gray-800 text-white p-4 rounded-lg shadow-md w-48 cursor-pointer hover:bg-gray-700 transition"
               onClick={() => handleCardClick(pack)}
             >
-              <h2 className="text-lg font-semibold mb-2 text-center">이름 : {pack.name}</h2>
+              <h2 className="text-lg font-semibold mb-2 text-center">{pack.name}</h2>
               <p className="text-gray-300 text-sm text-center">📧 {pack.author}</p>
               <p className="text-gray-400 text-xs text-center">📅 {formatDate(pack.createdAt)}</p>
             </div>
