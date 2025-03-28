@@ -137,7 +137,7 @@ function VoiceCreate() {
       const data = await response.json();
       console.log(`✅ 보이스팩 생성 성공:`, data);
       alert('보이스팩 생성이 완료되었습니다!');
-      navigate('/voicemarket');
+      navigate('/voicestore');
     } catch (error) {
       console.error('❌ 보이스팩 생성 오류:', error);
     }
