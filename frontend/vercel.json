@@ -1,0 +1,9 @@
+{
+  "branches": {
+    "develop": "production",
+    "develop/test/*": "preview"
+  },
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
