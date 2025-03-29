@@ -9,8 +9,8 @@ import io
 import time
 from modelscope import snapshot_download
 import os
-from cosyvoice.cli.cosyvoice import CosyVoice2
-from cosyvoice.utils.file_utils import load_wav
+from CosyVoice.cli.cosyvoice import CosyVoice2
+from CosyVoice.utils.file_utils import load_wav
 from .storage_manager import StorageManager
 from config.settings import MODEL_CONFIG
 
