@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.config
+package kr.ac.kookmin.cs.capstone.voicepack_platform.common.config
 
 import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI

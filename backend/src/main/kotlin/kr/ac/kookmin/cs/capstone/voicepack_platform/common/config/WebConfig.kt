@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.config
+package kr.ac.kookmin.cs.capstone.voicepack_platform.common.config
 
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.servlet.config.annotation.CorsRegistry

@@ -1,8 +1,10 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.user
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.service
 
 import jakarta.servlet.http.HttpSession
-import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.repository.UserRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.dto.UserLoginRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.dto.UserSignupRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 

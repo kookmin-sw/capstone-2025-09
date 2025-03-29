@@ -1,6 +1,5 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.controller
 
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -11,6 +10,12 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackConvertRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackConvertResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackSynthesisRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackSynthesisResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.service.VoicepackService
 
 @RestController
 @RequestMapping("/api/voicepack")

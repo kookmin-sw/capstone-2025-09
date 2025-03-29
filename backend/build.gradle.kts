@@ -66,7 +66,7 @@ dependencies {
 	implementation("software.amazon.awssdk:s3:2.21.42")
 	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
 
-	// AWS RDS (MySQL)
+	// AWS RDS (MySQL) 의존성 추가
 	implementation("mysql:mysql-connector-java:8.0.33")
 
 }

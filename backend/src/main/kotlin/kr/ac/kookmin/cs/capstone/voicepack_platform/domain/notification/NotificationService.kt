@@ -1,16 +1,12 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.notification
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.notification
 
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequest
 import org.springframework.stereotype.Service
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.time.OffsetDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 inline fun <reified T> T.logger(): Logger = LoggerFactory.getLogger(T::class.java)
 

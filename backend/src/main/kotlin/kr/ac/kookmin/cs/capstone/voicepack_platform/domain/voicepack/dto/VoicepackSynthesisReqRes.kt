@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto
 
 import kotlinx.serialization.Serializable
 import org.springframework.web.multipart.MultipartFile

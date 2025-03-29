@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.service
 
 import io.ktor.client.*
 import io.ktor.client.call.body
@@ -14,13 +14,13 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.LogLevel
-import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
-import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
-import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.notification.NotificationService
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.repository.UserRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequestStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository.VoicepackRequestRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -28,16 +28,20 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository.VoicepackRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.Voicepack
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackDto
 
 @Service
 class VoicepackService(
-        private val voicepackRepository: VoicepackRepository,
-        private val voicepackRequestRepository: VoicepackRequestRepository,
-        private val userRepository: UserRepository,
-        private val notificationService: NotificationService,
-        @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
-        @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
-        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
+    private val voicepackRepository: VoicepackRepository,
+    private val voicepackRequestRepository: VoicepackRequestRepository,
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService,
+    @Value("\${aws.lambda.endpoint}") private val lambdaEndpoint: String,
+    @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     
     private val httpClient = HttpClient(Java) {
@@ -100,14 +104,14 @@ class VoicepackService(
     // AI 모델 서비스 호출
     private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
         val aiModelRequest = AIModelRequest(
-            voicepackId = voicepackRequest.name,
+            voicepackId = voicepackRequest.id,
             voiceFile = voiceFile
         )
-        
+
         logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
-        
+
         try {
-            val response = httpClient.post("$voicepackCreationEndpoint") {
+            val response = httpClient.post(lambdaEndpoint) {
                 contentType(ContentType.MultiPart.FormData)
                 setBody(
                     MultiPartFormDataContent(
@@ -116,20 +120,20 @@ class VoicepackService(
                             append("voiceFile", aiModelRequest.voiceFile.bytes, Headers.build {
                                 append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
                                 append(HttpHeaders.ContentType, "audio/wav") // 필요 시 파일 확장자 변경 가능
-                })}))
+                            })
+                        }
+                    )
+                )
             }
-            
-            // 응답 상태 코드 확인
-            if (!response.status.isSuccess()) {
+
+            // Lambda가 202 Accepted를 반환하면 성공으로 간주
+            if (response.status == HttpStatusCode.Accepted) {
+                logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, response.body<String>())
+            } else {
                 val errorBody = response.body<String>()
                 logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
                 throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
             }
-            
-            // 성공 시 응답 파싱
-            val aiModelResponse: String = response.body()
-            logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
-            
         } catch (e: Exception) {
             logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
             throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)

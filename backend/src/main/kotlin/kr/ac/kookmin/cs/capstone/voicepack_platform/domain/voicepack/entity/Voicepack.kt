@@ -1,7 +1,7 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
+package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity
 
 import jakarta.persistence.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
 import java.time.OffsetDateTime
 
 @Entity
@@ -11,17 +11,17 @@ data class Voicepack(
     @Column(name = "voicepack_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    
+
     @Column(name = "name", nullable = false, unique = true)
     val name: String,
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
     val author: User,
-    
+
     @Column(name = "s3_path", nullable = false)
     val s3Path: String,
-    
+
     @Column(name = "created_at", nullable = false)
     val createdAt: OffsetDateTime = OffsetDateTime.now()
 ) 
