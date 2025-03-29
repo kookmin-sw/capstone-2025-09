@@ -304,4 +304,20 @@ class VoicepackService(
         val s3ObjectKey = "speakers/${voicepack.name}/sample_test.wav"
         return s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
     }
+
+    // 보이스팩 생성 결과 콜백 처리
+    @Transactional
+    fun handleCallback(voicepackRequestId: Long, status: String) {
+        val voicepackRequest = voicepackRequestRepository.findById(voicepackRequestId).orElseThrow {
+            IllegalArgumentException("Voicepack request not found")
+        }
+        when (status) {
+            "success" -> {
+                handleSuccessfulConversion(voicepackRequest)
+            }
+            "failed" -> {
+                handleFailedConversion(voicepackRequest, Exception("AI 모델 서비스 호출 실패"))
+            }
+        }
+    }
 }

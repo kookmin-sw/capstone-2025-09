@@ -161,5 +161,14 @@ class VoicepackController(
         } catch (e: IllegalArgumentException) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
         }
-    }   
+    }
+
+    @GetMapping("/callback")
+    fun callback(
+        @RequestParam("voicepackRequestId") voicepackRequestId: Long,
+        @RequestParam("status") status: String
+    ): ResponseEntity<Void> {
+        voicepackService.handleCallback(voicepackRequestId, status)
+        return ResponseEntity.ok().build()
+    }
 } 
