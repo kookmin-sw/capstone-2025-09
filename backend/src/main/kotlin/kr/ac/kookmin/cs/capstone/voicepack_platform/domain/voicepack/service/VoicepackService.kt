@@ -17,7 +17,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.repository.UserRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequestStatus
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository.VoicepackRequestRepository
@@ -145,7 +144,7 @@ class VoicepackService(
     private fun handleSuccessfulConversion(voicepackRequest: VoicepackRequest) {
         
         val outputPath = "speakers/${voicepackRequest.name}/feature.json"
-        val finishedTime = OffsetDateTime.now(); // 완료 시각 일관성 유지
+        val finishedTime = OffsetDateTime.now() // 완료 시각 일관성 유지
         
         // 요청 상태 업데이트
         voicepackRequest.status = VoicepackRequestStatus.COMPLETED
