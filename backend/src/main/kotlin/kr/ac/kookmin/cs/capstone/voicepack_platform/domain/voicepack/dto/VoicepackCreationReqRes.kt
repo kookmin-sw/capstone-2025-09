@@ -16,6 +16,7 @@ data class VoicepackConvertResponse(
 
 @Serializable
 data class AIModelRequest(
-    val voicepackId: Long,
-    val voiceFile: MultipartFile
+    val voicepackId: String,
+    val voiceFile: MultipartFile,
+    val voicepackRequestId: Long
 )

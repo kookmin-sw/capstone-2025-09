@@ -3,6 +3,7 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.service
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
+import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
@@ -45,7 +46,9 @@ class VoicepackService(
     
     private val httpClient = HttpClient(Java) {
         install(ContentNegotiation) { json() }
-        
+
+        install(HttpTimeout) { connectTimeoutMillis = 300000 } // 5분
+
         install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
@@ -103,8 +106,9 @@ class VoicepackService(
     // AI 모델 서비스 호출
     private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
         val aiModelRequest = AIModelRequest(
-            voicepackId = voicepackRequest.id,
-            voiceFile = voiceFile
+            voicepackId = voicepackRequest.name,
+            voiceFile = voiceFile,
+            voicepackRequestId = voicepackRequest.id
         )
 
         logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
@@ -120,6 +124,7 @@ class VoicepackService(
                                 append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
                                 append(HttpHeaders.ContentType, "audio/wav") // 필요 시 파일 확장자 변경 가능
                             })
+                            append("voicepackRequestId", aiModelRequest.voicepackRequestId)
                         }
                     )
                 )
