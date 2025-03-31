@@ -1,6 +1,7 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -161,5 +162,56 @@ class VoicepackController(
         } catch (e: IllegalArgumentException) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
         }
-    }   
+    }
+
+    @Operation(
+        summary = "보이스팩 사용권 획득",
+        description = "사용자가 특정 보이스팩의 사용권을 획득합니다 (구매 또는 제작자 자동 획득).",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "사용권 획득 성공",
+                content = [Content(schema = Schema(implementation = VoicepackUsageRightDto::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "잘못된 요청 (예: 사용자 또는 보이스팩 없음)"
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "이미 사용권을 가지고 있는 보이스팩"
+            ),
+            ApiResponse(
+                responseCode = "402",
+                description = "크레딧 부족 (크레딧 연동 시)"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @PostMapping("/grant-usage-right")
+    fun grantUsageRight(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
+        @Parameter(description = "보이스팩 ID") @RequestParam voicepackId: Long
+    ): ResponseEntity<Any> {
+        try {
+            val usageRightDto = voicepackService.grantUsageRight(userId, voicepackId)
+            return ResponseEntity.ok(usageRightDto)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
+        } catch (e: IllegalStateException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapOf("error" to e.message))
+        } catch (e: RuntimeException) {
+            if (e.message?.contains("크레딧") == true) {
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(mapOf("error" to e.message))
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to (e.message ?: "사용권 획득 처리 중 오류가 발생했습니다.")))
+            }
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "사용권 획득 처리 중 예상치 못한 오류가 발생했습니다."))
+        }
+    }
+
 } 
