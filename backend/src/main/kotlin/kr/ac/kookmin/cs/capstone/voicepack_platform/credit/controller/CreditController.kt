@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.TransactionStatus
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.service.CreditService
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
@@ -123,20 +124,29 @@ class CreditController(
     @PostMapping("/use")
     fun useCredits(
         @RequestBody request: UseCreditsRequest
-    ): ResponseEntity<TransactionResultDto> {
+    ): ResponseEntity<Any> {
         try {
             val result = creditService.useCredits(request)
-            return ResponseEntity.ok(result)
+            
+            // 상태에 따라 다른 HTTP 응답 코드 반환
+            return when (result.status) {
+                TransactionStatus.COMPLETED.name -> ResponseEntity.ok(result)
+                TransactionStatus.FAILED.name -> {
+                    if (result.message?.contains("크레딧이 부족") == true) {
+                        ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(result)
+                    } else {
+                        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result)
+                    }
+                }
+                else -> ResponseEntity.status(HttpStatus.PROCESSING).body(result)
+            }
         } catch (e: IllegalArgumentException) {
             logger.error("사용 요청 실패: {}", e.message)
-            return ResponseEntity.badRequest().build()
-        } catch (e: IllegalStateException) {
-            // 크레딧 부족
-            logger.error("크레딧 부족: {}", e.message)
-            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).build()
+            return ResponseEntity.badRequest().body(mapOf("error" to e.message))
         } catch (e: Exception) {
             logger.error("크레딧 사용 중 오류 발생: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "크레딧 사용 중 오류가 발생했습니다"))
         }
     }
     
@@ -170,20 +180,29 @@ class CreditController(
     @PostMapping("/exchange")
     fun exchangeCredits(
         @RequestBody request: ExchangeCreditsRequest
-    ): ResponseEntity<TransactionResultDto> {
+    ): ResponseEntity<Any> {
         try {
             val result = creditService.exchangeCredits(request)
-            return ResponseEntity.ok(result)
+            
+            // 상태에 따라 다른 HTTP 응답 코드 반환
+            return when (result.status) {
+                TransactionStatus.COMPLETED.name -> ResponseEntity.ok(result)
+                TransactionStatus.FAILED.name -> {
+                    if (result.message?.contains("크레딧이 부족") == true) {
+                        ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(result)
+                    } else {
+                        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result)
+                    }
+                }
+                else -> ResponseEntity.status(HttpStatus.PROCESSING).body(result)
+            }
         } catch (e: IllegalArgumentException) {
             logger.error("환전 요청 실패: {}", e.message)
-            return ResponseEntity.badRequest().build()
-        } catch (e: IllegalStateException) {
-            // 크레딧 부족
-            logger.error("크레딧 부족: {}", e.message)
-            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).build()
+            return ResponseEntity.badRequest().body(mapOf("error" to e.message))
         } catch (e: Exception) {
             logger.error("크레딧 환전 중 오류 발생: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "크레딧 환전 중 오류가 발생했습니다"))
         }
     }
     

@@ -130,11 +130,19 @@ class CreditService(
                 referenceType = request.referenceType,
                 description = request.description ?: "크레딧 사용 시도",
                 status = TransactionStatus.FAILED,
-                balanceBefore = balanceBefore
+                balanceBefore = balanceBefore,
+                balanceAfter = balanceBefore // 잔액 변동 없음
             )
-            creditTransactionRepository.save(failedTransaction)
+            // 별도 트랜잭션으로 저장하여 롤백 방지
+            creditTransactionRepository.saveAndFlush(failedTransaction)
             
-            throw IllegalStateException("크레딧이 부족합니다 (필요: ${request.amount}, 보유: $balanceBefore)")
+            // 결과 DTO 반환 (트랜잭션 롤백되지 않음)
+            return TransactionResultDto(
+                transactionId = failedTransaction.id,
+                status = TransactionStatus.FAILED.name,
+                newBalance = balanceBefore,
+                message = "크레딧이 부족합니다 (필요: ${request.amount}, 보유: $balanceBefore)"
+            )
         }
         
         // 트랜잭션 기록 생성
@@ -289,11 +297,19 @@ class CreditService(
                 type = TransactionType.EXCHANGE,
                 description = "크레딧 환전 시도 (${request.bankName ?: ""}, ${request.accountNumber ?: ""})",
                 status = TransactionStatus.FAILED,
-                balanceBefore = balanceBefore
+                balanceBefore = balanceBefore,
+                balanceAfter = balanceBefore // 잔액 변동 없음
             )
-            creditTransactionRepository.save(failedTransaction)
+            // 별도 트랜잭션으로 저장하여 롤백 방지
+            creditTransactionRepository.saveAndFlush(failedTransaction)
             
-            throw IllegalStateException("크레딧이 부족합니다 (필요: ${request.amount}, 보유: $balanceBefore)")
+            // 결과 DTO 반환 (트랜잭션 롤백되지 않음)
+            return TransactionResultDto(
+                transactionId = failedTransaction.id,
+                status = TransactionStatus.FAILED.name,
+                newBalance = balanceBefore,
+                message = "크레딧이 부족합니다 (필요: ${request.amount}, 보유: $balanceBefore)"
+            )
         }
         
         // 트랜잭션 기록 생성
