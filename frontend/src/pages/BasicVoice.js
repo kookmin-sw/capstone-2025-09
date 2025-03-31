@@ -2,7 +2,7 @@ import React from "react";
 
 const BasicVoice = () => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mx-16">
       <h1 className="text-2xl font-bold">베이직 보이스</h1>
 
       <div className="space-y-2">
