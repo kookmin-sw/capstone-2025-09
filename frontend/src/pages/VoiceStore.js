@@ -97,8 +97,11 @@ function VoiceStore() {
                   <source src={audioUrl} type="audio/wav" />
                   브라우저가 오디오를 지원하지 않습니다.
                 </audio>
-                <button className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-                사용처
+                <button
+                  className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  onClick={closeModal}
+                >
+                구매
                 </button>
               </>
             ) : (
