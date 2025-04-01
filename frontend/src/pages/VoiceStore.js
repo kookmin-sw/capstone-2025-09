@@ -6,6 +6,10 @@ function VoiceStore() {
   const [error, setError] = useState(null);
   const [selectedPack, setSelectedPack] = useState(null);
   const [audioUrl, setAudioUrl] = useState('');
+  const closeModal = () => {
+    setSelectedPack(null);
+    setAudioUrl('');
+  };
 
   useEffect(() => {
     const fetchVoicePacks = async () => {
