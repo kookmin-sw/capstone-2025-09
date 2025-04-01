@@ -4,15 +4,30 @@ const BasicVoice = () => {
   const [voiceList, setVoiceList] = useState([]);
   const [selectedVoice, setSelectedVoice] = useState("");
 
-  // 나중에 백엔드에서 불러올 부분
   useEffect(() => {
-    // 예시 데이터, 나중에 백 주소 생기면 fetch나 axios로 교체 가능
-    const dummyVoices = [
-      { id: "voice1", name: "따뜻한 목소리" },
-      { id: "voice2", name: "차분한 목소리" },
-      { id: "voice3", name: "밝은 목소리" },
-    ];
-    setVoiceList(dummyVoices);
+    const fetchVoiceList = async () => {
+      const userId = sessionStorage.getItem("userId"); // 예: "7"
+      const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
+      const endpoint = `${apiUrl}/usage-right?userId=${userId}`;
+
+      try {
+        const response = await fetch(endpoint, {
+          method: "GET",
+          credentials: "include", // 쿠키 등 인증 필요 시
+        });
+
+        if (!response.ok) {
+          throw new Error("보이스팩 목록을 불러오지 못했습니다.");
+        }
+
+        const data = await response.json();
+        setVoiceList(data); // 예: [{ id: 1, name: '차분한 목소리' }, ...]
+      } catch (error) {
+        console.error("❌ 오류 발생:", error);
+      }
+    };
+
+    fetchVoiceList();
   }, []);
 
   return (
