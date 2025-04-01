@@ -54,21 +54,16 @@ function VoiceStore() {
   const handlePurchase = async () => {
     if (!selectedPack) return;
     const userId = Number(sessionStorage.getItem("userId"));
+    const voicepackId = selectedPack.id;
+    console.log("확인 : ", userId,voicePackId);
+
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const purchaseEndpoint = `${apiUrl}/usage-right`; // 백엔드 구매 API 경로
-    const payload = {
-      userId,
-      voicePackId: selectedPack.id,
-    };
+    const purchaseUrl = `${apiUrl}/usage-right?userId=${userId}&voicepackId=${voicepackId}`;
 
     console.log('voicePackId', payload);
     try {
-      const response = await fetch(purchaseEndpoint, {
+      const response = await fetch(purchaseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
         credentials: 'include',
       });
 
