@@ -192,7 +192,7 @@ class VoicepackController(
             )
         ]
     )
-    @PostMapping("/grant-usage-right")
+    @PostMapping("/usage-right")
     fun grantUsageRight(
         @Parameter(description = "사용자 ID") @RequestParam userId: Long,
         @Parameter(description = "보이스팩 ID") @RequestParam voicepackId: Long
@@ -232,7 +232,7 @@ class VoicepackController(
             )
         ]
     )
-    @GetMapping("/user-voicepacks")
+    @GetMapping("/usage-right")
     fun getUserVoicepacks(
         @Parameter(description = "사용자 ID") @RequestParam userId: Long
     ): ResponseEntity<List<VoicepackUsageRightBriefDto>> {
