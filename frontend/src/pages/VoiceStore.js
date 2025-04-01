@@ -47,9 +47,39 @@ function VoiceStore() {
     }
   };
 
-  const closeModal = () => {
-    setSelectedPack(null);
-    setAudioUrl('');
+  const handlePurchase = async () => {
+    if (!selectedPack) return;
+    const userId = sessionStorage.getItem("userId"); // 혹은 sessionStorage.getItem("userId")
+
+    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
+    const purchaseEndpoint = `${apiUrl}/usage-right`; // 백엔드 구매 API 경로
+    const payload = {
+      userId,
+      voicePackId: selectedPack.id,
+    };
+
+    console.log('voicePackId', payload);
+    try {
+      const response = await fetch(purchaseEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error('구매 요청 실패');
+      }
+
+      const result = await response.json();
+      alert(`✅ 구매 완료: ${result.message || '성공적으로 구매되었습니다.'}`);
+      closeModal();
+    } catch (err) {
+      console.error('❌ 구매 실패:', err);
+      alert('❌ 구매에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   const formatDate = (isoString) => {
@@ -99,7 +129,7 @@ function VoiceStore() {
                 </audio>
                 <button
                   className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                  onClick={closeModal}
+                  onClick={handlePurchase}
                 >
                 구매
                 </button>
