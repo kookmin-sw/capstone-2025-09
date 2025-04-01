@@ -16,11 +16,13 @@ const BasicVoice = () => {
           credentials: "include", // 쿠키 등 인증 필요 시
         });
 
+
         if (!response.ok) {
           throw new Error("보이스팩 목록을 불러오지 못했습니다.");
         }
 
         const data = await response.json();
+        console.log("🎙️ 가져온 보이스팩 목록:", data); // ← 여기 추가!
         setVoiceList(data); // 예: [{ id: 1, name: '차분한 목소리' }, ...]
       } catch (error) {
         console.error("❌ 오류 발생:", error);
