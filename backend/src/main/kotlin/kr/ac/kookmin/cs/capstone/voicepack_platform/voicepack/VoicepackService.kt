@@ -24,6 +24,7 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackR
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -346,5 +347,14 @@ class VoicepackService(
         // 4. 결과 반환
         return VoicepackUsageRightDto.fromEntity(savedUsageRight)
     }
+
+
+    /**
+     * 사용자가 보유한 보이스팩 목록 조회
+     */
+    fun getVoicepacksByUserId(userId: Long): List<VoicepackUsageRightBriefDto> {
+        logger.info("사용자의 보이스팩 목록 조회: userId={}", userId)
+        return voicepackUsageRightRepository.findVoicepackDtosByUserId(userId)
+    } 
 
 }

@@ -23,3 +23,10 @@ data class VoicepackUsageRightDto(
         }
     }
 } 
+
+// voicepackId와 voicepackName만 반환하는 DTO
+@Serializable
+data class VoicepackUsageRightBriefDto(
+    val voicepackId: Long,
+    val voicepackName: String
+)

@@ -2,6 +2,7 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -212,6 +213,31 @@ class VoicepackController(
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "사용권 획득 처리 중 예상치 못한 오류가 발생했습니다."))
         }
+    }
+
+
+    // 사용자가 사용권을 보유한 보이스팩 목록 조회
+    @Operation(
+        summary = "사용자가 사용권을 보유한 보이스팩 목록 조회",
+        description = "사용자가 사용권을 보유한 보이스팩 목록을 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = List::class))]
+            ),
+            ApiResponse(
+                responseCode = "500",   
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/user-voicepacks")
+    fun getUserVoicepacks(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long
+    ): ResponseEntity<List<VoicepackUsageRightBriefDto>> {
+        val voicepacks = voicepackService.getVoicepacksByUserId(userId)
+        return ResponseEntity.ok(voicepacks)
     }
 
 } 
