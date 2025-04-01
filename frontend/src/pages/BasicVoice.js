@@ -45,8 +45,8 @@ const BasicVoice = () => {
         >
           <option value="">목소리를 선택하세요</option>
           {voiceList.map((voice) => (
-            <option key={voice.id} value={voice.id}>
-              {voice.name}
+            <option key={voice.voicepackId} value={voice.voicepackId}>
+              {voice.voicepackName}
             </option>
           ))}
         </select>
