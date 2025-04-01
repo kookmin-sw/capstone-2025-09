@@ -7,5 +7,5 @@ import java.util.Optional
 
 @Repository
 interface CreditRepository : JpaRepository<Credit, Long> {
-    fun findByUserId(userId: Long): Optional<Credit>
+    fun findByUserId(userId: Long): Credit?
 } 

@@ -243,17 +243,7 @@ class CreditService(
     fun findOrCreateUserCredit(userId: Long): Credit {
         val user = findUser(userId)
         
-        val credit = creditRepository.findByUserId(userId)
-        if (credit.isPresent) {
-            return credit.get()
-        }
-        
-        // 새 크레딧 계정 생성
-        val newCredit = Credit(
-            user = user,
-            balance = 0
-        )
-        return creditRepository.save(newCredit)
+        return creditRepository.findByUserId(userId) ?: creditRepository.save(Credit(user = user, balance = 0))
     }
     
     /**
