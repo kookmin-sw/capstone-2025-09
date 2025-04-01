@@ -59,7 +59,6 @@ function VoiceStore() {
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const purchaseUrl = `${apiUrl}/usage-right?userId=${userId}&voicepackId=${voicepackId}`;
-    console.log('voicePackId', payload);
     try {
       const response = await fetch(purchaseUrl, {
         method: 'POST',
