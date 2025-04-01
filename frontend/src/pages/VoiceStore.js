@@ -55,11 +55,10 @@ function VoiceStore() {
     if (!selectedPack) return;
     const userId = Number(sessionStorage.getItem("userId"));
     const voicepackId = selectedPack.id;
-    console.log("확인 : ", userId,voicePackId);
+    console.log("확인 : ", userId,voicepackId);
 
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const purchaseUrl = `${apiUrl}/usage-right?userId=${userId}&voicepackId=${voicepackId}`;
-
     console.log('voicePackId', payload);
     try {
       const response = await fetch(purchaseUrl, {
