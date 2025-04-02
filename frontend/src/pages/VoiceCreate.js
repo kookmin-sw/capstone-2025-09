@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import ThreeWaveVisualizer from './ThreeWaveVisualizer';
+
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -9,14 +9,17 @@ function VoiceCreate() {
   const [timer, setTimer] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
-  const [analyserNode, setAnalyserNode] = useState(null);
 
   const ffmpegRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
-  const audioContextRef = useRef(null);
   const navigate = useNavigate();
+
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     const loadFFmpeg = async () => {
@@ -36,6 +39,48 @@ function VoiceCreate() {
     }
   }, [audioBlob]);
 
+  const drawVisualizer = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const analyser = analyserRef.current;
+
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#6B21A8'; // 진한 보라색
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * canvas.height) / 2;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      animationFrameRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+  };
+
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) {
       alert("FFmpeg가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
@@ -48,10 +93,11 @@ function VoiceCreate() {
 
       audioContextRef.current = new AudioContext();
       const source = audioContextRef.current.createMediaStreamSource(stream);
-      const analyser = audioContextRef.current.createAnalyser();
-      analyser.fftSize = 2048;
-      source.connect(analyser);
-      setAnalyserNode(analyser);
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 2048;
+      source.connect(analyserRef.current);
+
+      drawVisualizer();
 
       audioChunksRef.current = [];
       setTimer(0);
@@ -63,6 +109,7 @@ function VoiceCreate() {
       mediaRecorderRef.current.onstop = async () => {
         const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         clearInterval(timerRef.current);
+        cancelAnimationFrame(animationFrameRef.current);
         if (audioContextRef.current) {
           audioContextRef.current.close();
         }
@@ -173,10 +220,12 @@ function VoiceCreate() {
           {isRecording && <span className="text-sm">{timer}s</span>}
           {!isFFmpegLoaded && <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>}
 
-          {/* 3D Mesh Visualizer 삽입 */}
-          {isRecording && analyserNode && (
-            <ThreeWaveVisualizer analyser={analyserNode} />
-          )}
+          <canvas
+            ref={canvasRef}
+            width={300}
+            height={300}
+            className="border rounded mt-4 bg-white w-full"
+          />
         </div>
       </div>
 
