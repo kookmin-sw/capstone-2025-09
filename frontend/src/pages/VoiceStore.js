@@ -6,21 +6,24 @@ function VoiceStore() {
   const [error, setError] = useState(null);
   const [selectedPack, setSelectedPack] = useState(null);
   const [audioUrl, setAudioUrl] = useState('');
+  const API_URL = process.env.REACT_APP_VOICEPACK_API_URL;
+
   const closeModal = () => {
     setSelectedPack(null);
     setAudioUrl('');
   };
 
+  const fetchData = async (url, options = {}) => {
+    const response = await fetch(url, options);
+    if (!response.ok) throw new Error(`HTTP 오류: ${response.status}`);
+    return response;
+  };
+
   useEffect(() => {
     const fetchVoicePacks = async () => {
-      const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-
       try {
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          throw new Error(`HTTP 오류! 상태 코드: ${response.status}`);
-        }
-        const data = await response.json();
+        const res = await fetchData(API_URL);
+        const data = await res.json();
         console.log('📥 받아온 데이터:', data);
         setVoicePacks(data);
       } catch (err) {
@@ -32,44 +35,34 @@ function VoiceStore() {
     };
 
     fetchVoicePacks();
-  }, []);
+  }, [API_URL]);
 
   const handleCardClick = async (pack) => {
-    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const endpoint = `${apiUrl}/example/${pack.id}`;
     setSelectedPack(pack);
     try {
-      const response = await fetch(endpoint);
-      if (!response.ok) {
-        throw new Error('오디오를 불러오는 데 실패했습니다.');
-      }
-      const url = await response.text();
+      const res = await fetchData(`${API_URL}/example/${pack.id}`);
+      const url = await res.text();
       setAudioUrl(url);
     } catch (err) {
-      console.error(err);
+      console.error('❌ 오디오 로딩 실패:', err);
       setAudioUrl('');
     }
   };
 
   const handlePurchase = async () => {
     if (!selectedPack) return;
+
     const userId = Number(sessionStorage.getItem("userId"));
     const voicepackId = selectedPack.id;
-    console.log("확인 : ", userId,voicepackId);
+    const purchaseUrl = `${API_URL}/usage-right?userId=${userId}&voicepackId=${voicepackId}`;
 
-    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const purchaseUrl = `${apiUrl}/usage-right?userId=${userId}&voicepackId=${voicepackId}`;
     try {
-      const response = await fetch(purchaseUrl, {
+      const res = await fetchData(purchaseUrl, {
         method: 'POST',
         credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error('구매 요청 실패');
-      }
-
-      const result = await response.json();
+      const result = await res.json();
       alert(`✅ 구매 완료: ${result.message || '성공적으로 구매되었습니다.'}`);
       closeModal();
     } catch (err) {
@@ -78,10 +71,7 @@ function VoiceStore() {
     }
   };
 
-  const formatDate = (isoString) => {
-    const date = new Date(isoString);
-    return date.toISOString().split('T')[0];
-  };
+  const formatDate = (isoString) => new Date(isoString).toISOString().split('T')[0];
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-white p-4">
@@ -92,11 +82,11 @@ function VoiceStore() {
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {voicePacks.map((pack) => (
             <div
               key={pack.id}
-              className="bg-gray-800 text-white p-4 rounded-lg shadow-md w-48 cursor-pointer hover:bg-gray-700 transition"
+              className="bg-gray-800 text-white p-4 rounded-lg shadow-md cursor-pointer hover:bg-gray-700 transition w-full"
               onClick={() => handleCardClick(pack)}
             >
               <h2 className="text-lg font-semibold mb-2 text-center">{pack.name}</h2>
@@ -127,7 +117,7 @@ function VoiceStore() {
                   className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                   onClick={handlePurchase}
                 >
-                구매
+                  구매
                 </button>
               </>
             ) : (
