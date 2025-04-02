@@ -74,11 +74,10 @@ class StorageManager:
                 Body=features_json
             )
 
-            logger.info(f"화자 특징 저장 완료: {voicepackId}")
             return True
         
         except Exception as e:
-            logger.error(f"화자 특징 저장 실패: {str(e)}")
+            logger.error(f"화자 특징 s3에 저장 실패: {str(e)}")
             return False
 
     def get_speaker_features(self, voicepackId: str) -> dict:
