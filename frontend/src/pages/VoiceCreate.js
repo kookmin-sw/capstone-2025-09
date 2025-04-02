@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import ThreeWaveVisualizer from './ThreeWaveVisualizer';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -8,17 +9,14 @@ function VoiceCreate() {
   const [timer, setTimer] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
+  const [analyserNode, setAnalyserNode] = useState(null);
 
   const ffmpegRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const timerRef = useRef(null);
-  const navigate = useNavigate();
-
   const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const canvasRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadFFmpeg = async () => {
@@ -38,49 +36,6 @@ function VoiceCreate() {
     }
   }, [audioBlob]);
 
-  const drawVisualizer = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const analyser = analyserRef.current;
-
-    const bufferLength = analyser.frequencyBinCount;
-    const dataArray = new Uint8Array(bufferLength);
-
-    const draw = () => {
-      analyser.getByteFrequencyData(dataArray);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
-      const radius = 30; // 중심 원 반지름
-      const bars = 64;   // 시각화할 바 개수
-      const step = (Math.PI * 2) / bars;
-
-      for (let i = 0; i < bars; i++) {
-        const value = dataArray[i];
-        const barLength = value * 0.7; // 바 길이 조정
-
-        const angle = i * step;
-        const x1 = centerX + Math.cos(angle) * radius;
-        const y1 = centerY + Math.sin(angle) * radius;
-        const x2 = centerX + Math.cos(angle) * (radius + barLength);
-        const y2 = centerY + Math.sin(angle) * (radius + barLength);
-
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.strokeStyle = `hsl(${i * 6}, 100%, 50%)`; // 무지개색
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      }
-
-      animationFrameRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
-  };
-
-
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) {
       alert("FFmpeg가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
@@ -93,11 +48,10 @@ function VoiceCreate() {
 
       audioContextRef.current = new AudioContext();
       const source = audioContextRef.current.createMediaStreamSource(stream);
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 2048;
-      source.connect(analyserRef.current);
-
-      drawVisualizer();
+      const analyser = audioContextRef.current.createAnalyser();
+      analyser.fftSize = 2048;
+      source.connect(analyser);
+      setAnalyserNode(analyser);
 
       audioChunksRef.current = [];
       setTimer(0);
@@ -109,7 +63,6 @@ function VoiceCreate() {
       mediaRecorderRef.current.onstop = async () => {
         const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         clearInterval(timerRef.current);
-        cancelAnimationFrame(animationFrameRef.current);
         if (audioContextRef.current) {
           audioContextRef.current.close();
         }
@@ -220,12 +173,10 @@ function VoiceCreate() {
           {isRecording && <span className="text-sm">{timer}s</span>}
           {!isFFmpegLoaded && <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>}
 
-          <canvas
-            ref={canvasRef}
-            width={300}
-            height={300}
-            className="border rounded mt-4 bg-white w-full"
-          />
+          {/* 3D Mesh Visualizer 삽입 */}
+          {isRecording && analyserNode && (
+            <ThreeWaveVisualizer analyser={analyserNode} />
+          )}
         </div>
       </div>
 
