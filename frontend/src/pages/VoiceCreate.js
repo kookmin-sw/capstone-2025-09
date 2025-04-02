@@ -40,36 +40,46 @@ function VoiceCreate() {
 
   const drawVisualizer = () => {
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     const analyser = analyserRef.current;
 
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
     const draw = () => {
-      analyser.getByteTimeDomainData(dataArray);
+      analyser.getByteFrequencyData(dataArray);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#6B21A8';
 
-      const sliceWidth = canvas.width / bufferLength;
-      let x = 0;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 30; // 중심 원 반지름
+      const bars = 64;   // 시각화할 바 개수
+      const step = (Math.PI * 2) / bars;
 
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = (v * canvas.height) / 2;
-        i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        x += sliceWidth;
+      for (let i = 0; i < bars; i++) {
+        const value = dataArray[i];
+        const barLength = value * 0.7; // 바 길이 조정
+
+        const angle = i * step;
+        const x1 = centerX + Math.cos(angle) * radius;
+        const y1 = centerY + Math.sin(angle) * radius;
+        const x2 = centerX + Math.cos(angle) * (radius + barLength);
+        const y2 = centerY + Math.sin(angle) * (radius + barLength);
+
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.strokeStyle = `hsl(${i * 6}, 100%, 50%)`; // 무지개색
+        ctx.lineWidth = 2;
+        ctx.stroke();
       }
 
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
       animationFrameRef.current = requestAnimationFrame(draw);
     };
 
     draw();
   };
+
 
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) {
@@ -213,7 +223,7 @@ function VoiceCreate() {
           <canvas
             ref={canvasRef}
             width={300}
-            height={100}
+            height={300}
             className="border rounded mt-4 bg-white w-full"
           />
         </div>
