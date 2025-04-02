@@ -1,7 +1,7 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity
+package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import jakarta.persistence.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import java.time.OffsetDateTime
 
 @Entity

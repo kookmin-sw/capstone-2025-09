@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity
+package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
 import jakarta.persistence.*
 

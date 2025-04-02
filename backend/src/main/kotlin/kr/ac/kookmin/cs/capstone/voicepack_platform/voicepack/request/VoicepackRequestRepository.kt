@@ -1,8 +1,7 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository
+package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request
 
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequest
 
 @Repository
 interface VoicepackRequestRepository : JpaRepository<VoicepackRequest, Long> {

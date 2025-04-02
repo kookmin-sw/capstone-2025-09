@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.service
+package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import io.ktor.client.*
 import io.ktor.client.call.body
@@ -15,12 +15,9 @@ import io.ktor.client.plugins.logging.*
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.LogLevel
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.notification.NotificationService
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.repository.UserRepository
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.user.entity.User
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequestStatus
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository.VoicepackRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -28,10 +25,10 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.repository.VoicepackRepository
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.Voicepack
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
 
 @Service
 class VoicepackService(
@@ -80,14 +77,11 @@ class VoicepackService(
         try {
             // AI 모델 서비스 호출 및 결과 처리
             callAiModelService(voicepackRequest, request.voiceFile)
-            
-            // 변환 성공 시 처리
-            handleSuccessfulConversion(voicepackRequest)
-            return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.COMPLETED.name)
+
+            return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.PROCESSING.name)
             
         } catch (e: Exception) {
-            // 실패 시 처리
-            handleFailedConversion(voicepackRequest, e)       
+
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.FAILED.name)
         }
     }

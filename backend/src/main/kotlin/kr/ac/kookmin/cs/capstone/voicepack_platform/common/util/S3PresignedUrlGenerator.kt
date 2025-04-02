@@ -15,9 +15,9 @@ import java.time.Duration
  */
 @Component
 class S3PresignedUrlGenerator(
-    @Value("\${aws.access-key}") private val accessKey: String,
-    @Value("\${aws.secret-key}") private val secretKey: String,
-    @Value("\${aws.region}") private val regionName: String,
+    @Value("\${aws.s3.access-key}") private val accessKey: String,
+    @Value("\${aws.s3.secret-key}") private val secretKey: String,
+    @Value("\${aws.s3.region}") private val regionName: String,
     @Value("\${aws.s3.bucket-name}") private val bucketName: String
 ) {
 

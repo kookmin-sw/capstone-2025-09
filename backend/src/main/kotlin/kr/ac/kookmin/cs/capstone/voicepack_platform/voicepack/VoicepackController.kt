@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.controller
+package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
@@ -10,12 +10,10 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackConvertRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackConvertResponse
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackSynthesisRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.dto.VoicepackSynthesisResponse
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.entity.VoicepackDto
-import kr.ac.kookmin.cs.capstone.voicepack_platform.domain.voicepack.service.VoicepackService
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisResponse
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -124,6 +122,7 @@ class VoicepackController(
             )
         ]
     )
+
     @GetMapping("/{voicepackId}")
     fun getVoicepack(
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
