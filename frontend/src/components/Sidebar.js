@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Mic, Store, ShoppingBag } from 'lucide-react';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo-new.svg';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -18,7 +18,7 @@ const Sidebar = () => {
         to="/"
         className="flex content-center justify-center text-center font-bold text-xl mb-4"
       >
-        <img src={logo} alt="COVOS" width="100" />
+        <img src={logo} alt="COVOS" width={120} />
       </Link>
       <Link
         to="/voice-create"
