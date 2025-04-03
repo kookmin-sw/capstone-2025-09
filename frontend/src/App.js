@@ -15,6 +15,7 @@ import AiAssistant from './pages/AiAssistant';
 import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/MyPage';
+import BlurBackgrounds from './components/BlurBackground';
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -27,9 +28,15 @@ const Layout = ({ children }) => {
       <div className="flex flex-col flex-1">
         {!isNoLayout && <Header />}
         <main
-          className={`${location.pathname === '/' ? '' : 'p-4'} overflow-auto`}
+          className={`${location.pathname === '/' ? '' : 'p-4'} relative flex-1`}
         >
-          {children}
+          {/* 배경 블러 */}
+          <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden bg-indigo-100">
+            <BlurBackgrounds />
+          </div>
+
+          {/* 실제 페이지 콘텐츠 */}
+          <div className="relative z-0">{children}</div>
         </main>
       </div>
     </div>

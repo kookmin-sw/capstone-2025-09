@@ -1,88 +1,114 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import logo from '../assets/logo.svg';
+import logo from '../assets/logo-new.svg';
+import BlurBackgrounds from '../components/BlurBackground';
+import WaveAninmation from '../components/WaveAninmation';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import WaveSphere from '../components/WaveSphere';
+import GradientButton from '../components/GradientButton';
 
 const Landing = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-white text-black">
-      <header className="flex justify-between items-center p-6 bg-gray-100">
-        <img src={logo} alt="COVOS" width="100" />
-        <button
+    <div className="relative  overflow-hidden">
+      {/* Blur background를 절대 위치로 */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <BlurBackgrounds />
+      </div>
+
+      {/* Header */}
+      <header className="flex justify-between items-end h-[96px] px-28 z-10 relative ">
+        <img src={logo} alt="COVOS" width={150} />
+        <GradientButton
           onClick={() => navigate('/sign-in')}
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="py-2 px-8 text-base"
         >
-          로그인
-        </button>
+          로그인하기
+        </GradientButton>
       </header>
 
-      <section className="hero h-screen flex flex-col justify-center items-center bg-blue-100">
-        <h1 className="text-3xl font-bold mb-4 text-center">
-          당신만의 AI 보이스를 만들고,
-          <br />
-          공유하고, 활용하세요.
-        </h1>
-        <p className="text-lg mb-6 text-center">
-          AI 음성 합성 기술로 나만의 목소리를 제작하고, 마켓플레이스에서
-          공유하거나 직접 활용하세요.
-        </p>
-        <button
-          onClick={() => navigate('/sign-in')}
-          className="bg-blue-500 text-white px-6 py-3 text-lg font-semibold rounded"
-        >
-          보이스팩 제작 시작하기
-        </button>
+      {/* Section 1 - Hero*/}
+      <section
+        className="relative flex flex-col justify-center items-center"
+        style={{ minHeight: 'calc(100vh - 96px)' }}
+      >
+        <div className="flex justify-center items-center h-full w-full">
+          <div className="w-[80vh] h-[80vh] min-h-[300px] flex items-end ml-32">
+            <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
+              <ambientLight intensity={0.3} />
+              <directionalLight
+                position={[5, 5, 5]}
+                intensity={1.2}
+                shadow-mapSize-width={1024}
+                shadow-mapSize-height={1024}
+              />
+              <WaveSphere />
+              <OrbitControls
+                enableZoom={false}
+                autoRotate
+                autoRotateSpeed={0.5}
+              />
+            </Canvas>
+          </div>
+
+          <div className="flex-1 flex flex-col items-start justify-start text-left px-4 text-black">
+            <h1 className="text-4xl font-bold mb-4">나만의 AI 보이스를</h1>
+            <h1 className="text-4xl font-bold mb-20 ">
+              만들고 공유하고 활용하세요
+            </h1>
+            <GradientButton
+              onClick={() => navigate('/sign-in')}
+              className="text-lg py-3 px-12"
+            >
+              보이스팩 생성 시작하기
+            </GradientButton>
+          </div>
+        </div>
       </section>
 
-      <section className="feature h-screen flex flex-col justify-center items-center bg-white">
-        <h2 className="text-2xl mb-2">🎙 AI 보이스팩 제작</h2>
-        <p>
-          쉽고 간편하게 음성을 녹음하고 AI 학습을 통해 보이스팩을 생성하세요.
-        </p>
+      {/* Section 2 */}
+      <section className="h-screen flex flex-col justify-center items-center text-black mt-10">
+        <h2 className="text-2xl mb-2 font-semibold">🛍 마켓 플레이스</h2>
+        <p className="mb-10">나만의 보이스팩을 업로드하고 수익을 창출하세요</p>
+        <div className="flex justify-center items-center w-full h-2/3 bg-gray-400 opacity-30">
+          LP 컴포넌트 구역
+        </div>
       </section>
 
-      <section className="feature h-screen flex flex-col justify-center items-center bg-gray-100">
-        <h2 className="text-2xl mb-2">🛍 마켓플레이스</h2>
-        <p>생성한 보이스팩을 업로드하고, 수익을 창출하세요.</p>
-        <div className="marketplace flex gap-4 mt-4">
-          <div className="card w-28 h-36 bg-blue-200 rounded flex items-center justify-center">
+      {/* Section 3 */}
+      <section className="h-screen flex flex-col justify-center items-center text-black">
+        <h2 className="text-2xl mb-2 font-semibold">COVOS만의 기능</h2>
+        <div className="flex justify-center gap-16 items-center w-full h-1/2 mt-14">
+          <div className="card w-1/5 h-full bg-blue-200 rounded-lg flex items-center justify-center opacity-30">
             보이스팩 1
           </div>
-          <div className="card w-28 h-36 bg-blue-200 rounded flex items-center justify-center">
+          <div className="card w-1/5 h-full bg-blue-200 rounded-lg flex items-center justify-center opacity-30">
             보이스팩 2
           </div>
-          <div className="card w-28 h-36 bg-blue-200 rounded flex items-center justify-center">
+          <div className="card w-1/5 h-full bg-blue-200 rounded-lg flex items-center justify-center opacity-30">
             보이스팩 3
           </div>
         </div>
       </section>
 
-      <section className="feature h-screen flex flex-col justify-center items-center bg-white">
-        <h2 className="text-2xl mb-2">🧠 AI 음성 활용 기능</h2>
-        <p>뉴스, 날씨, 명언을 맞춤형 AI 보이스로 들어보세요.</p>
-        <ul className="mt-4 space-y-2">
-          <li>📢 텍스트 변환 기능</li>
-          <li>📡 실시간 뉴스 리딩</li>
-          <li>🌤 맞춤형 날씨 알림</li>
-        </ul>
-      </section>
-
-      <section className="testimonials h-screen flex flex-col justify-center items-center bg-gray-100">
-        <h2 className="text-2xl mb-2">💬 사용자 리뷰</h2>
-        <p>"이제 내 목소리를 AI로 활용할 수 있어서 놀랍습니다!"</p>
-      </section>
-
-      <section className="cta-final py-20 bg-blue-500 text-white text-center">
-        <h2 className="text-2xl mb-4 font-semibold">
-          지금, 당신의 AI 보이스를 만들어보세요.
+      {/* Section 4 */}
+      <section className="pt-40 pb-40 bg-black text-white text-center">
+        <h2 className="text-4xl mb-8 font-semibold">
+          지금,
+          <br />
+          당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
           onClick={() => navigate('/sign-in')}
-          className="bg-white text-blue-500 px-6 py-2 rounded font-semibold"
+          className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
-          지금 시작하기
+          시작하기
         </button>
+        <div className="absolute bottom-0  w-full z-0">
+          <WaveAninmation />
+        </div>
       </section>
     </div>
   );

@@ -3,14 +3,21 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@react-three/drei": "^10.0.5",
+    "@react-three/fiber": "^9.1.1",
     "cra-template": "1.2.0",
+    "leva": "^0.10.0",
     "lucide-react": "^0.483.0",
     "prettier": "^3.5.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
     "react-scripts": "5.0.1",
-    "tailwindcss": "^3.4.17"
+    "simplex-noise": "^4.0.3",
+    "tailwindcss": "^3.4.17",
+    "three": "^0.175.0",
+    "three-custom-shader-material": "^6.3.1",
+    "usehooks-ts": "^3.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
