@@ -3,7 +3,6 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
-import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.formData
@@ -44,8 +43,6 @@ class VoicepackService(
     private val httpClient = HttpClient(Java) {
         install(ContentNegotiation) { json() }
 
-        install(HttpTimeout) { connectTimeoutMillis = 300000 } // 5분
-
         install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
@@ -77,7 +74,6 @@ class VoicepackService(
         try {
             // AI 모델 서비스 호출 및 결과 처리
             callAiModelService(voicepackRequest, request.voiceFile)
-
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.PROCESSING.name)
             
         } catch (e: Exception) {
@@ -126,15 +122,15 @@ class VoicepackService(
 
             // Lambda가 202 Accepted를 반환하면 성공으로 간주
             if (response.status == HttpStatusCode.Accepted) {
-                logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, response.body<String>())
+                logger.info("람다 응답: requestId={}, response={}", voicepackRequest.id, response.body<String>())
             } else {
                 val errorBody = response.body<String>()
-                logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
-                throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
+                logger.error("람다 호출 오류: HTTP ${response.status.value}, 응답: $errorBody")
+                throw RuntimeException("람다 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
             }
         } catch (e: Exception) {
-            logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
-            throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)
+            logger.error("람다 호출 중 예외 발생: ${e.message}", e)
+            throw RuntimeException("람다 호출 중 오류 발생: ${e.message}", e)
         }
     }
 
