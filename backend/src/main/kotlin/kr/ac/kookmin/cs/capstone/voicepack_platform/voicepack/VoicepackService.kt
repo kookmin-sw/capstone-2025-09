@@ -30,6 +30,7 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSyn
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.SynthesisStatus
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisSubmitResponse
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackCallbackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisStatusDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -274,6 +275,9 @@ class VoicepackService(
                 // Lambda는 비동기 호출이므로 응답 본문은 중요하지 않을 수 있음 (202 Accepted 등 상태 코드 확인 가능)
             }
             logger.info("AWS Lambda 호출 성공: jobId={}", synthesisRequest.jobId)
+            synthesisRequest.status = SynthesisStatus.PROCESSING
+            synthesisRequest.updatedAt = OffsetDateTime.now()
+            voiceSynthesisRequestRepository.save(synthesisRequest)
 
             // 3. 요청 제출 성공 응답 반환
             return VoicepackSynthesisSubmitResponse(
@@ -416,6 +420,28 @@ class VoicepackService(
     fun getVoicepacksByUserId(userId: Long): List<VoicepackUsageRightBriefDto> {
         logger.info("사용자의 보이스팩 목록 조회: userId={}", userId)
         return voicepackUsageRightRepository.findVoicepackDtosByUserId(userId)
-    } 
+    }
+
+    /**
+     * 음성 합성 상태 조회
+     */
+    @Transactional(readOnly = true) // 읽기 전용 트랜잭션
+    fun getSynthesisStatus(jobId: String): VoicepackSynthesisStatusDto {
+        logger.debug("음성 합성 상태 조회 요청: jobId={}", jobId)
+        
+        val synthesisRequest = voiceSynthesisRequestRepository.findByJobId(jobId)
+            .orElseThrow { 
+                logger.warn("상태 조회 실패: 해당 jobId의 요청을 찾을 수 없음 - jobId={}", jobId)
+                IllegalArgumentException("해당 Job ID의 합성 요청을 찾을 수 없습니다.") 
+            }
+        
+        logger.debug("음성 합성 상태 조회 성공: jobId={}, status={}", jobId, synthesisRequest.status)
+        return VoicepackSynthesisStatusDto(
+            jobId = synthesisRequest.jobId,
+            status = synthesisRequest.status.name,
+            resultUrl = synthesisRequest.resultUrl,
+            errorMessage = synthesisRequest.errorMessage
+        )
+    }
 
 }

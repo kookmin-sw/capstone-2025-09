@@ -16,6 +16,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisStatusDto
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import java.net.URI
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -85,7 +88,15 @@ class VoicepackController(
     ): ResponseEntity<Any> {
         try {
             val response = voicepackService.submitSynthesisRequest(userId, request)
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
+            
+            // Location 헤더 생성 (상태 조회 엔드포인트 URL)
+            val locationUri = ServletUriComponentsBuilder
+                .fromCurrentContextPath() // 현재 요청의 기본 URL (e.g., http://localhost:8080)
+                .path("/api/voicepack/synthesis/status/{jobId}") // 상태 조회 경로 추가
+                .buildAndExpand(response.jobId) // 경로 변수({jobId}) 채우기
+                .toUri()
+                
+            return ResponseEntity.accepted().location(locationUri).body(response)
         } catch (e: SecurityException) {
             logger.error("음성 합성 권한 오류: {}", e.message)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
@@ -290,6 +301,41 @@ class VoicepackController(
             // 콜백 처리 중 오류 발생 시 로깅만 하고 500 에러 반환 (Cloud Run 재시도 방지 목적)
             logger.error("음성 합성 콜백 처리 중 오류 발생: jobId={}, error={}", callbackRequest.jobId, e.message, e)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "콜백 처리 중 오류 발생"))
+        }
+    }
+
+    @Operation(
+        summary = "음성 합성 상태 조회 (Polling)",
+        description = "제출된 음성 합성 요청의 현재 상태와 결과(완료 시)를 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = VoicepackSynthesisStatusDto::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "해당 Job ID의 요청을 찾을 수 없음"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/synthesis/status/{jobId}")
+    fun getSynthesisStatus(
+        @Parameter(description = "조회할 요청의 Job ID") @PathVariable jobId: String
+    ): ResponseEntity<Any> {
+        try {
+            val statusDto = voicepackService.getSynthesisStatus(jobId)
+            return ResponseEntity.ok(statusDto)
+        } catch (e: IllegalArgumentException) {
+            logger.warn("음성 합성 상태 조회 실패: {}", e.message)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("음성 합성 상태 조회 중 오류 발생: jobId={}, error={}", jobId, e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "상태 조회 중 오류 발생"))
         }
     }
 
