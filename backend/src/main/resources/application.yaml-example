@@ -21,3 +21,6 @@ aws:
     secret-key: YOUR_AWS_SECRET_KEY_HERE
     region: your-aws-region
     bucket-name: your-voicepack-bucket
+  lambda:
+    endpoint:
+      synthesis: YOUR_SYNTHESIS_LAMBDA_ENDPOINT_HERE

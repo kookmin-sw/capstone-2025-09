@@ -1,6 +1,8 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisSubmitResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackCallbackRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.springframework.http.ResponseEntity
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.LoggerFactory
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -20,6 +23,8 @@ import io.swagger.v3.oas.annotations.tags.Tag
 class VoicepackController(
     private val voicepackService: VoicepackService
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Operation(
         summary = "보이스팩 변환",
         description = "사용자가 업로드한 음성 파일을 보이스팩으로 변환합니다.",
@@ -51,31 +56,49 @@ class VoicepackController(
     }
 
     @Operation(
-        summary = "보이스팩 기반 TTS 생성",
-        description = "사용자가 보이스팩을 기반으로 TTS 생성을 요청합니다.",
+        summary = "보이스팩 기반 TTS 생성 요청 (비동기)",
+        description = "사용자가 보이스팩을 기반으로 TTS 생성을 비동기적으로 요청합니다.",
         responses = [
             ApiResponse(
                 responseCode = "202",
-                description = "생성 요청 성공",
-                content = [Content(schema = Schema(implementation = VoicepackSynthesisResponse::class))]
+                description = "생성 요청 성공 (처리 시작됨)",
+                content = [Content(schema = Schema(implementation = VoicepackSynthesisSubmitResponse::class))]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "잘못된 요청"
             ),
             ApiResponse(
+                responseCode = "403",
+                description = "사용 권한 없음"
+            ),
+            ApiResponse(
                 responseCode = "500",
-                description = "서버 오류"
+                description = "서버 오류 (Lambda 호출 실패 등)"
             )
-        ]       
+        ]
     )
     @PostMapping("/synthesis")
-    suspend fun synthesisVoicepack(
+    suspend fun submitSynthesisRequest(
         @Parameter(description = "사용자 ID") @RequestParam userId: Long,
         @RequestBody request: VoicepackSynthesisRequest
-    ): ResponseEntity<VoicepackSynthesisResponse> {
-        val response = voicepackService.synthesisVoicepack(userId, request)
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
+    ): ResponseEntity<Any> {
+        try {
+            val response = voicepackService.submitSynthesisRequest(userId, request)
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
+        } catch (e: SecurityException) {
+            logger.error("음성 합성 권한 오류: {}", e.message)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
+        } catch (e: IllegalArgumentException) {
+            logger.error("음성 합성 잘못된 요청: {}", e.message)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
+        } catch (e: RuntimeException) {
+            logger.error("음성 합성 요청 제출 오류: {}", e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("음성 합성 중 예상치 못한 오류: {}", e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "음성 합성 요청 중 오류가 발생했습니다."))
+        }
     }
 
     @Operation(
@@ -238,6 +261,36 @@ class VoicepackController(
     ): ResponseEntity<List<VoicepackUsageRightBriefDto>> {
         val voicepacks = voicepackService.getVoicepacksByUserId(userId)
         return ResponseEntity.ok(voicepacks)
+    }
+
+    // 음성 합성 시 모델로부터 부를 callback url
+    @Operation(
+        summary = "음성 합성 콜백",
+        description = "음성 합성 처리 완료 후 Cloud Run에서 호출하는 내부 콜백 엔드포인트입니다.",
+    )
+    @PostMapping("/synthesis/callback")
+    fun handleSynthesisCallback(
+        @Parameter(description = "요청 Job ID") @RequestParam jobId: String,
+        @Parameter(description = "처리 성공 여부") @RequestParam success: Boolean,
+        @Parameter(description = "성공 시 결과 URL") @RequestParam(required = false) resultUrl: String?,
+        @Parameter(description = "실패 시 오류 메시지") @RequestParam(required = false) errorMessage: String?
+    ): ResponseEntity<Any> {
+        // RequestParam으로 받은 값들을 사용하여 DTO 객체 생성
+        val callbackRequest = VoicepackCallbackRequest(
+            jobId = jobId,
+            success = success,
+            resultUrl = resultUrl,
+            errorMessage = errorMessage
+        )
+        
+        try {
+            voicepackService.handleSynthesisCallback(callbackRequest)
+            return ResponseEntity.ok().build() // 성공 시 200 OK만 반환
+        } catch (e: Exception) {
+            // 콜백 처리 중 오류 발생 시 로깅만 하고 500 에러 반환 (Cloud Run 재시도 방지 목적)
+            logger.error("음성 합성 콜백 처리 중 오류 발생: jobId={}, error={}", callbackRequest.jobId, e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "콜백 처리 중 오류 발생"))
+        }
     }
 
 } 

@@ -25,6 +25,11 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackR
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.SynthesisStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisSubmitResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackCallbackRequest
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -32,17 +37,20 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Service
 class VoicepackService(
         private val voicepackRepository: VoicepackRepository,
         private val voicepackRequestRepository: VoicepackRequestRepository,
         private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
+        private val voiceSynthesisRequestRepository: VoiceSynthesisRequestRepository,
         private val userRepository: UserRepository,
         private val notificationService: NotificationService,
         // private val creditService: CreditService,
         @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
-        @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
+        @Value("\${aws.lambda.endpoint.synthesis}") private val awsLambdaSynthesisEndpoint: String,
         private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     
@@ -221,56 +229,109 @@ class VoicepackService(
      */
 
     /**
-     * 보이스팩 합성 요청 및 처리
+     * 보이스팩 합성 요청 (비동기 방식)
      * =========== START ===========
      */
-    
     @Transactional
-    suspend fun synthesisVoicepack(userId: Long, request: VoicepackSynthesisRequest): VoicepackSynthesisResponse {
-        logger.info("보이스팩 합성 요청 시작: userId={}, request={}", userId, request)  
-        
-        logger.info("사용자 정보 조회 중...")
-        findUser(userId)
-        
-        logger.info("보이스팩 정보 조회 중: voicepackId={}", request.voicepackId)
+    suspend fun submitSynthesisRequest(userId: Long, request: VoicepackSynthesisRequest): VoicepackSynthesisSubmitResponse {
+        logger.info("보이스팩 합성 비동기 요청 시작: userId={}, request={}", userId, request)
+
+        val user = findUser(userId)
         val voicepack = findVoicepack(request.voicepackId)
-        // TODO: 보유한 보이스팩인지 확인
-        
-        logger.info("AI 모델 서비스 요청 준비 중...")
-        val aiModelRequest = VoicepackSynthesisAIModelRequest(
-            userId = userId,
-            voicepackId = voicepack.name,
-            prompt = request.prompt
-        )
 
-        logger.info("AI 모델 서비스 호출 중: endpoint={}", voicepackSynthesisEndpoint)
-        val response = httpClient.post(voicepackSynthesisEndpoint) {
-            contentType(ContentType.Application.FormUrlEncoded)
-            setBody(FormDataContent(Parameters.build {
-                append("userId", aiModelRequest.userId.toString())
-                append("voicepackId", aiModelRequest.voicepackId)
-                append("prompt", aiModelRequest.prompt)
-            }))
-        }.body<VoicepackSynthesisAIModelResponse>()
-        logger.info("AI 모델 서비스 응답 수신 완료: {}", response)
-
-        logger.info("S3 객체 키 생성 중...")
-        val s3ObjectKey = try {
-            val uri = java.net.URI(response.audio_url)
-            val path = uri.path
-            if (path.startsWith("/")) path.substring(1) else path
-        } catch (e: Exception) {
-            logger.error("S3 URL 파싱 실패: {}", response.audio_url, e)
-            throw IllegalStateException("잘못된 S3 URL 형식입니다: ${response.audio_url}")
+        // TODO: 사용권 확인 로직 강화 (사용자가 이 보이스팩에 대한 사용권을 가지고 있는지 확인)
+        if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, request.voicepackId)) {
+            logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, request.voicepackId)
+            throw SecurityException("해당 보이스팩에 대한 사용 권한이 없습니다.")
         }
-        
-        logger.info("S3 Presigned URL 생성 중: objectKey={}", s3ObjectKey)
-        val presignedUrl = s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
-        
-        logger.info("보이스팩 합성 요청 완료")
-        return VoicepackSynthesisResponse(
-            synthesis_result = presignedUrl
+
+        // 1. 합성 요청 엔티티 생성 및 저장
+        val synthesisRequest = VoiceSynthesisRequest(
+            user = user,
+            voicepack = voicepack,
+            prompt = request.prompt
+            // jobId는 자동 생성됨
         )
+        voiceSynthesisRequestRepository.save(synthesisRequest)
+        logger.info("음성 합성 요청 저장됨: jobId={}, userId={}, voicepackId={}", 
+            synthesisRequest.jobId, userId, request.voicepackId)
+
+        // 2. AWS Lambda 비동기 호출
+        val lambdaPayload = mapOf(
+            "jobId" to synthesisRequest.jobId,
+            "voicepackName" to voicepack.name,
+            "prompt" to request.prompt,
+            // TODO: 필요한 경우 추가 파라미터 전달 (예: 콜백 URL)
+            "callbackUrl" to "/api/voicepack/synthesis/callback" // 경로 변경
+        )
+
+        try {
+            withContext(Dispatchers.IO) { // 네트워크 호출은 IO 스레드에서
+                httpClient.post(awsLambdaSynthesisEndpoint) {
+                    contentType(ContentType.Application.Json)
+                    setBody(lambdaPayload)
+                }
+                // Lambda는 비동기 호출이므로 응답 본문은 중요하지 않을 수 있음 (202 Accepted 등 상태 코드 확인 가능)
+            }
+            logger.info("AWS Lambda 호출 성공: jobId={}", synthesisRequest.jobId)
+
+            // 3. 요청 제출 성공 응답 반환
+            return VoicepackSynthesisSubmitResponse(
+                jobId = synthesisRequest.jobId,
+                message = "음성 합성 요청이 성공적으로 제출되었습니다. 완료 시 알림이 전송됩니다."
+            )
+
+        } catch (e: Exception) {
+            logger.error("AWS Lambda 호출 실패: jobId={}, error={}", synthesisRequest.jobId, e.message, e)
+            // Lambda 호출 실패 시 요청 상태 FAILED로 변경 및 저장
+            synthesisRequest.status = SynthesisStatus.FAILED
+            synthesisRequest.errorMessage = "Lambda 호출 실패: ${e.message}"
+            synthesisRequest.updatedAt = OffsetDateTime.now()
+            voiceSynthesisRequestRepository.save(synthesisRequest)
+            throw RuntimeException("음성 합성 요청 제출 중 오류 발생 (Lambda 호출 실패)", e)
+        }
+    }
+
+    /**
+     * 음성 합성 콜백 처리
+     */
+    @Transactional
+    fun handleSynthesisCallback(callbackRequest: VoicepackCallbackRequest) {
+        logger.info("음성 합성 콜백 수신: jobId={}", callbackRequest.jobId)
+
+        val synthesisRequestOpt = voiceSynthesisRequestRepository.findByJobId(callbackRequest.jobId)
+        if (synthesisRequestOpt.isEmpty) {
+            logger.error("콜백 처리 실패: 해당 jobId의 요청을 찾을 수 없음 - jobId={}", callbackRequest.jobId)
+            // TODO: 적절한 오류 처리 (예: 로깅만 할지, 예외를 던질지)
+            return // 혹은 예외 발생
+        }
+        val synthesisRequest = synthesisRequestOpt.get()
+
+        // 이미 처리된 콜백인지 확인 (멱등성)
+        if (synthesisRequest.status == SynthesisStatus.COMPLETED || synthesisRequest.status == SynthesisStatus.FAILED) {
+            logger.warn("이미 처리된 콜백 요청입니다: jobId={}, status={}", callbackRequest.jobId, synthesisRequest.status)
+            return
+        }
+
+        // 콜백 결과에 따라 상태 업데이트
+        synthesisRequest.updatedAt = OffsetDateTime.now()
+        if (callbackRequest.success) {
+            synthesisRequest.status = SynthesisStatus.COMPLETED
+            synthesisRequest.resultUrl = callbackRequest.resultUrl // S3 Presigned URL 또는 직접 URL
+            logger.info("음성 합성 성공 처리 완료: jobId={}, resultUrl={}", 
+                synthesisRequest.jobId, synthesisRequest.resultUrl)
+            // TODO: 사용자에게 성공 알림 전송 (notificationService 사용)
+            // notificationService.notifySynthesisComplete(synthesisRequest)
+        } else {
+            synthesisRequest.status = SynthesisStatus.FAILED
+            synthesisRequest.errorMessage = callbackRequest.errorMessage ?: "음성 합성 처리 실패 (원인 미상)"
+            logger.error("음성 합성 실패 처리 완료: jobId={}, error={}", 
+                synthesisRequest.jobId, synthesisRequest.errorMessage)
+            // TODO: 사용자에게 실패 알림 전송
+            // notificationService.notifySynthesisFailed(synthesisRequest)
+        }
+
+        voiceSynthesisRequestRepository.save(synthesisRequest)
     }
 
     private fun findVoicepack(voicepackId: Long) =
