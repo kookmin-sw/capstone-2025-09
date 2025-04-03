@@ -99,11 +99,11 @@ const Landing = () => {
         </h2>
         <button
           onClick={() => navigate('/sign-in')}
-          className="bg-white text-blue-500 px-12 py-2 rounded font-semibold"
+          className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
         </button>
-        <div className="absolute bottom-0">
+        <div className="absolute bottom-0  w-full z-0">
           <WaveAninmation />
         </div>
       </section>
