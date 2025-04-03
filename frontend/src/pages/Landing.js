@@ -6,6 +6,7 @@ import WaveAninmation from '../components/WaveAninmation';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import WaveSphere from '../components/WaveSphere';
+import GradientButton from '../components/GradientButton';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -20,15 +21,15 @@ const Landing = () => {
       {/* Header */}
       <header className="flex justify-between items-end h-[96px] px-28 z-10 relative ">
         <img src={logo} alt="COVOS" width={150} />
-        <button
+        <GradientButton
           onClick={() => navigate('/sign-in')}
-          className="bg-gradient-to-r from-purple-400 to-blue-500 text-white font-semibold py-2 px-8 rounded-lg shadow-sm hover:opacity-90 transition"
+          className="py-2 px-8 text-base"
         >
           로그인하기
-        </button>
+        </GradientButton>
       </header>
 
-      {/* Hero Section */}
+      {/* Section 1 - Hero*/}
       <section
         className="relative flex flex-col justify-center items-center"
         style={{ minHeight: 'calc(100vh - 96px)' }}
@@ -57,12 +58,12 @@ const Landing = () => {
             <h1 className="text-4xl font-bold mb-20 ">
               만들고 공유하고 활용하세요
             </h1>
-            <button
+            <GradientButton
               onClick={() => navigate('/sign-in')}
-              className="bg-gradient-to-r from-purple-400 to-blue-500 text-white text-lg font-semibold py-3 px-12 rounded-lg shadow-sm hover:opacity-90 transition"
+              className="text-lg py-3 px-12"
             >
-              보이스팩 제작 시작하기
-            </button>
+              보이스팩 생성 시작하기
+            </GradientButton>
           </div>
         </div>
       </section>
@@ -76,6 +77,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Section 3 */}
       <section className="h-screen flex flex-col justify-center items-center text-black">
         <h2 className="text-2xl mb-2 font-semibold">COVOS만의 기능</h2>
         <div className="flex justify-center gap-16 items-center w-full h-1/2 mt-14">
@@ -91,6 +93,7 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Section 4 */}
       <section className="pt-40 pb-40 bg-black text-white text-center">
         <h2 className="text-4xl mb-8 font-semibold">
           지금,
