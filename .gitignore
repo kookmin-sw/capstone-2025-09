@@ -18,3 +18,4 @@ env/
 # IDE 설정
 .idea/
 *.iml
+*.DS_Store

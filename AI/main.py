@@ -1,6 +1,8 @@
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from utils.voice_synthesizer import VoiceSynthesizer
+from utils.voice_registration_handler import process_voice_registration
 import logging
+from fastapi.responses import JSONResponse
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -10,16 +12,36 @@ voice_synthesizer = VoiceSynthesizer()
 
 @app.post("/register_speaker")
 async def register_speaker_endpoint(
+    background_tasks: BackgroundTasks,
     voicepackId: str = Form(...),
-    voiceFile: UploadFile = File(...)
+    voiceFile: UploadFile = File(...),
+    voicepackRequestId: int = Form(...)
 ):
     """화자 등록 API 엔드포인트"""
-    result = await voice_synthesizer.extract_speaker_features(
-        voicepackId=voicepackId,
-        voiceFile=voiceFile
-    )
-    
-    return {"sample_audio_url": result}
+    try:
+        # 파일 데이터 읽기
+        file_content = await voiceFile.read()
+        
+        # 백그라운드로 처리 시작
+        background_tasks.add_task(
+            process_voice_registration,
+            voicepackId=voicepackId,
+            file_content=file_content,
+            voicepackRequestId=voicepackRequestId
+        )
+        
+        return JSONResponse(
+            status_code=202,
+            content={
+                "status": "processing",
+                "message": "화자 등록이 시작되었습니다.",
+                "voicepackRequestId": voicepackRequestId
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"요청 처리 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail="화자 등록 요청 처리 중 오류가 발생했습니다.")
 
 @app.post("/synthesize")
 async def synthesize_endpoint(

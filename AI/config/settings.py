@@ -11,6 +11,10 @@ AWS_CONFIG = {
     'secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY')
 }
 
+BACKEND_CONFIG = {
+    'callback_url': os.getenv('CALLBACK_URL')
+}
+
 # 모델 설정
 MODEL_CONFIG = {
     'path': "./pretrained_models/CosyVoice2-0.5B",

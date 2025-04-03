@@ -13,6 +13,7 @@ from CosyVoice.cli.cosyvoice import CosyVoice2
 from CosyVoice.utils.file_utils import load_wav
 from .storage_manager import StorageManager
 from config.settings import MODEL_CONFIG
+import tempfile
 
 logger = logging.getLogger(__name__)
 
@@ -61,42 +62,63 @@ class VoiceSynthesizer:
     async def extract_speaker_features(
         self,
         voicepackId: str,
-        voiceFile: UploadFile
+        file_content: bytes
     ) -> str:
-        """화자의 음성에서 특징을 추출하고 S3에 저장, 테스트 음성도 생성"""
         try:
-            prompt_speech = load_wav(voiceFile.file, self.sample_rate)
+            """화자의 음성에서 특징을 추출하고 S3에 저장, 테스트 음성도 생성"""
+            try:
+                with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+                    temp_file.write(file_content)
+                    temp_file.flush()
+        
+                    prompt_speech = load_wav(temp_file.name, self.sample_rate)
+                    logger.info(f"음성 파일 로드 완료: {voicepackId}")
+
+                os.unlink(temp_file.name)
+
+            except Exception as e:
+                    logger.error(f"음성 파일 처리 실패: {str(e)}")
+                    raise HTTPException(
+                        status_code=400,
+                        detail="잘못된 음성 파일 형식입니다."
+                    )
 
             features = self.model.frontend.frontend_zero_shot(
                 prompt_speech_16k=prompt_speech,
                 resample_rate=self.model.sample_rate
             )
-            
-            # 특징 저장
+
+            logger.info(f"화자 특징 추출 완료: {voicepackId}")
+                
+            # 특징을 s3에 저장
             if not self.storage_manager.save_speaker_features(voicepackId, features):
-                raise HTTPException(status_code=500, detail="Failed to save speaker features")
-            
+                logger.error(f"화자 특징 저장 실패: {voicepackId}")
+                raise HTTPException(
+                    status_code=503,
+                    detail="S3 저장소 접근 오류"
+                )
+                
             logger.info(f"화자 특징 저장 완료: {voicepackId}")
-            
+                
             # 테스트 음성 생성
-            test_text = "작은 도전이 큰 변화를 이끕니다. 실패를 두려워하지 않고 한 걸음씩 나아가면 반드시 새로운 가능성이 열릴 것입니다."
+            test_text = "어제의 실패는 내일의 성공을 위한 발판입니다. 포기하지 않고 꾸준히 노력한다면 결국 원하는 목표에 도달할 수 있습니다."
 
             audio_data, _ = self._generate_speech_internal(
                 text=test_text,
                 features=features,
                 speed=1.0
             )
-            
+
             # 테스트 음성 저장
             test_filename = "sample_test.wav"
             file_path = f"speakers/{voicepackId}/{test_filename}"
             audio_url = self.storage_manager.save_audio(audio_data, file_path)
-            
+                
             if not audio_url:
                 raise HTTPException(status_code=500, detail="Failed to save sample audio")
-            
+                
             return audio_url
-            
+        
         except Exception as e:
             logger.error(f"화자 특징 추출 실패: {str(e)}")
             raise

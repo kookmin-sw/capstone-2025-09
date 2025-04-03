@@ -40,3 +40,4 @@ numpy
 git+https://github.com/shivammehta25/Matcha-TTS.git
 boto3
 dotenv
+httpx
