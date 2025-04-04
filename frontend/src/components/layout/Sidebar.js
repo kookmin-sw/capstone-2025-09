@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Mic, Store, ShoppingBag } from 'lucide-react';
-import logo from '../assets/logo-new.svg';
+import logo from '../../assets/logo-new.svg';
 
 const Sidebar = () => {
   const location = useLocation();

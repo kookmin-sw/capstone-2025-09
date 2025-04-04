@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from 'react-router-dom';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import Layout from './components/layout/Layout';
 import Landing from './pages/Landing';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
@@ -15,33 +10,6 @@ import AiAssistant from './pages/AiAssistant';
 import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/MyPage';
-import BlurBackgrounds from './components/BlurBackground';
-
-const Layout = ({ children }) => {
-  const location = useLocation();
-  const noLayoutPaths = ['/', '/sign-in', '/sign-up'];
-  const isNoLayout = noLayoutPaths.includes(location.pathname);
-
-  return (
-    <div className="flex h-screen">
-      {!isNoLayout && <Sidebar />}
-      <div className="flex flex-col flex-1">
-        {!isNoLayout && <Header />}
-        <main
-          className={`${location.pathname === '/' ? '' : 'p-4'} relative flex-1`}
-        >
-          {/* 배경 블러 */}
-          <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden bg-indigo-100">
-            <BlurBackgrounds />
-          </div>
-
-          {/* 실제 페이지 콘텐츠 */}
-          <div className="relative z-0">{children}</div>
-        </main>
-      </div>
-    </div>
-  );
-};
 
 function App() {
   return (
