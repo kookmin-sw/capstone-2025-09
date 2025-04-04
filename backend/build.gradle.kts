@@ -33,7 +33,7 @@ dependencies {
 	// implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
-	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // JSON 직렬화/역직렬화
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	compileOnly("org.projectlombok:lombok")
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -68,6 +68,10 @@ dependencies {
 
 	// AWS RDS (MySQL) 의존성 추가
 	implementation("mysql:mysql-connector-java:8.0.33")
+
+	// rabbitmq 로직 관련 의존성 추가
+	implementation("org.springframework.boot:spring-boot-starter-amqp")
+
 
 }
 
