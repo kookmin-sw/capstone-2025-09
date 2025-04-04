@@ -5,10 +5,8 @@ import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
-import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
-import java.io.BufferedReader
-import java.io.InputStreamReader
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -29,16 +27,12 @@ class RequestLoggingInterceptor : HandlerInterceptor {
         val clientIp = getClientIp(request)
         val userAgent = request.getHeader("User-Agent")
         
-        // 요청 본문 로깅
-        val requestBody = getRequestBody(request)
-
         logger.info("""
             [Request] $timestamp
             Method: $method
             URI: $fullUri
             Client IP: $clientIp
             User-Agent: $userAgent
-            Body: $requestBody
         """.trimIndent())
 
         return true
@@ -53,13 +47,13 @@ class RequestLoggingInterceptor : HandlerInterceptor {
         val startTime = request.getAttribute("startTime") as Long
         val endTime = System.currentTimeMillis()
         val processingTime = endTime - startTime
+        
         val status = response.status
 
         val timestamp = LocalDateTime.now().format(dateTimeFormatter)
         val method = request.method
         val uri = request.requestURI
         
-        // 응답 본문 로깅 (ContentCachingResponseWrapper 사용)
         val responseBody = getResponseBody(response)
 
         logger.info("""
@@ -72,37 +66,19 @@ class RequestLoggingInterceptor : HandlerInterceptor {
         """.trimIndent())
     }
     
-    private fun getRequestBody(request: HttpServletRequest): String {
-        return try {
-            if (request.contentType?.contains("multipart/form-data") == true) {
-                return "[Multipart Form Data]"
-            }
-            
-            val reader = BufferedReader(InputStreamReader(request.inputStream))
-            val body = StringBuilder()
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                body.append(line)
-            }
-            request.setAttribute("requestBody", body.toString())
-            body.toString()
-        } catch (e: Exception) {
-            logger.warn("요청 본문을 읽는 중 오류 발생: ${e.message}")
-            "[Error reading request body]"
-        }
-    }
-    
     private fun getResponseBody(response: HttpServletResponse): String {
-        return try {
-            // ContentCachingResponseWrapper를 사용하여 응답 본문 캐싱
-            val wrapper = ContentCachingResponseWrapper(response)
-            val contentAsString = String(wrapper.contentAsByteArray)
-            wrapper.copyBodyToResponse()
-            contentAsString
-        } catch (e: Exception) {
-            logger.warn("응답 본문을 읽는 중 오류 발생: ${e.message}")
-            "[Error reading response body]"
+        if (response is ContentCachingResponseWrapper) {
+            val buf = response.contentAsByteArray
+            if (buf.isNotEmpty()) {
+                return try {
+                    String(buf, 0, buf.size, response.characterEncoding?.let { charset(it) } ?: StandardCharsets.UTF_8)
+                } catch (e: Exception) {
+                    logger.warn("응답 본문을 문자열로 변환 중 오류 발생: ${e.message}")
+                    "[Error converting response body to string]"
+                }
+            }
         }
+        return "[Response body not available]"
     }
 
     private fun getClientIp(request: HttpServletRequest): String {
