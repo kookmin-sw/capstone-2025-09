@@ -167,12 +167,19 @@ class VoicepackController(
         }
     }
 
+    /**
+     * 보이스팩 생성 콜백 처리 (SQS로 대체됨)
+     * @deprecated SQS를 통한 비동기 처리로 대체되었습니다.
+     *
+    @Deprecated("SQS를 통한 비동기 처리로 대체되었습니다.")
     @GetMapping("/callback")
     fun callback(
         @RequestParam("voicepackRequestId") voicepackRequestId: Long,
         @RequestParam("status") status: String
     ): ResponseEntity<Void> {
+        logger.warn("HTTP 콜백 엔드포인트가 호출되었습니다. 이 엔드포인트는 더 이상 사용되지 않습니다.")
         voicepackService.handleCallback(voicepackRequestId, status)
         return ResponseEntity.ok().build()
     }
+    */
 } 

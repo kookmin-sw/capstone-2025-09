@@ -303,7 +303,7 @@ class VoicepackService(
 
     // 보이스팩 생성 결과 콜백 처리
     @Transactional
-    fun handleCallback(voicepackRequestId: Long, status: String) {
+    fun handleCreationCallback(voicepackRequestId: Long, status: String) {
         val voicepackRequest = voicepackRequestRepository.findById(voicepackRequestId).orElseThrow {
             IllegalArgumentException("Voicepack request not found")
         }
