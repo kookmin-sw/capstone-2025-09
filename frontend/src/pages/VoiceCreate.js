@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 
+
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
   const [voicePackName, setVoicePackName] = useState('');
@@ -15,7 +16,11 @@ function VoiceCreate() {
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
-  // FFmpeg 로드
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationFrameRef = useRef(null);
+  const canvasRef = useRef(null);
+
   useEffect(() => {
     const loadFFmpeg = async () => {
       const ffmpegInstance = createFFmpeg({ log: true });
@@ -24,7 +29,6 @@ function VoiceCreate() {
       setIsFFmpegLoaded(true);
       console.log("✅ FFmpeg 로드 완료!");
     };
-
     loadFFmpeg();
   }, []);
 
@@ -35,6 +39,48 @@ function VoiceCreate() {
     }
   }, [audioBlob]);
 
+  const drawVisualizer = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+    const analyser = analyserRef.current;
+
+    const bufferLength = analyser.fftSize;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const draw = () => {
+      analyser.getByteTimeDomainData(dataArray);
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#6B21A8'; // 진한 보라색
+      ctx.beginPath();
+
+      const sliceWidth = canvas.width / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = dataArray[i] / 128.0;
+        const y = (v * canvas.height) / 2;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+
+        x += sliceWidth;
+      }
+
+      ctx.lineTo(canvas.width, canvas.height / 2);
+      ctx.stroke();
+
+      animationFrameRef.current = requestAnimationFrame(draw);
+    };
+
+    draw();
+  };
+
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) {
       alert("FFmpeg가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
@@ -44,7 +90,14 @@ function VoiceCreate() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-      console.log("🎤 MediaRecorder 지원 코덱:", mediaRecorderRef.current.mimeType);
+
+      audioContextRef.current = new AudioContext();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      analyserRef.current.fftSize = 2048;
+      source.connect(analyserRef.current);
+
+      drawVisualizer();
 
       audioChunksRef.current = [];
       setTimer(0);
@@ -55,14 +108,10 @@ function VoiceCreate() {
 
       mediaRecorderRef.current.onstop = async () => {
         const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-
-        console.log("🎵 녹음 완료! 변환 전 파일 타입:", webmBlob.type);
-        console.log("🎵 변환 전 파일 크기:", webmBlob.size, "bytes");
-
-        if (!isFFmpegLoaded || !ffmpegRef.current) {
-          console.error("❌ FFmpeg가 로드되지 않음. WAV 변환 불가능.");
-          alert("FFmpeg 로드가 완료되지 않았습니다. 잠시 후 다시 시도해주세요.");
-          return;
+        clearInterval(timerRef.current);
+        cancelAnimationFrame(animationFrameRef.current);
+        if (audioContextRef.current) {
+          audioContextRef.current.close();
         }
 
         try {
@@ -78,17 +127,13 @@ function VoiceCreate() {
           console.log("✅ WAV 변환 완료!");
         } catch (error) {
           console.error("❌ WAV 변환 실패:", error);
-          alert("녹음 파일을 WAV로 변환하는 중 오류가 발생했습니다.");
+          alert("WAV 변환에 실패했습니다.");
         }
-
-        clearInterval(timerRef.current);
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
-      timerRef.current = setInterval(() => {
-        setTimer((prev) => prev + 1);
-      }, 1000);
+      timerRef.current = setInterval(() => setTimer((prev) => prev + 1), 1000);
     } catch (error) {
       console.error('❌ 오디오 녹음 오류:', error);
       alert('오디오 녹음 중 오류가 발생했습니다.');
@@ -108,16 +153,12 @@ function VoiceCreate() {
       return;
     }
 
-    // 바로 이동
     const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
     const endpoint = `${apiUrl}/convert`;
 
     try {
       const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
-      const userId = sessionStorage.getItem('userId'); 
-
-      console.log("📤 서버로 보낼 파일 타입:", audioFile.type);
-      console.log("📤 서버로 보낼 파일 크기:", audioFile.size, "bytes");
+      const userId = sessionStorage.getItem('userId');
 
       const formData = new FormData();
       formData.append('userId', userId);
@@ -130,14 +171,11 @@ function VoiceCreate() {
         credentials: 'include',
       });
 
-      if (!response.ok) {
-        throw new Error('서버 응답 실패');
-      }
+      if (!response.ok) throw new Error('서버 응답 실패');
 
       const data = await response.json();
-      console.log(`✅ 보이스팩 생성 성공:`, data);
       alert('보이스팩 생성이 완료되었습니다!');
-      navigate('/voicemarket');
+      navigate('/voicestore');
     } catch (error) {
       console.error('❌ 보이스팩 생성 오류:', error);
     }
@@ -148,16 +186,16 @@ function VoiceCreate() {
       <h1 className="text-3xl font-bold mb-8">보이스팩 생성</h1>
 
       <div className="w-full max-w-md">
-        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="voicepackName">
+        <label htmlFor="voicepackName" className="block text-gray-700 text-sm font-bold mb-2">
           보이스팩 이름 <span className="text-red-500">*</span>
         </label>
         <input
           id="voicepackName"
           type="text"
-          placeholder="보이스팩 이름 입력"
           value={voicePackName}
           onChange={(e) => setVoicePackName(e.target.value)}
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+          placeholder="보이스팩 이름 입력"
+          className="shadow border rounded w-full py-2 px-3 text-gray-700"
         />
       </div>
 
@@ -177,11 +215,17 @@ function VoiceCreate() {
           >
             🎤
           </button>
+
           {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
           {isRecording && <span className="text-sm">{timer}s</span>}
-          {!isFFmpegLoaded && (
-            <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>
-          )}
+          {!isFFmpegLoaded && <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>}
+
+          <canvas
+            ref={canvasRef}
+            width={300}
+            height={300}
+            className="border rounded mt-4 bg-white w-full"
+          />
         </div>
       </div>
 
