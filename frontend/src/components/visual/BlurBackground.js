@@ -1,7 +1,7 @@
 import React from 'react';
-import blur50 from '../assets/blur50.svg';
-import blur100 from '../assets/blur100.svg';
-import blurGray from '../assets/blur-gray.svg';
+import blur50 from '../../assets/blur50.svg';
+import blur100 from '../../assets/blur100.svg';
+import blurGray from '../../assets/blur-gray.svg';
 
 const BlurBackgrounds = () => {
   return (

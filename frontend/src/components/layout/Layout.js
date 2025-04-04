@@ -1,9 +1,9 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Header from '../components/Header';
-import BlurBackgrounds from '../components/BlurBackground';
-import PageContainer from '../components/PageContainer';
+import Sidebar from './Sidebar';
+import Header from './Header';
+import BlurBackgrounds from '../visual/BlurBackground';
+import PageContainer from '../common/PageContainer';
 
 const Layout = ({ children }) => {
   const location = useLocation();

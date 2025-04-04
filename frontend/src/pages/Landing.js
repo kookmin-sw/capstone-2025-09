@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-new.svg';
-import BlurBackgrounds from '../components/BlurBackground';
-import WaveAninmation from '../components/WaveAninmation';
+import BlurBackgrounds from '../components/visual/BlurBackground';
+import WaveAninmation from '../components/visual/WaveAninmation';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
-import WaveSphere from '../components/WaveSphere';
-import GradientButton from '../components/GradientButton';
+import WaveSphere from '../components/visual/WaveSphere';
+import GradientButton from '../components/common/GradientButton';
 
 const Landing = () => {
   const navigate = useNavigate();

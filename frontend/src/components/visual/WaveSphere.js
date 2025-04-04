@@ -3,12 +3,12 @@ import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 
 // 텍스처 이미지
-import sirens from '../assets/sirens.jpeg';
-import cosmic from '../assets/cosmic-fusion.jpeg';
-import deepOcean from '../assets/deep-ocean.jpeg';
-import hollogram from '../assets/hollogram.jpeg';
-import imaginarium from '../assets/imaginarium.jpeg';
-import iridescent from '../assets/iridescent.jpeg';
+import sirens from '../../assets/sirens.jpeg';
+import cosmic from '../../assets/cosmic-fusion.jpeg';
+import deepOcean from '../../assets/deep-ocean.jpeg';
+import hollogram from '../../assets/hollogram.jpeg';
+import imaginarium from '../../assets/imaginarium.jpeg';
+import iridescent from '../../assets/iridescent.jpeg';
 
 const texturesList = [
   sirens,
