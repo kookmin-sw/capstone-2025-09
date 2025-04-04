@@ -1,0 +1,34 @@
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import Sidebar from '../components/Sidebar';
+import Header from '../components/Header';
+import BlurBackgrounds from '../components/BlurBackground';
+import PageContainer from '../components/PageContainer';
+
+const Layout = ({ children }) => {
+  const location = useLocation();
+  const noLayoutPaths = ['/', '/sign-in', '/sign-up'];
+  const isNoLayout = noLayoutPaths.includes(location.pathname);
+
+  return (
+    <div className="flex h-screen">
+      {!isNoLayout && <Sidebar />}
+      <div className="flex flex-col flex-1">
+        {!isNoLayout && <Header />}
+        <main className={`${isNoLayout ? '' : 'p-4'} relative flex-1`}>
+          {/* 배경 블러 */}
+          <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden bg-indigo-100">
+            <BlurBackgrounds />
+          </div>
+
+          {/* 콘텐츠 영역 */}
+          <div className="relative z-0">
+            {isNoLayout ? children : <PageContainer>{children}</PageContainer>}
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default Layout;
