@@ -197,7 +197,9 @@ function VoiceCreate() {
               <audio
                 ref={audioPlayerRef}
                 src={URL.createObjectURL(audioBlob)}
+                controls
                 onEnded={() => setIsPlaying(false)}
+                className="w-full mt-2"
               />
               <button
                 onClick={handlePlayPause}
