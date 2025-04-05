@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import Logo from '../icons/logo.png';
+import Logo from '../icons/covosLogo.svg';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
