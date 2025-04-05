@@ -207,24 +207,24 @@ function VoiceCreate() {
           안녕하세요. 목소리를 녹음합니다. 잘 들리시나요? 감사합니다..
         </p>
 
-        <div className="mb-4">
+        <div className="mb-4 flex items-center space-x-4">
           <button
             onClick={isRecording ? handleStopRecording : handleStartRecording}
-            className={`p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+            className={`p-2 rounded-full ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
             disabled={!isFFmpegLoaded}
           >
             🎤
           </button>
 
-          {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
+          {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2"/>}
           {isRecording && <span className="text-sm">{timer}s</span>}
-          {!isFFmpegLoaded && <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>}
 
+          {/* 🎯 파형을 작게 오른쪽에 표시 */}
           <canvas
             ref={canvasRef}
-            width={300}
-            height={300}
-            className="border rounded mt-4 bg-white w-full"
+            width={100}
+            height={40}
+            className="border rounded bg-white"
           />
         </div>
       </div>
