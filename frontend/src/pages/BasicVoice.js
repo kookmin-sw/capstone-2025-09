@@ -37,7 +37,7 @@ const BasicVoice = () => {
 
   return (
     <div className="space-y-6 mx-16">
-      <div className="mb-8 cursor-pointer" onClick={() => navigate('/landing')}>
+      <div className="mt-8 mb-8 cursor-pointer" onClick={() => navigate('/landing')}>
         <img src={Logo} alt="Logo"/>
       </div>
       <h1 className="text-2xl font-bold">베이직 보이스</h1>
