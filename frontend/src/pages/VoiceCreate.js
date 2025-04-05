@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
 import WaveSurfer from 'wavesurfer.js';
-import MicrophonePlugin from 'wavesurfer.js/dist/plugins/microphone.js';
+import MicrophonePlugin from 'wavesurfer.js/src/plugin/microphone/index.js';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
