@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-import WaveSurfer from 'wavesurfer.js';
-import MicrophonePlugin from 'wavesurfer.js/src/plugin/microphone/index.js';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -18,10 +16,12 @@ function VoiceCreate() {
   const timerRef = useRef(null);
   const navigate = useNavigate();
 
-  const wavesurferRef = useRef(null);
-  const waveformRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationRef = useRef(null);
+  const volumeCanvasRef = useRef(null);
+  const audioPlayerRef = useRef(null);
 
-  // FFmpeg 로딩
   useEffect(() => {
     const loadFFmpeg = async () => {
       const ffmpeg = createFFmpeg({ log: false });
@@ -32,50 +32,37 @@ function VoiceCreate() {
     loadFFmpeg();
   }, []);
 
-  // 녹음 중 실시간 파형
-  useEffect(() => {
-    if (isRecording && waveformRef.current) {
-      const ws = WaveSurfer.create({
-        container: waveformRef.current,
-        waveColor: '#ddd',
-        progressColor: '#7C3AED',
-        height: 60,
-        barWidth: 2,
-        barGap: 2,
-        responsive: true,
-        plugins: [
-          MicrophonePlugin.create()
-        ],
-      });
+  // 볼륨 막대 그리기
+  const drawVolumeMeter = () => {
+    const canvas = volumeCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const analyser = analyserRef.current;
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
-      ws.microphone.start();
-      wavesurferRef.current = ws;
-    }
+    const draw = () => {
+      analyser.getByteFrequencyData(dataArray);
+      const volume = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
 
-    return () => {
-      wavesurferRef.current?.microphone?.stop();
-      wavesurferRef.current?.destroy();
+      const width = canvas.width;
+      const height = canvas.height;
+
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#7C3AED';
+      ctx.fillRect(0, 0, (volume / 255) * width, height);
+
+      animationRef.current = requestAnimationFrame(draw);
     };
-  }, [isRecording]);
 
-  // 녹음 완료 후 파형 재로딩
-  useEffect(() => {
-    if (audioBlob && waveformRef.current) {
-      const ws = WaveSurfer.create({
-        container: waveformRef.current,
-        waveColor: '#ddd',
-        progressColor: '#7C3AED',
-        height: 60,
-        barWidth: 2,
-        barGap: 2,
-        responsive: true,
-      });
+    draw();
+  };
 
-      ws.loadBlob(audioBlob);
-      ws.on('finish', () => setIsPlaying(false));
-      wavesurferRef.current = ws;
+  const stopVolumeMeter = () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
     }
-  }, [audioBlob]);
+    const ctx = volumeCanvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, volumeCanvasRef.current.width, volumeCanvasRef.current.height);
+  };
 
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) return alert('FFmpeg 로딩 중입니다.');
@@ -85,12 +72,23 @@ function VoiceCreate() {
     setTimer(0);
     audioChunksRef.current = [];
 
+    // 오디오 분석기 연결
+    audioContextRef.current = new AudioContext();
+    const source = audioContextRef.current.createMediaStreamSource(stream);
+    analyserRef.current = audioContextRef.current.createAnalyser();
+    analyserRef.current.fftSize = 256;
+    source.connect(analyserRef.current);
+
+    drawVolumeMeter();
+
     mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
     mediaRecorderRef.current.ondataavailable = (e) => {
       audioChunksRef.current.push(e.data);
     };
     mediaRecorderRef.current.onstop = async () => {
       clearInterval(timerRef.current);
+      stopVolumeMeter();
+      audioContextRef.current?.close();
 
       const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
 
@@ -118,10 +116,15 @@ function VoiceCreate() {
   };
 
   const handlePlayPause = () => {
-    if (wavesurferRef.current) {
-      wavesurferRef.current.playPause();
-      setIsPlaying((prev) => !prev);
+    const audio = audioPlayerRef.current;
+    if (!audio) return;
+
+    if (isPlaying) {
+      audio.pause();
+    } else {
+      audio.play();
     }
+    setIsPlaying(!isPlaying);
   };
 
   const handleCreateVoicePack = async () => {
@@ -176,9 +179,12 @@ function VoiceCreate() {
               🎤
             </button>
 
-            <div className="flex-1 bg-white rounded-lg overflow-hidden relative h-16 px-2 py-1">
-              <div ref={waveformRef} className="w-full h-full" />
-            </div>
+            <canvas
+              ref={volumeCanvasRef}
+              width={300}
+              height={20}
+              className="bg-white rounded border"
+            />
 
             <span className="text-sm w-20 text-right text-[#7C3AED]">
               {String(Math.floor(timer / 60)).padStart(2, '0')} : {String(timer % 60).padStart(2, '0')}
@@ -188,6 +194,11 @@ function VoiceCreate() {
           {/* ▶️ 녹음 완료 후 재생 버튼 */}
           {audioBlob && (
             <div className="mt-4 text-right">
+              <audio
+                ref={audioPlayerRef}
+                src={URL.createObjectURL(audioBlob)}
+                onEnded={() => setIsPlaying(false)}
+              />
               <button
                 onClick={handlePlayPause}
                 className="text-sm bg-[#7C3AED] text-white px-4 py-2 rounded"
