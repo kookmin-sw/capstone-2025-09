@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
+import Logo from '../assets/logo.png';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -139,6 +140,9 @@ function VoiceCreate() {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f4ff] px-4 py-8">
+      <div className='mb-8' onClick={() => navigate('/landing')}>
+        <Logo/>
+      </div>
       <div className="w-full max-w-2xl bg-white shadow-lg rounded-xl p-8">
         <label className="block text-gray-700 text-xl font-semibold mb-2">보이스팩 이름</label>
         <input
