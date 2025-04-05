@@ -115,18 +115,6 @@ function VoiceCreate() {
     setIsRecording(false);
   };
 
-  const handlePlayPause = () => {
-    const audio = audioPlayerRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
   const handleCreateVoicePack = async () => {
     if (!voicePackName.trim() || !audioBlob) return alert('이름과 녹음이 필요합니다.');
 
@@ -201,12 +189,6 @@ function VoiceCreate() {
                 onEnded={() => setIsPlaying(false)}
                 className="w-full mt-2"
               />
-              <button
-                onClick={handlePlayPause}
-                className="text-sm bg-[#7C3AED] text-white px-4 py-2 rounded"
-              >
-                {isPlaying ? '⏸️ 일시정지' : '▶️ 재생'}
-              </button>
             </div>
           )}
         </div>
