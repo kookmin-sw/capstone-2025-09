@@ -13,12 +13,18 @@ const Layout = ({ children }) => {
   return (
     <div className="flex h-screen">
       {!isNoLayout && <Sidebar />}
-      <div className="flex flex-col flex-1">
-        {!isNoLayout && <Header />}
-        <main className={`${isNoLayout ? '' : 'p-4'} relative flex-1`}>
+      <div className="flex flex-col flex-1 relative">
+        {!isNoLayout && (
+          <div className="absolute top-0 left-0 w-full z-10">
+            <Header/>
+          </div>
+        )}
+        <main
+          className={`relative flex-1 ${location.pathname === '/' ? '' : 'py-20 px-8'}`}
+        >
           {/* 배경 블러 */}
           <div className="absolute inset-0 -z-10 pointer-events-none overflow-hidden bg-indigo-100">
-            <BlurBackgrounds />
+            <BlurBackgrounds/>
           </div>
 
           {/* 콘텐츠 영역 */}
