@@ -13,6 +13,14 @@ import io.ktor.client.plugins.logging.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRight
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -32,8 +40,10 @@ import java.util.*
 class VoicepackService(
     private val voicepackRepository: VoicepackRepository,
     private val voicepackRequestRepository: VoicepackRequestRepository,
+    private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
+    // private val creditService: CreditService,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate,
     @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
@@ -316,4 +326,52 @@ class VoicepackService(
             }
         }
     }
+
+    /**
+     * 보이스팩 사용권 획득 처리 (구매 또는 제작자 획득)
+     */
+    @Transactional
+    fun grantUsageRight(userId: Long, voicepackId: Long): VoicepackUsageRightDto {
+        logger.info("보이스팩 사용권 획득 요청: userId={}, voicepackId={}", userId, voicepackId)
+
+        val user = findUser(userId)
+        val voicepack = findVoicepack(voicepackId)
+
+        // 1. 이미 사용권을 가지고 있는지 확인
+        if (voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, voicepackId)) {
+            logger.warn("이미 사용권을 가지고 있는 보이스팩입니다: userId={}, voicepackId={}", userId, voicepackId)
+            throw IllegalStateException("이미 사용권을 가지고 있는 보이스팩입니다.")
+        }
+
+        // 2. (선택 사항) 가격 확인 및 크레딧 차감 (제작자가 아닌 경우에만)
+        // if (voicepack.author.id != userId) {
+        //     // TODO: 보이스팩 가격 확인 및 크레딧 차감 로직
+        //     /*
+        //     val voicepackPrice = voicepack.price ?: 0
+        //     if (voicepackPrice > 0) { ... }
+        //     */
+        // }
+
+        // 3. 사용권 정보 생성 및 저장
+        val usageRight = VoicepackUsageRight(
+            user = user,
+            voicepack = voicepack
+        )
+        val savedUsageRight = voicepackUsageRightRepository.save(usageRight)
+        logger.info("보이스팩 사용권 저장 성공: usageRightId={}, userId={}, voicepackId={}", savedUsageRight.id, userId, voicepackId)
+
+        // 4. 결과 반환
+        return VoicepackUsageRightDto.fromEntity(savedUsageRight)
+    }
+
+
+    /**
+     * 사용자가 보유한 보이스팩 목록 조회
+     */
+    fun getVoicepacksByUserId(userId: Long): List<VoicepackUsageRightBriefDto> {
+        logger.info("사용자의 보이스팩 목록 조회: userId={}", userId)
+        return voicepackUsageRightRepository.findVoicepackDtosByUserId(userId)
+    } 
+
 }
+

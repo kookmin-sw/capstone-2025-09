@@ -1,5 +1,8 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.springframework.http.ResponseEntity
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -167,19 +170,79 @@ class VoicepackController(
         }
     }
 
-    /**
-     * 보이스팩 생성 콜백 처리 (SQS로 대체됨)
-     * @deprecated SQS를 통한 비동기 처리로 대체되었습니다.
-     *
-    @Deprecated("SQS를 통한 비동기 처리로 대체되었습니다.")
-    @GetMapping("/callback")
-    fun callback(
-        @RequestParam("voicepackRequestId") voicepackRequestId: Long,
-        @RequestParam("status") status: String
-    ): ResponseEntity<Void> {
-        logger.warn("HTTP 콜백 엔드포인트가 호출되었습니다. 이 엔드포인트는 더 이상 사용되지 않습니다.")
-        voicepackService.handleCallback(voicepackRequestId, status)
-        return ResponseEntity.ok().build()
+    @Operation(
+        summary = "보이스팩 사용권 획득",
+        description = "사용자가 특정 보이스팩의 사용권을 획득합니다 (구매 또는 제작자 자동 획득).",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "사용권 획득 성공",
+                content = [Content(schema = Schema(implementation = VoicepackUsageRightDto::class))]
+            ),
+            ApiResponse(
+                responseCode = "400",
+                description = "잘못된 요청 (예: 사용자 또는 보이스팩 없음)"
+            ),
+            ApiResponse(
+                responseCode = "409",
+                description = "이미 사용권을 가지고 있는 보이스팩"
+            ),
+            ApiResponse(
+                responseCode = "402",
+                description = "크레딧 부족 (크레딧 연동 시)"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @PostMapping("/usage-right")
+    fun grantUsageRight(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
+        @Parameter(description = "보이스팩 ID") @RequestParam voicepackId: Long
+    ): ResponseEntity<Any> {
+        try {
+            val usageRightDto = voicepackService.grantUsageRight(userId, voicepackId)
+            return ResponseEntity.ok(usageRightDto)
+        } catch (e: IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
+        } catch (e: IllegalStateException) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(mapOf("error" to e.message))
+        } catch (e: RuntimeException) {
+            if (e.message?.contains("크레딧") == true) {
+                return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(mapOf("error" to e.message))
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to (e.message ?: "사용권 획득 처리 중 오류가 발생했습니다.")))
+            }
+        } catch (e: Exception) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "사용권 획득 처리 중 예상치 못한 오류가 발생했습니다."))
+        }
     }
-    */
+
+
+    // 사용자가 사용권을 보유한 보이스팩 목록 조회
+    @Operation(
+        summary = "사용자가 사용권을 보유한 보이스팩 목록 조회",
+        description = "사용자가 사용권을 보유한 보이스팩 목록을 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = List::class))]
+            ),
+            ApiResponse(
+                responseCode = "500",   
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/usage-right")
+    fun getUserVoicepacks(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long
+    ): ResponseEntity<List<VoicepackUsageRightBriefDto>> {
+        val voicepacks = voicepackService.getVoicepacksByUserId(userId)
+        return ResponseEntity.ok(voicepacks)
+    }
+
 } 
