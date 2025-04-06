@@ -35,7 +35,7 @@ async def process_voice_registration(
         logger.info(f"speaker features extracted: voicepackId={voicepackId}")
         
         # 성공 메시지 전송
-        await sqs_handler.send_message(
+        await sqs_handler.send_register_message(
             voicepackId=voicepackId,
             voicepackRequestId=voicepackRequestId,
             status="success"
@@ -47,8 +47,7 @@ async def process_voice_registration(
         logger.error(f"failed to register speaker: {str(e)}", exc_info=True)
         # 실패 메시지 전송
         try:
-            await sqs_handler.send_message(
-                voicepackId=voicepackId,
+            await sqs_handler.send_register_message(
                 voicepackRequestId=voicepackRequestId,
                 status="failed",
                 additional_params={"error": str(e)}

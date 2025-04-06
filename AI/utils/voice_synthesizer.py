@@ -33,7 +33,7 @@ class VoiceSynthesizer:
         logger.info("Model loaded")
 
 
-    def _generate_speech_internal(
+    def _synthesize_speech_internal(
         self,
         text: str,
         features: dict,
@@ -103,7 +103,7 @@ class VoiceSynthesizer:
             # 테스트 음성 생성
             test_text = "어제의 실패는 내일의 성공을 위한 발판입니다. 포기하지 않고 꾸준히 노력한다면 결국 원하는 목표에 도달할 수 있습니다."
 
-            audio_data, _ = self._generate_speech_internal(
+            audio_data, _ = self._synthesize_speech_internal(
                 text=test_text,
                 features=features,
                 speed=1.0
@@ -124,23 +124,23 @@ class VoiceSynthesizer:
             raise
 
 
-    async def generate_speech(
+    async def synthesize_speech(
         self,
         prompt: str,
-        voicepackId: str,
+        voicepackName: str,
         userId: int,
         speed: float = 1.0,
     ) -> dict:
         """기능 1: 베이직 기능에 사용되는 음성 생성"""
         try:
-            if not self.storage_manager.speaker_exists(voicepackId):
+            if not self.storage_manager.speaker_exists(voicepackName):
                 raise HTTPException(status_code=404, detail="Speaker not found")
             
-            features = self.storage_manager.get_speaker_features(voicepackId)
+            features = self.storage_manager.get_speaker_features(voicepackName)
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
-            audio_data, duration = self._generate_speech_internal(
+            audio_data, duration = self._synthesize_speech_internal(
                 text=prompt,
                 features=features,
                 speed=speed
@@ -149,7 +149,7 @@ class VoiceSynthesizer:
             # S3에 저장
             timestamp = time.strftime('%Y%m%d_%H%M%S')
             filename = f"speech_{timestamp}.wav"
-            file_path = f"generated_audio/{userId}/{voicepackId}/{filename}"
+            file_path = f"generated_audio/{userId}/{voicepackName}/{filename}"
             
             audio_url = self.storage_manager.save_audio(audio_data, file_path)
             
