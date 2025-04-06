@@ -9,8 +9,8 @@ import io
 import time
 from modelscope import snapshot_download
 import os
-from CosyVoice.cli.cosyvoice import CosyVoice2
-from CosyVoice.utils.file_utils import load_wav
+from cosyvoice.cli.cosyvoice import CosyVoice2
+from cosyvoice.utils.file_utils import load_wav
 from .storage_manager import StorageManager
 from config.settings import MODEL_CONFIG
 import tempfile
@@ -30,7 +30,7 @@ class VoiceSynthesizer:
             snapshot_download(MODEL_CONFIG['model_id'], local_dir=model_path)
         
         self.model = CosyVoice2(model_path, load_jit=False, load_trt=False, fp16=False)
-        logger.info("모델 로딩 완료")
+        logger.info("Model loaded")
 
 
     def _generate_speech_internal(
@@ -72,12 +72,12 @@ class VoiceSynthesizer:
                     temp_file.flush()
         
                     prompt_speech = load_wav(temp_file.name, self.sample_rate)
-                    logger.info(f"음성 파일 로드 완료: {voicepackId}")
+                    logger.info(f"voicefile loaded: {voicepackId}")
 
                 os.unlink(temp_file.name)
 
             except Exception as e:
-                    logger.error(f"음성 파일 처리 실패: {str(e)}")
+                    logger.error(f"failed to load voicefile: {str(e)}")
                     raise HTTPException(
                         status_code=400,
                         detail="잘못된 음성 파일 형식입니다."
@@ -88,17 +88,17 @@ class VoiceSynthesizer:
                 resample_rate=self.model.sample_rate
             )
 
-            logger.info(f"화자 특징 추출 완료: {voicepackId}")
+            logger.info(f"speaker features extracted: {voicepackId}")
                 
             # 특징을 s3에 저장
             if not self.storage_manager.save_speaker_features(voicepackId, features):
-                logger.error(f"화자 특징 저장 실패: {voicepackId}")
+                logger.error(f"failed to save speaker features: {voicepackId}")
                 raise HTTPException(
                     status_code=503,
                     detail="S3 저장소 접근 오류"
                 )
                 
-            logger.info(f"화자 특징 저장 완료: {voicepackId}")
+            logger.info(f"speaker features saved: {voicepackId}")
                 
             # 테스트 음성 생성
             test_text = "어제의 실패는 내일의 성공을 위한 발판입니다. 포기하지 않고 꾸준히 노력한다면 결국 원하는 목표에 도달할 수 있습니다."
@@ -120,7 +120,7 @@ class VoiceSynthesizer:
             return audio_url
         
         except Exception as e:
-            logger.error(f"화자 특징 추출 실패: {str(e)}")
+            logger.error(f"failed to extract speaker features: {str(e)}")
             raise
 
 
@@ -162,5 +162,5 @@ class VoiceSynthesizer:
             }
             
         except Exception as e:
-            logger.error(f"음성 합성 실패: {str(e)}")
+            logger.error(f"failed to generate speech: {str(e)}")
             raise 

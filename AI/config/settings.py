@@ -8,11 +8,8 @@ AWS_CONFIG = {
     'bucket_name': os.getenv('AWS_BUCKET_NAME'),
     'region': os.getenv('AWS_DEFAULT_REGION'),
     'access_key_id': os.getenv('AWS_ACCESS_KEY_ID'),
-    'secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY')
-}
-
-BACKEND_CONFIG = {
-    'callback_url': os.getenv('CALLBACK_URL')
+    'secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY'),
+    'queue_url': os.getenv('AWS_SQS_QUEUE_URL')
 }
 
 # 모델 설정

@@ -53,11 +53,11 @@ class StorageManager:
             )
 
             url = f"https://{self.bucket_name}.s3.{AWS_CONFIG['region']}.amazonaws.com/{file_path}"
-            logger.info(f"음성 파일 저장 완료: {url}")
+            logger.info(f"audio file saved: {url}")
             return url
         
         except Exception as e:
-            logger.error(f"음성 파일 저장 실패: {str(e)}")
+            logger.error(f"failed to save audio file: {str(e)}")
             return None
 
     def save_speaker_features(self, voicepackId: str, features: dict) -> bool:
@@ -77,7 +77,7 @@ class StorageManager:
             return True
         
         except Exception as e:
-            logger.error(f"화자 특징 s3에 저장 실패: {str(e)}")
+            logger.error(f"failed to save speaker features to s3: {str(e)}")
             return False
 
     def get_speaker_features(self, voicepackId: str) -> dict:
@@ -94,7 +94,7 @@ class StorageManager:
             return features
         
         except Exception as e:
-            logger.error(f"화자 특징 로드 실패: {str(e)}")
+            logger.error(f"failed to load speaker features: {str(e)}")
             return None
 
     def save_generated_audio(self, 

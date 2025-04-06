@@ -50,7 +50,7 @@ def get_optimized_script(model, preserved_attrs=[]):
 def main():
     args = get_args()
     logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s %(message)s')
+                        format='%(levelname)s %(message)s')
 
     torch._C._jit_set_fusion_strategy([('STATIC', 1)])
     torch._C._jit_set_profiling_mode(False)

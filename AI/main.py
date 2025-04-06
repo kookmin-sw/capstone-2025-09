@@ -3,11 +3,15 @@ from utils.voice_synthesizer import VoiceSynthesizer
 from utils.voice_registration_handler import process_voice_registration
 import logging
 from fastapi.responses import JSONResponse
+from utils import voice_synthesizer
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger('cosyvoice').setLevel(logging.WARNING)
+
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+logging.info("Starting server... ----------------------------------------------------------------------------")
 voice_synthesizer = VoiceSynthesizer()
 
 @app.post("/register_speaker")
@@ -40,7 +44,7 @@ async def register_speaker_endpoint(
         )
         
     except Exception as e:
-        logger.error(f"요청 처리 실패: {str(e)}")
+        logger.error(f"failed to register speaker: {str(e)}")
         raise HTTPException(status_code=500, detail="화자 등록 요청 처리 중 오류가 발생했습니다.")
 
 @app.post("/synthesize")

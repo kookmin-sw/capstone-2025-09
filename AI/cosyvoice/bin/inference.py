@@ -53,7 +53,7 @@ def get_args():
 def main():
     args = get_args()
     logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(levelname)s %(message)s')
+                        format='%(levelname)s %(message)s')
     os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 
     # Init cosyvoice models from configs

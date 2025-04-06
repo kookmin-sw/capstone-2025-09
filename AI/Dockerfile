@@ -2,8 +2,16 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
+COPY . .
+
 # 필수 패키지 설치 (git, gcc, g++)
-RUN apt-get update && apt-get install -y git gcc g++ && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git git-lfs gcc g++ && rm -rf /var/lib/apt/lists/*
+
+# 모델 다운로드
+RUN mkdir -p pretrained_models
+RUN git lfs install
+RUN git clone https://www.modelscope.cn/iic/CosyVoice2-0.5B.git pretrained_models/CosyVoice2-0.5B
+RUN git clone https://www.modelscope.cn/iic/CosyVoice-ttsfrd.git pretrained_models/CosyVoice-ttsfrd
 
 # 파이썬 패키지 설치
 COPY requirements.txt .

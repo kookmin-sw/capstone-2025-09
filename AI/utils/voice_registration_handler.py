@@ -1,57 +1,57 @@
 import logging
 from utils.voice_synthesizer import VoiceSynthesizer
-from utils.callback_handler import send_callback
+from utils.sqs_handler import SQSHandler
 
 logger = logging.getLogger(__name__)
 voice_synthesizer = VoiceSynthesizer()
+sqs_handler = SQSHandler()
 
 async def process_voice_registration(
     voicepackId: str,
     file_content: bytes,
     voicepackRequestId: int
 ):
-    """비동기로 화자 등록 처리 및 콜백 전송
+    """비동기로 화자 등록 처리 및 SQS 메시지 전송
     
     Args:
         voicepackId (str): 음성팩 ID
         file_content (bytes): 음성 파일 데이터
         voicepackRequestId (int): 음성팩 요청 ID
     """
-    logger.info(f"화자 등록 처리 시작: voicepackId={voicepackId}, voicepackRequestId={voicepackRequestId}")
+    logger.info(f"starting speaker registration: voicepackId={voicepackId}, voicepackRequestId={voicepackRequestId}")
     
     try:
         # 화자 특징 추출
-        logger.info(f"화자 특징 추출 시작: voicepackId={voicepackId}")
+        logger.info(f"extracting speaker features: voicepackId={voicepackId}")
         features_result = await voice_synthesizer.extract_speaker_features(
             voicepackId=voicepackId,
             file_content=file_content
         )
         
         if not features_result:
-            logger.error(f"화자 특징 추출 실패: voicepackId={voicepackId}")
-            raise Exception("화자 특징 추출 실패")
+            logger.error(f"failed to extract speaker features: voicepackId={voicepackId}")
+            raise Exception("failed to extract speaker features")
         
-        logger.info(f"화자 특징 추출 성공: voicepackId={voicepackId}")
+        logger.info(f"speaker features extracted: voicepackId={voicepackId}")
         
-        # 성공 콜백
-        await send_callback(
+        # 성공 메시지 전송
+        await sqs_handler.send_message(
             voicepackId=voicepackId,
             voicepackRequestId=voicepackRequestId,
-            status="success",
-            callback_path="/api/voicepack/callback"
+            status="success"
         )
 
-        logger.info(f"화자 등록 성공: voicepackId={voicepackId}, voicepackRequestId={voicepackRequestId}")
+        logger.info(f"speaker registered: voicepackId={voicepackId}, voicepackRequestId={voicepackRequestId}")
 
     except Exception as e:
-        logger.error(f"화자 등록 실패: {str(e)}", exc_info=True)
-        # 실패 콜백
+        logger.error(f"failed to register speaker: {str(e)}", exc_info=True)
+        # 실패 메시지 전송
         try:
-            await send_callback(
+            await sqs_handler.send_message(
                 voicepackId=voicepackId,
                 voicepackRequestId=voicepackRequestId,
                 status="failed",
-                callback_path="/api/voicepack/callback"
+                additional_params={"error": str(e)}
             )
-        except Exception as callback_error:
-            logger.error(f"콜백 전송 실패: {str(callback_error)}", exc_info=True) 
+        except Exception as sqs_error:
+            logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True) 

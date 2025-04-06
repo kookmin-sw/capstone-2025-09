@@ -19,3 +19,5 @@ env/
 
 # Build files
 *.log
+
+/pretrained_models
