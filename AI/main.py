@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
 from utils.voice_synthesizer import VoiceSynthesizer
 from utils.voice_registration_handler import process_voice_registration
+from utils.synthesis_handler import process_synthesis_request
 import logging
 from fastapi.responses import JSONResponse
 from utils import voice_synthesizer
@@ -49,19 +50,37 @@ async def register_speaker_endpoint(
 
 @app.post("/synthesize")
 async def synthesize_endpoint(
+    background_tasks: BackgroundTasks,
     prompt: str = Form(...),
-    voicepackId: str = Form(...),
+    voicepackName: str = Form(...),
+    userId: int = Form(...),
+    jobId: int = Form(...),
     speed: float = Form(1.0),
-    userId: int = Form(...)
 ):
     """음성 합성 API 엔드포인트"""
-    result = await voice_synthesizer.generate_speech(
-        prompt=prompt,
-        voicepackId=voicepackId,
-        speed=speed,
-        userId=userId
-    )
-    return result
+    try:     
+        # 백그라운드로 처리 시작
+        background_tasks.add_task(
+            process_synthesis_request,
+            prompt=prompt,
+            voicepackName=voicepackName,
+            userId=userId,
+            jobId=jobId,
+            speed=speed
+        )
+        
+        return JSONResponse(
+            status_code=202,
+            content={
+                "status": "processing",
+                "message": "음성 합성이 시작되었습니다.",
+                "jobId": jobId
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"failed to synthesize: {str(e)}")
+        raise HTTPException(status_code=500, detail="음성 합성 요청 처리 중 오류가 발생했습니다.")
 
 @app.get("/health")
 def health_check():
