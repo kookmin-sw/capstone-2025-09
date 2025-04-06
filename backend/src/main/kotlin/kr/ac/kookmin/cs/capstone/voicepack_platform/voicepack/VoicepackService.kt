@@ -310,6 +310,7 @@ class VoicepackService(
             val messageJson = objectMapper.writeValueAsString(
                 mapOf(
                     "jobId" to synthesisRequest.jobId,
+                    "userId" to synthesisRequest.user.id,
                     "voicepackName" to voicepack.name,
                     "prompt" to prompt,
                     "callbackUrl" to "/api/voicepack/synthesis/callback"
