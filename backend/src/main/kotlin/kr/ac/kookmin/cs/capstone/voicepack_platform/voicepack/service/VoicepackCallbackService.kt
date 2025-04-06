@@ -130,8 +130,8 @@ class VoicepackCallbackService(
         val messageId = message.messageId()
         try {
             val callbackMessage: SynthesisCallbackMessage = objectMapper.readValue(message.body())
-            logger.info("[Synthesis] 메시지 처리 시작: messageId={}, id={}, success={}",
-                messageId, callbackMessage.id, callbackMessage.success)
+            logger.info("[Synthesis] 메시지 처리 시작: messageId={}, id={}, success={}, resultUrl={}, errorMessage={}",
+                messageId, callbackMessage.id, callbackMessage.success, callbackMessage.resultUrl, callbackMessage.errorMessage)
 
             val callbackRequest = VoicepackCallbackRequest(
                 id = callbackMessage.id,
