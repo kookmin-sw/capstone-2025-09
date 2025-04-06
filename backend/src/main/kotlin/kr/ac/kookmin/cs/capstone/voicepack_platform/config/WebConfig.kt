@@ -15,6 +15,7 @@ class WebConfig : WebMvcConfigurer{
             )
             .allowedMethods("*")
             .allowedHeaders("*")
+            .exposedHeaders("Location")
             .allowCredentials(true)
     }
 }
