@@ -3,7 +3,7 @@ import React from 'react';
 const PageContainer = ({ children, className = '' }) => {
   return (
     <div
-      className={`w-full max-w-7xl mx-auto my-5 bg-white bg-opacity-50 p-8 rounded-3xl ${className}`}
+      className={`w-full bg-white bg-opacity-50 p-8 rounded-3xl ${className}`}
     >
       {children}
     </div>
