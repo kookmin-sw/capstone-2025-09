@@ -471,7 +471,7 @@ class VoicepackService(
         return VoicepackSynthesisStatusDto(
             id = synthesisRequest.id,
             status = synthesisRequest.status.name,
-            resultUrl = synthesisRequest.resultUrl,
+            resultUrl = synthesisRequest.resultUrl?.let { s3Key -> s3PresignedUrlGenerator.generatePresignedUrl(s3Key) },
             errorMessage = synthesisRequest.errorMessage
         )
     }
