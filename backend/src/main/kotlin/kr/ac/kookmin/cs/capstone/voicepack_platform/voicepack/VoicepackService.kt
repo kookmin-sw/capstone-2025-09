@@ -258,44 +258,43 @@ class VoicepackService(
             user = user,
             voicepack = voicepack,
             prompt = request.prompt
-            // jobId는 자동 생성됨
         )
         val savedRequest = voiceSynthesisRequestRepository.save(synthesisRequest) // 저장된 엔티티를 받음
-        logger.info("음성 합성 요청 엔티티 생성 및 저장 완료: jobId={}, userId={}, voicepackId={}, status={}", 
-            savedRequest.jobId, userId, request.voicepackId, savedRequest.status)
+        logger.info("음성 합성 요청 엔티티 생성 및 저장 완료: id={}, userId={}, voicepackId={}, status={}", 
+            savedRequest.id, userId, request.voicepackId, savedRequest.status)
 
         // RabbitMQ로 메시지 전송
-        logger.info("RabbitMQ 메시지 전송 시도: jobId={}", savedRequest.jobId)
+        logger.info("RabbitMQ 메시지 전송 시도: id={}", savedRequest.id)
         val sendSuccess = sendSynthesisMessageToRabbitMQ(savedRequest, voicepack, request.prompt)
         
         if (sendSuccess) {
             // 성공 시 처리
-            logger.info("RabbitMQ 메시지 전송 성공: jobId={}", savedRequest.jobId)
+            logger.info("RabbitMQ 메시지 전송 성공: id={}", savedRequest.id)
             savedRequest.status = SynthesisStatus.PROCESSING
             savedRequest.updatedAt = OffsetDateTime.now()
             voiceSynthesisRequestRepository.save(savedRequest)
-            logger.info("합성 요청 상태 업데이트: jobId={}, status={}", savedRequest.jobId, SynthesisStatus.PROCESSING)
+            logger.info("합성 요청 상태 업데이트: id={}, status={}", savedRequest.id, SynthesisStatus.PROCESSING)
 
             val response = VoicepackSynthesisSubmitResponse(
-                jobId = savedRequest.jobId,
+                id = savedRequest.id,
                 message = "음성 합성 요청이 성공적으로 제출되었습니다. 완료 시 알림이 전송됩니다."
             )
-            logger.info("합성 요청 성공 응답 반환: jobId={}", savedRequest.jobId)
+            logger.info("합성 요청 성공 응답 반환: id={}", savedRequest.id)
             return response
         } else {
             // 실패 시 처리
-            logger.error("RabbitMQ 메시지 전송 실패: jobId={}", savedRequest.jobId)
+            logger.error("RabbitMQ 메시지 전송 실패: id={}", savedRequest.id)
             savedRequest.status = SynthesisStatus.FAILED
             savedRequest.errorMessage = "MQ 메시지 전송 실패"
             savedRequest.updatedAt = OffsetDateTime.now()
             voiceSynthesisRequestRepository.save(savedRequest)
-            logger.info("합성 요청 상태 업데이트: jobId={}, status={}, errorMessage={}", savedRequest.jobId, SynthesisStatus.FAILED, savedRequest.errorMessage)
+            logger.info("합성 요청 상태 업데이트: id={}, status={}, errorMessage={}", savedRequest.id, SynthesisStatus.FAILED, savedRequest.errorMessage)
 
             val response = VoicepackSynthesisSubmitResponse(
-                jobId = savedRequest.jobId,
+                id = savedRequest.id,
                 message = "음성 합성 요청 처리 중 오류가 발생했습니다. 나중에 다시 시도해주세요."
             )
-            logger.warn("합성 요청 실패 응답 반환: jobId={}", savedRequest.jobId)
+            logger.warn("합성 요청 실패 응답 반환: id={}", savedRequest.id)
             return response
         }
     }
@@ -309,7 +308,7 @@ class VoicepackService(
             // 메시지 생성
             val messageJson = objectMapper.writeValueAsString(
                 mapOf(
-                    "jobId" to synthesisRequest.jobId,
+                    "id" to synthesisRequest.id,
                     "userId" to synthesisRequest.user.id,
                     "voicepackName" to voicepack.name,
                     "prompt" to prompt,
@@ -318,9 +317,9 @@ class VoicepackService(
             )
 
             // MQ로 메시지 전송
-            logger.info("RabbitMQ 전송 시작: jobId={}", synthesisRequest.jobId)
+            logger.info("RabbitMQ 전송 시작: id={}", synthesisRequest.id)
             rabbitTemplate.convertAndSend("synthesis", messageJson)
-            logger.info("MQ 메시지 전송 완료: jobId={}, queue={}", synthesisRequest.jobId, "synthesis")
+            logger.info("MQ 메시지 전송 완료: id={}, queue={}", synthesisRequest.id, "synthesis")
             
             return true
         } catch (e: Exception) {
@@ -334,11 +333,11 @@ class VoicepackService(
      */
     @Transactional
     fun handleSynthesisCallback(callbackRequest: VoicepackCallbackRequest) {
-        logger.info("음성 합성 콜백 수신: jobId={}", callbackRequest.jobId)
+        logger.info("음성 합성 콜백 수신: id={}", callbackRequest.id)
 
-        val synthesisRequestOpt = voiceSynthesisRequestRepository.findByJobId(callbackRequest.jobId)
+        val synthesisRequestOpt = voiceSynthesisRequestRepository.findById(callbackRequest.id)
         if (synthesisRequestOpt.isEmpty) {
-            logger.error("콜백 처리 실패: 해당 jobId의 요청을 찾을 수 없음 - jobId={}", callbackRequest.jobId)
+            logger.error("콜백 처리 실패: 해당 id의 요청을 찾을 수 없음 - id={}", callbackRequest.id)
             // TODO: 적절한 오류 처리 (예: 로깅만 할지, 예외를 던질지)
             return // 혹은 예외 발생
         }
@@ -346,7 +345,7 @@ class VoicepackService(
 
         // 이미 처리된 콜백인지 확인 (멱등성)
         if (synthesisRequest.status == SynthesisStatus.COMPLETED || synthesisRequest.status == SynthesisStatus.FAILED) {
-            logger.warn("이미 처리된 콜백 요청입니다: jobId={}, status={}", callbackRequest.jobId, synthesisRequest.status)
+            logger.warn("이미 처리된 콜백 요청입니다: id={}, status={}", callbackRequest.id, synthesisRequest.status)
             return
         }
 
@@ -355,15 +354,15 @@ class VoicepackService(
         if (callbackRequest.success) {
             synthesisRequest.status = SynthesisStatus.COMPLETED
             synthesisRequest.resultUrl = callbackRequest.resultUrl // S3 Presigned URL 또는 직접 URL
-            logger.info("음성 합성 성공 처리 완료: jobId={}, resultUrl={}", 
-                synthesisRequest.jobId, synthesisRequest.resultUrl)
+            logger.info("음성 합성 성공 처리 완료: id={}, resultUrl={}", 
+                synthesisRequest.id, synthesisRequest.resultUrl)
             // TODO: 사용자에게 성공 알림 전송 (notificationService 사용)
             // notificationService.notifySynthesisComplete(synthesisRequest)
         } else {
             synthesisRequest.status = SynthesisStatus.FAILED
             synthesisRequest.errorMessage = callbackRequest.errorMessage ?: "음성 합성 처리 실패 (원인 미상)"
-            logger.error("음성 합성 실패 처리 완료: jobId={}, error={}", 
-                synthesisRequest.jobId, synthesisRequest.errorMessage)
+            logger.error("음성 합성 실패 처리 완료: id={}, error={}", 
+                synthesisRequest.id, synthesisRequest.errorMessage)
             // TODO: 사용자에게 실패 알림 전송
             // notificationService.notifySynthesisFailed(synthesisRequest)
         }
@@ -459,18 +458,18 @@ class VoicepackService(
      * 음성 합성 상태 조회
      */
     @Transactional(readOnly = true) // 읽기 전용 트랜잭션
-    fun getSynthesisStatus(jobId: String): VoicepackSynthesisStatusDto {
-        logger.debug("음성 합성 상태 조회 요청: jobId={}", jobId)
+    fun getSynthesisStatus(id: Long): VoicepackSynthesisStatusDto {
+        logger.debug("음성 합성 상태 조회 요청: id={}", id)
         
-        val synthesisRequest = voiceSynthesisRequestRepository.findByJobId(jobId)
+        val synthesisRequest = voiceSynthesisRequestRepository.findById(id)
             .orElseThrow { 
-                logger.warn("상태 조회 실패: 해당 jobId의 요청을 찾을 수 없음 - jobId={}", jobId)
-                IllegalArgumentException("해당 Job ID의 합성 요청을 찾을 수 없습니다.") 
+                logger.warn("상태 조회 실패: 해당 id의 요청을 찾을 수 없음 - id={}", id)
+                IllegalArgumentException("해당 id의 합성 요청을 찾을 수 없습니다.") 
             }
         
-        logger.debug("음성 합성 상태 조회 성공: jobId={}, status={}", jobId, synthesisRequest.status)
+        logger.debug("음성 합성 상태 조회 성공: id={}, status={}", id, synthesisRequest.status)
         return VoicepackSynthesisStatusDto(
-            jobId = synthesisRequest.jobId,
+            id = synthesisRequest.id,
             status = synthesisRequest.status.name,
             resultUrl = synthesisRequest.resultUrl,
             errorMessage = synthesisRequest.errorMessage

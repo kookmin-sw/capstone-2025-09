@@ -31,7 +31,7 @@ class VoicepackCallbackService(
     )
 
     data class SynthesisCallbackMessage(
-        val jobId: String,
+        val id: Long,
         val success: Boolean,
         val resultUrl: String?,
         val errorMessage: String?
@@ -130,11 +130,11 @@ class VoicepackCallbackService(
         val messageId = message.messageId()
         try {
             val callbackMessage: SynthesisCallbackMessage = objectMapper.readValue(message.body())
-            logger.info("[Synthesis] 메시지 처리 시작: messageId={}, jobId={}, success={}",
-                messageId, callbackMessage.jobId, callbackMessage.success)
+            logger.info("[Synthesis] 메시지 처리 시작: messageId={}, id={}, success={}",
+                messageId, callbackMessage.id, callbackMessage.success)
 
             val callbackRequest = VoicepackCallbackRequest(
-                jobId = callbackMessage.jobId,
+                id = callbackMessage.id,
                 success = callbackMessage.success,
                 resultUrl = callbackMessage.resultUrl,
                 errorMessage = callbackMessage.errorMessage

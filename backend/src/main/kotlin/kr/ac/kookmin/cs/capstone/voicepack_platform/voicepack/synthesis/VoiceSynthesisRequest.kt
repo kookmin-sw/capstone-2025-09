@@ -4,7 +4,6 @@ import jakarta.persistence.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.Voicepack
 import java.time.OffsetDateTime
-import java.util.UUID
 
 @Entity
 @Table(name = "voice_synthesis_requests")
@@ -23,10 +22,6 @@ data class VoiceSynthesisRequest(
 
     @Column(nullable = false, columnDefinition = "TEXT")
     val prompt: String,
-
-    // Lambda/Cloud Run과의 연동을 위한 고유 ID
-    @Column(name = "job_id", nullable = false, unique = true)
-    val jobId: String = UUID.randomUUID().toString(),
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

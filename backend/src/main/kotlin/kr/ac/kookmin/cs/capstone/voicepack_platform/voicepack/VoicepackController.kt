@@ -92,8 +92,8 @@ class VoicepackController(
             // Location 헤더 생성 (상태 조회 엔드포인트 URL)
             val locationUri = ServletUriComponentsBuilder
                 .fromCurrentContextPath() // 현재 요청의 기본 URL (e.g., http://localhost:8080)
-                .path("/api/voicepack/synthesis/status/{jobId}") // 상태 조회 경로 추가
-                .buildAndExpand(response.jobId) // 경로 변수({jobId}) 채우기
+                .path("/api/voicepack/synthesis/status/{id}") // 상태 조회 경로 추가
+                .buildAndExpand(response.id) // 경로 변수({id}) 채우기
                 .toUri()
                 
             return ResponseEntity.accepted().location(locationUri).body(response)
@@ -282,14 +282,14 @@ class VoicepackController(
     )
     @PostMapping("/synthesis/callback")
     fun handleSynthesisCallback(
-        @Parameter(description = "요청 Job ID") @RequestParam jobId: String,
+        @Parameter(description = "요청 ID") @RequestParam id: Long,
         @Parameter(description = "처리 성공 여부") @RequestParam success: Boolean,
         @Parameter(description = "성공 시 결과 URL") @RequestParam(required = false) resultUrl: String?,
         @Parameter(description = "실패 시 오류 메시지") @RequestParam(required = false) errorMessage: String?
     ): ResponseEntity<Any> {
         // RequestParam으로 받은 값들을 사용하여 DTO 객체 생성
         val callbackRequest = VoicepackCallbackRequest(
-            jobId = jobId,
+            id = id,
             success = success,
             resultUrl = resultUrl,
             errorMessage = errorMessage
@@ -300,7 +300,7 @@ class VoicepackController(
             return ResponseEntity.ok().build() // 성공 시 200 OK만 반환
         } catch (e: Exception) {
             // 콜백 처리 중 오류 발생 시 로깅만 하고 500 에러 반환 (Cloud Run 재시도 방지 목적)
-            logger.error("음성 합성 콜백 처리 중 오류 발생: jobId={}, error={}", callbackRequest.jobId, e.message, e)
+            logger.error("음성 합성 콜백 처리 중 오류 발생: id={}, error={}", callbackRequest.id, e.message, e)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "콜백 처리 중 오류 발생"))
         }
     }
@@ -324,18 +324,18 @@ class VoicepackController(
             )
         ]
     )
-    @GetMapping("/synthesis/status/{jobId}")
+    @GetMapping("/synthesis/status/{id}")
     fun getSynthesisStatus(
-        @Parameter(description = "조회할 요청의 Job ID") @PathVariable jobId: String
+        @Parameter(description = "조회할 요청의 ID") @PathVariable id: Long
     ): ResponseEntity<Any> {
         try {
-            val statusDto = voicepackService.getSynthesisStatus(jobId)
+            val statusDto = voicepackService.getSynthesisStatus(id)
             return ResponseEntity.ok(statusDto)
         } catch (e: IllegalArgumentException) {
             logger.warn("음성 합성 상태 조회 실패: {}", e.message)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
         } catch (e: Exception) {
-            logger.error("음성 합성 상태 조회 중 오류 발생: jobId={}, error={}", jobId, e.message, e)
+            logger.error("음성 합성 상태 조회 중 오류 발생: id={}, error={}", id, e.message, e)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "상태 조회 중 오류 발생"))
         }
     }
