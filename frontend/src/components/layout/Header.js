@@ -7,10 +7,10 @@ const Header = () => {
   const navigate = useNavigate();
 
   return (
-    <header className="flex items-center justify-end px-8 py-2 bg-[#FCF8F8]/40">
+    <header className="flex items-center justify-end px-8 py-2 bg-stone-50/40">
       <button
         onClick={() => navigate("/mypage")}
-        className="w-10 h-10 bg-[#FFFFFF] opacity-80 rounded-[8px] flex items-center justify-center border-none"
+        className="w-10 h-10 bg-white opacity-80 rounded-[8px] flex items-center justify-center border-none"
       >
         <User size={20} className="text-gray-400"/>
       </button>
