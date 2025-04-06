@@ -61,16 +61,4 @@ async def process_synthesis_request(
             )
             
         except Exception as sqs_error:
-            logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True) 
-        
-        
-        
-        
-        
- 
-        
-        
-        
-        
-
-    
+            logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True)

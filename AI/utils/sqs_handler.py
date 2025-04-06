@@ -63,10 +63,9 @@ class SQSHandler:
         """SQS에 메시지를 전송하는 함수
         
         Args:
-            voicepackId (str): 음성팩 ID
-            voicepackRequestId (int): 음성팩 요청 ID
-            status (str): 상태 ('success' 또는 'failed')
-            additional_params (dict): 추가 파라미터
+            jobId (int): 작업 ID
+            success (bool): 성공 여부
+            additional_params (dict): 추가 파라미터. 성공 시 음성 파일 URL 포함, 실패 시 오류 메시지 포함
         """
         try:
             # 메시지 본문 구성
