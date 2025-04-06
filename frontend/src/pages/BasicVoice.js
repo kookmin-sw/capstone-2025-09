@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+import Logo from "../icons/covosLogo.svg";
 
 const BasicVoice = () => {
   const [voiceList, setVoiceList] = useState([]);
@@ -7,6 +9,7 @@ const BasicVoice = () => {
 
   const API_URL = process.env.REACT_APP_VOICEPACK_API_URL;
   const userId = sessionStorage.getItem("userId");
+  const navigate = useNavigate();
 
   const fetchVoiceList = async () => {
     try {
@@ -34,6 +37,9 @@ const BasicVoice = () => {
 
   return (
     <div className="space-y-6 mx-16">
+      <div className="mt-8 mb-8 cursor-pointer" onClick={() => navigate('/landing')}>
+        <img src={Logo} alt="Logo"/>
+      </div>
       <h1 className="text-2xl font-bold">베이직 보이스</h1>
 
       <div className="space-y-2">

@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Logo from '../icons/covosLogo.svg';
+
 
 function VoiceStore() {
   const [voicePacks, setVoicePacks] = useState([]);
@@ -7,6 +10,7 @@ function VoiceStore() {
   const [selectedPack, setSelectedPack] = useState(null);
   const [audioUrl, setAudioUrl] = useState('');
   const API_URL = process.env.REACT_APP_VOICEPACK_API_URL;
+  const navigate = useNavigate();
 
   const closeModal = () => {
     setSelectedPack(null);
@@ -75,6 +79,9 @@ function VoiceStore() {
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-white p-4">
+      <div className="mb-8 cursor-pointer" onClick={() => navigate('/landing')}>
+        <img src={Logo} alt="Logo"/>
+      </div>
       <h1 className="text-3xl font-bold mb-8">보이스팩 구매</h1>
 
       {loading ? (
@@ -110,7 +117,7 @@ function VoiceStore() {
             {audioUrl ? (
               <>
                 <audio controls className="w-full" crossOrigin="anonymous">
-                  <source src={audioUrl} type="audio/wav" />
+                  <source src={audioUrl} type="audio/wav"/>
                   브라우저가 오디오를 지원하지 않습니다.
                 </audio>
                 <button

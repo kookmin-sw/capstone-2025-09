@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createFFmpeg, fetchFile } from '@ffmpeg/ffmpeg';
-
+import Logo from '../icons/covosLogo.svg';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -9,6 +9,7 @@ function VoiceCreate() {
   const [timer, setTimer] = useState(0);
   const [audioBlob, setAudioBlob] = useState(null);
   const [isFFmpegLoaded, setIsFFmpegLoaded] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const ffmpegRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -18,224 +19,192 @@ function VoiceCreate() {
 
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
-  const animationFrameRef = useRef(null);
-  const canvasRef = useRef(null);
+  const animationRef = useRef(null);
+  const volumeCanvasRef = useRef(null);
+  const audioPlayerRef = useRef(null);
 
   useEffect(() => {
     const loadFFmpeg = async () => {
-      const ffmpegInstance = createFFmpeg({ log: true });
-      await ffmpegInstance.load();
-      ffmpegRef.current = ffmpegInstance;
+      const ffmpeg = createFFmpeg({ log: false });
+      await ffmpeg.load();
+      ffmpegRef.current = ffmpeg;
       setIsFFmpegLoaded(true);
-      console.log("✅ FFmpeg 로드 완료!");
     };
     loadFFmpeg();
   }, []);
 
-  useEffect(() => {
-    if (audioBlob) {
-      console.log("✅ 변환된 WAV 오디오 타입:", audioBlob.type);
-      console.log("✅ 변환된 WAV 오디오 크기:", audioBlob.size, "bytes");
-    }
-  }, [audioBlob]);
-
-  const drawVisualizer = () => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+  // 볼륨 막대 그리기
+  const drawVolumeMeter = () => {
+    const canvas = volumeCanvasRef.current;
+    const ctx = canvas.getContext('2d');
     const analyser = analyserRef.current;
-
-    const bufferLength = analyser.fftSize;
-    const dataArray = new Uint8Array(bufferLength);
+    const dataArray = new Uint8Array(analyser.frequencyBinCount);
 
     const draw = () => {
-      analyser.getByteTimeDomainData(dataArray);
+      analyser.getByteFrequencyData(dataArray);
+      const volume = dataArray.reduce((sum, val) => sum + val, 0) / dataArray.length;
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width;
+      const height = canvas.height;
 
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = '#6B21A8'; // 진한 보라색
-      ctx.beginPath();
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#7C3AED';
+      ctx.fillRect(0, 0, (volume / 255) * width, height);
 
-      const sliceWidth = canvas.width / bufferLength;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = (v * canvas.height) / 2;
-
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-
-        x += sliceWidth;
-      }
-
-      ctx.lineTo(canvas.width, canvas.height / 2);
-      ctx.stroke();
-
-      animationFrameRef.current = requestAnimationFrame(draw);
+      animationRef.current = requestAnimationFrame(draw);
     };
 
     draw();
   };
 
+  const stopVolumeMeter = () => {
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    const ctx = volumeCanvasRef.current.getContext('2d');
+    ctx.clearRect(0, 0, volumeCanvasRef.current.width, volumeCanvasRef.current.height);
+  };
+
   const handleStartRecording = async () => {
-    if (!isFFmpegLoaded) {
-      alert("FFmpeg가 아직 로드되지 않았습니다. 잠시만 기다려주세요.");
-      return;
-    }
+    if (!isFFmpegLoaded) return alert('FFmpeg 로딩 중입니다.');
 
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    setAudioBlob(null);
+    setTimer(0);
+    audioChunksRef.current = [];
 
-      audioContextRef.current = new AudioContext();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 2048;
-      source.connect(analyserRef.current);
+    // 오디오 분석기 연결
+    audioContextRef.current = new AudioContext();
+    const source = audioContextRef.current.createMediaStreamSource(stream);
+    analyserRef.current = audioContextRef.current.createAnalyser();
+    analyserRef.current.fftSize = 256;
+    source.connect(analyserRef.current);
 
-      drawVisualizer();
+    drawVolumeMeter();
 
-      audioChunksRef.current = [];
-      setTimer(0);
+    mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    mediaRecorderRef.current.ondataavailable = (e) => {
+      audioChunksRef.current.push(e.data);
+    };
+    mediaRecorderRef.current.onstop = async () => {
+      clearInterval(timerRef.current);
+      stopVolumeMeter();
+      audioContextRef.current?.close();
 
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+      const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
 
-      mediaRecorderRef.current.onstop = async () => {
-        const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        clearInterval(timerRef.current);
-        cancelAnimationFrame(animationFrameRef.current);
-        if (audioContextRef.current) {
-          audioContextRef.current.close();
-        }
+      try {
+        const ffmpeg = ffmpegRef.current;
+        const file = new File([webmBlob], 'input.webm', { type: 'audio/webm' });
+        ffmpeg.FS('writeFile', 'input.webm', await fetchFile(file));
+        await ffmpeg.run('-i', 'input.webm', 'output.wav');
+        const data = ffmpeg.FS('readFile', 'output.wav');
+        const wavBlob = new Blob([data.buffer], { type: 'audio/wav' });
+        setAudioBlob(wavBlob);
+      } catch (err) {
+        console.error('WAV 변환 오류:', err);
+      }
+    };
 
-        try {
-          const ffmpeg = ffmpegRef.current;
-          const webmFile = new File([webmBlob], 'audio.webm', { type: 'audio/webm' });
-
-          ffmpeg.FS('writeFile', 'input.webm', await fetchFile(webmFile));
-          await ffmpeg.run('-i', 'input.webm', 'output.wav');
-          const wavData = ffmpeg.FS('readFile', 'output.wav');
-
-          const wavBlob = new Blob([wavData.buffer], { type: 'audio/wav' });
-          setAudioBlob(wavBlob);
-          console.log("✅ WAV 변환 완료!");
-        } catch (error) {
-          console.error("❌ WAV 변환 실패:", error);
-          alert("WAV 변환에 실패했습니다.");
-        }
-      };
-
-      mediaRecorderRef.current.start();
-      setIsRecording(true);
-      timerRef.current = setInterval(() => setTimer((prev) => prev + 1), 1000);
-    } catch (error) {
-      console.error('❌ 오디오 녹음 오류:', error);
-      alert('오디오 녹음 중 오류가 발생했습니다.');
-    }
+    mediaRecorderRef.current.start();
+    setIsRecording(true);
+    timerRef.current = setInterval(() => setTimer((prev) => prev + 1), 1000);
   };
 
   const handleStopRecording = () => {
-    if (mediaRecorderRef.current) {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
-    }
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
   };
 
   const handleCreateVoicePack = async () => {
-    if (!voicePackName.trim() || !audioBlob) {
-      alert('보이스팩 이름과 녹음을 완료해야 합니다.');
-      return;
-    }
+    if (!voicePackName.trim() || !audioBlob) return alert('이름과 녹음이 필요합니다.');
 
-    const apiUrl = process.env.REACT_APP_VOICEPACK_API_URL;
-    const endpoint = `${apiUrl}/convert`;
+    const formData = new FormData();
+    formData.append('userId', sessionStorage.getItem('userId'));
+    formData.append('name', voicePackName);
+    formData.append('voiceFile', new File([audioBlob], 'voice.wav', { type: 'audio/wav' }));
 
     try {
-      const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
-      const userId = sessionStorage.getItem('userId');
-
-      const formData = new FormData();
-      formData.append('userId', userId);
-      formData.append('name', voicePackName);
-      formData.append('voiceFile', audioFile);
-
-      const response = await fetch(endpoint, {
+      const res = await fetch(`${process.env.REACT_APP_VOICEPACK_API_URL}/convert`, {
         method: 'POST',
         body: formData,
         credentials: 'include',
       });
-
-      if (!response.ok) throw new Error('서버 응답 실패');
-
-      const data = await response.json();
-      alert('보이스팩 생성이 완료되었습니다!');
+      if (!res.ok) throw new Error();
+      alert('보이스팩 생성 완료!');
       navigate('/voicestore');
-    } catch (error) {
-      console.error('❌ 보이스팩 생성 오류:', error);
+    } catch (err) {
+      console.error('업로드 실패:', err);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white p-4">
-      <h1 className="text-3xl font-bold mb-8">보이스팩 생성</h1>
-
-      <div className="w-full max-w-md">
-        <label htmlFor="voicepackName" className="block text-gray-700 text-sm font-bold mb-2">
-          보이스팩 이름 <span className="text-red-500">*</span>
-        </label>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f5f4ff] px-4 py-8">
+      <div className="mb-8 cursor-pointer" onClick={() => navigate('/landing')}>
+        <img src={Logo} alt="Logo"/>
+      </div>
+      <div className="w-full max-w-2xl bg-white shadow-lg rounded-xl p-8">
+        <label className="block text-gray-700 text-xl font-semibold mb-2">보이스팩 이름</label>
         <input
-          id="voicepackName"
-          type="text"
           value={voicePackName}
           onChange={(e) => setVoicePackName(e.target.value)}
+          className="w-full px-4 py-2 border rounded-md mb-6"
           placeholder="보이스팩 이름 입력"
-          className="shadow border rounded w-full py-2 px-3 text-gray-700"
         />
-      </div>
 
-      <div className="w-full max-w-md mt-6">
-        <h2 className="text-lg font-semibold mb-2">
-          보이스팩 샘플 녹음 <span className="text-red-500">*</span>
-        </h2>
-        <p className="text-sm text-gray-500 mb-4">
-          안녕하세요. 목소리를 녹음합니다. 잘 들리시나요? 감사합니다..
-        </p>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">보이스팩 샘플 녹음</h2>
+        <p className="text-sm text-gray-500 mb-4">녹음 버튼을 누르고 각 문장을 따라 읽어주세요.</p>
 
-        <div className="mb-4">
-          <button
-            onClick={isRecording ? handleStopRecording : handleStartRecording}
-            className={`p-2 rounded-full mr-2 ${isRecording ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
-            disabled={!isFFmpegLoaded}
-          >
-            🎤
-          </button>
+        <div className="bg-[#f5f4ff] rounded-xl p-6">
+          <p className="text-lg font-medium text-gray-800 mb-4">
+            “안녕하세요. 목소리를 제공합니다. 잘 들리시나요? 감사합니다.”
+          </p>
 
-          {audioBlob && <audio src={URL.createObjectURL(audioBlob)} controls className="mr-2" />}
-          {isRecording && <span className="text-sm">{timer}s</span>}
-          {!isFFmpegLoaded && <p className="text-xs text-red-500 mt-2">FFmpeg 로드 중입니다...</p>}
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg transition-colors duration-300 ${
+                isRecording ? 'bg-[#7C3AED]' : 'bg-gray-300'
+              }`}
+              disabled={!isFFmpegLoaded}
+            >
+              🎤
+            </button>
 
-          <canvas
-            ref={canvasRef}
-            width={300}
-            height={300}
-            className="border rounded mt-4 bg-white w-full"
-          />
+            <canvas
+              ref={volumeCanvasRef}
+              width={300}
+              height={20}
+              className="bg-white rounded border"
+            />
+
+            <span className="text-sm w-20 text-right text-[#7C3AED]">
+              {String(Math.floor(timer / 60)).padStart(2, '0')} : {String(timer % 60).padStart(2, '0')}
+            </span>
+          </div>
+
+          {/* ▶️ 녹음 완료 후 재생 버튼 */}
+          {audioBlob && (
+            <div className="mt-4 text-right">
+              <audio
+                ref={audioPlayerRef}
+                src={URL.createObjectURL(audioBlob)}
+                controls
+                onEnded={() => setIsPlaying(false)}
+                className="w-full mt-2"
+              />
+            </div>
+          )}
         </div>
-      </div>
 
-      <button
-        onClick={handleCreateVoicePack}
-        className="bg-purple-500 text-white font-bold py-2 px-4 rounded mt-6 disabled:opacity-50"
-        disabled={!voicePackName.trim() || !audioBlob}
-      >
-        생성
-      </button>
+        <button
+          onClick={handleCreateVoicePack}
+          className="mt-6 w-full py-3 bg-[#7C3AED] text-white rounded-md text-sm font-semibold disabled:opacity-50"
+          disabled={!voicePackName.trim() || !audioBlob}
+        >
+          보이스팩 생성
+        </button>
+      </div>
     </div>
   );
 }
