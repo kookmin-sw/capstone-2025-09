@@ -3,7 +3,7 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # 필수 시스템 패키지 설치
-RUN apt-get update && apt-get install -y git git-lfs gcc g++ && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git git-lfs gcc g++ unzip && rm -rf /var/lib/apt/lists/*
 
 # 파이썬 패키지 설치
 COPY requirements.txt .
@@ -16,6 +16,7 @@ RUN git clone https://www.modelscope.cn/iic/CosyVoice2-0.5B.git pretrained_model
 RUN git clone https://www.modelscope.cn/iic/CosyVoice-ttsfrd.git pretrained_models/CosyVoice-ttsfrd
 
 WORKDIR /app/pretrained_models/CosyVoice-ttsfrd
+RUN unzip resource.zip -d .
 RUN pip install --no-cache-dir ttsfrd_dependency-0.1-py3-none-any.whl
 RUN pip install --no-cache-dir ttsfrd-0.4.2-cp310-cp310-linux_x86_64.whl
 WORKDIR /app
@@ -25,8 +26,6 @@ COPY . .
 
 # Cloud Run은 8080 포트 사용
 EXPOSE 8080
-
-WORKDIR /app
 
 ENV UVICORN_BUFFER_SIZE=16777216
 ENV TZ=Asia/Seoul      
