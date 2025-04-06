@@ -1,28 +1,21 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.LogLevel
 import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRight
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.slf4j.LoggerFactory
@@ -32,30 +25,39 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
+import org.springframework.amqp.rabbit.core.RabbitTemplate
+
+import java.util.*
 
 @Service
 class VoicepackService(
-        private val voicepackRepository: VoicepackRepository,
-        private val voicepackRequestRepository: VoicepackRequestRepository,
-        private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
-        private val userRepository: UserRepository,
-        private val notificationService: NotificationService,
-        // private val creditService: CreditService,
-        @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
-        @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
-        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
+    private val voicepackRepository: VoicepackRepository,
+    private val voicepackRequestRepository: VoicepackRequestRepository,
+    private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService,
+    // private val creditService: CreditService,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
+    private val rabbitTemplate: RabbitTemplate,
+    @Value("\${ai.model.service.voicepack_synthesis}") private val voicepackSynthesisEndpoint: String,
 ) {
-    
+
     private val httpClient = HttpClient(Java) {
         install(ContentNegotiation) { json() }
-        
+
         install(Logging) {
             logger = Logger.DEFAULT
             level = LogLevel.ALL
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
         }
     }
+
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val objectMapper = jacksonObjectMapper() // JSON 변환기
 
     /**
      * 보이스팩 변환 요청 및 처리
@@ -73,21 +75,18 @@ class VoicepackService(
         validatePackName(request.name)
         
         // 진행 중인 요청이 있는지 확인
-        checkOngoingRequests(userId)
+        //checkOngoingRequests(userId)
 
         // 보이스팩 요청 엔티티 생성
         val voicepackRequest = createVoicepackRequest(user, request.name)
+
         try {
-            // AI 모델 서비스 호출 및 결과 처리
+            // ActiveMQ로 메시지 전송
             callAiModelService(voicepackRequest, request.voiceFile)
-            
-            // 변환 성공 시 처리
-            handleSuccessfulConversion(voicepackRequest)
-            return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.COMPLETED.name)
+            return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.PROCESSING.name)
             
         } catch (e: Exception) {
-            // 실패 시 처리
-            handleFailedConversion(voicepackRequest, e)       
+
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.FAILED.name)
         }
     }
@@ -107,38 +106,34 @@ class VoicepackService(
     private suspend fun callAiModelService(voicepackRequest: VoicepackRequest, voiceFile: MultipartFile) {
         val aiModelRequest = AIModelRequest(
             voicepackId = voicepackRequest.name,
-            voiceFile = voiceFile
+            voiceFile = voiceFile,
+            voicepackRequestId = voicepackRequest.id
         )
-        
+
         logger.info("AI 모델 요청: requestId={}, request={}", voicepackRequest.id, aiModelRequest)
-        
+
         try {
-            val response = httpClient.post("$voicepackCreationEndpoint") {
-                contentType(ContentType.MultiPart.FormData)
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            append("voicepackId", aiModelRequest.voicepackId)
-                            append("voiceFile", aiModelRequest.voiceFile.bytes, Headers.build {
-                                append(HttpHeaders.ContentDisposition, "form-data; name=\"voiceFile\"; filename=\"audio.wav\"")
-                                append(HttpHeaders.ContentType, "audio/wav") // 필요 시 파일 확장자 변경 가능
-                })}))
-            }
-            
-            // 응답 상태 코드 확인
-            if (!response.status.isSuccess()) {
-                val errorBody = response.body<String>()
-                logger.error("AI 모델 서비스 오류: HTTP ${response.status.value}, 응답: $errorBody")
-                throw RuntimeException("AI 모델 서비스 호출 실패: HTTP ${response.status.value}, 응답: $errorBody")
-            }
-            
-            // 성공 시 응답 파싱
-            val aiModelResponse: String = response.body()
-            logger.info("AI 모델 응답: requestId={}, response={}", voicepackRequest.id, aiModelResponse)
-            
+            // MultipartFile을 바이너리 데이터로 변환
+            val voiceFileBase64 = Base64.getEncoder().encodeToString(voiceFile.bytes)
+
+            // 메시지를 JSON 형식으로 변환
+            val messageJson = objectMapper.writeValueAsString(
+                mapOf(
+                    "voicepackId" to aiModelRequest.voicepackId,
+                    "voicepackRequestId" to aiModelRequest.voicepackRequestId,
+                    "voiceFile" to voiceFileBase64 // Base64로 변환된 음성 파일
+                )
+            )
+
+            // MQ로 메시지 전송
+            rabbitTemplate.convertAndSend("convert", messageJson)
+
+            logger.info("MQ 메시지 전송 완료: requestId={}, queue={}", voicepackRequest.id, "convert")
+            return
+
         } catch (e: Exception) {
-            logger.error("AI 모델 서비스 호출 중 예외 발생: ${e.message}", e)
-            throw RuntimeException("AI 모델 서비스 호출 중 오류 발생: ${e.message}", e)
+            logger.error("MQ 메시지 전송 중 오류 발생: ${e.message}", e)
+            throw RuntimeException("MQ 메시지 전송 실패: ${e.message}", e)
         }
     }
 
@@ -147,7 +142,7 @@ class VoicepackService(
     private fun handleSuccessfulConversion(voicepackRequest: VoicepackRequest) {
         
         val outputPath = "speakers/${voicepackRequest.name}/feature.json"
-        val finishedTime = OffsetDateTime.now(); // 완료 시각 일관성 유지
+        val finishedTime = OffsetDateTime.now() // 완료 시각 일관성 유지
         
         // 요청 상태 업데이트
         voicepackRequest.status = VoicepackRequestStatus.COMPLETED
@@ -311,6 +306,22 @@ class VoicepackService(
         return s3PresignedUrlGenerator.generatePresignedUrl(s3ObjectKey)
     }
 
+    // 보이스팩 생성 결과 콜백 처리
+    @Transactional
+    fun handleCreationCallback(voicepackRequestId: Long, status: String) {
+        val voicepackRequest = voicepackRequestRepository.findById(voicepackRequestId).orElseThrow {
+            IllegalArgumentException("Voicepack request not found")
+        }
+        when (status) {
+            "success" -> {
+                handleSuccessfulConversion(voicepackRequest)
+            }
+            "failed" -> {
+                handleFailedConversion(voicepackRequest, Exception("AI 모델 서비스 호출 실패"))
+            }
+        }
+    }
+
     /**
      * 보이스팩 사용권 획득 처리 (구매 또는 제작자 획득)
      */
@@ -358,3 +369,4 @@ class VoicepackService(
     } 
 
 }
+

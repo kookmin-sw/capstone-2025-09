@@ -13,6 +13,10 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisResponse
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -121,6 +125,7 @@ class VoicepackController(
             )
         ]
     )
+
     @GetMapping("/{voicepackId}")
     fun getVoicepack(
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
