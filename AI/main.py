@@ -7,7 +7,6 @@ from fastapi.responses import JSONResponse
 from utils import voice_synthesizer
 
 logging.basicConfig(level=logging.INFO)
-logging.getLogger('cosyvoice').setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
