@@ -16,9 +16,6 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRight
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import org.slf4j.LoggerFactory
