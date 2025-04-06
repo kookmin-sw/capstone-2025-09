@@ -126,9 +126,7 @@ class VoicepackService(
             )
 
             // MQ로 메시지 전송
-            println("RabbitMQ 전송 시작")
             rabbitTemplate.convertAndSend("convert", messageJson)
-            println("RabbitMQ 전송 완료")
 
             logger.info("MQ 메시지 전송 완료: requestId={}, queue={}", voicepackRequest.id, "convert")
             return
