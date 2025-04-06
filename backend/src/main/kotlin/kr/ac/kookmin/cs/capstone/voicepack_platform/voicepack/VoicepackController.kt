@@ -278,6 +278,7 @@ class VoicepackController(
     @Operation(
         summary = "음성 합성 콜백",
         description = "음성 합성 처리 완료 후 Cloud Run에서 호출하는 내부 콜백 엔드포인트입니다.",
+        deprecated = true
     )
     @PostMapping("/synthesis/callback")
     fun handleSynthesisCallback(
@@ -339,4 +340,19 @@ class VoicepackController(
         }
     }
 
+    // 디버그용 엔드포인트
+    @Operation(
+        summary = "디버그용 엔드포인트",
+        description = "디버그용 엔드포인트입니다.",
+        deprecated = true
+    )
+    @PostMapping("/debug/create-voicepack")
+    fun createVoicepackForDebug(
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
+        @Parameter(description = "보이스팩 ID") @RequestParam voicepackId: Long
+    ): ResponseEntity<Any> {
+        voicepackService.createVoicepackForDebug(userId, voicepackId)
+        return ResponseEntity.ok().build()
+    }
+    
 } 

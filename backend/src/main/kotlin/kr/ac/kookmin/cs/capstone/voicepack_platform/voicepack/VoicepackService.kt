@@ -1,5 +1,6 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
 import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
@@ -40,6 +41,8 @@ import java.time.OffsetDateTime
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.springframework.amqp.rabbit.core.RabbitTemplate
+
 
 @Service
 class VoicepackService(
@@ -51,8 +54,8 @@ class VoicepackService(
         private val notificationService: NotificationService,
         // private val creditService: CreditService,
         @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
-        @Value("\${aws.lambda.endpoint.synthesis}") private val awsLambdaSynthesisEndpoint: String,
-        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
+        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
+        private val rabbitTemplate: RabbitTemplate
 ) {
     
     private val httpClient = HttpClient(Java) {
@@ -65,6 +68,7 @@ class VoicepackService(
         }
     }
     private val logger = LoggerFactory.getLogger(this::class.java)
+    private val objectMapper = jacksonObjectMapper() // JSON 변환기
 
     /**
      * 보이스팩 변환 요청 및 처리
@@ -239,11 +243,14 @@ class VoicepackService(
 
         val user = findUser(userId)
         val voicepack = findVoicepack(request.voicepackId)
+        logger.info("요청 정보 확인 완료: userId={}, voicepackId={}, voicepackName={}", userId, voicepack.id, voicepack.name)
 
         // TODO: 사용권 확인 로직 강화 (사용자가 이 보이스팩에 대한 사용권을 가지고 있는지 확인)
         if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, request.voicepackId)) {
             logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, request.voicepackId)
             throw SecurityException("해당 보이스팩에 대한 사용 권한이 없습니다.")
+        } else {
+            logger.info("사용 권한 확인 완료: userId={}, voicepackId={}", userId, request.voicepackId)
         }
 
         // 1. 합성 요청 엔티티 생성 및 저장
@@ -253,46 +260,71 @@ class VoicepackService(
             prompt = request.prompt
             // jobId는 자동 생성됨
         )
-        voiceSynthesisRequestRepository.save(synthesisRequest)
-        logger.info("음성 합성 요청 저장됨: jobId={}, userId={}, voicepackId={}", 
-            synthesisRequest.jobId, userId, request.voicepackId)
+        val savedRequest = voiceSynthesisRequestRepository.save(synthesisRequest) // 저장된 엔티티를 받음
+        logger.info("음성 합성 요청 엔티티 생성 및 저장 완료: jobId={}, userId={}, voicepackId={}, status={}", 
+            savedRequest.jobId, userId, request.voicepackId, savedRequest.status)
 
-        // 2. AWS Lambda 비동기 호출
-        val lambdaPayload = mapOf(
-            "jobId" to synthesisRequest.jobId,
-            "voicepackName" to voicepack.name,
-            "prompt" to request.prompt,
-            // TODO: 필요한 경우 추가 파라미터 전달 (예: 콜백 URL)
-            "callbackUrl" to "/api/voicepack/synthesis/callback" // 경로 변경
-        )
+        // RabbitMQ로 메시지 전송
+        logger.info("RabbitMQ 메시지 전송 시도: jobId={}", savedRequest.jobId)
+        val sendSuccess = sendSynthesisMessageToRabbitMQ(savedRequest, voicepack, request.prompt)
+        
+        if (sendSuccess) {
+            // 성공 시 처리
+            logger.info("RabbitMQ 메시지 전송 성공: jobId={}", savedRequest.jobId)
+            savedRequest.status = SynthesisStatus.PROCESSING
+            savedRequest.updatedAt = OffsetDateTime.now()
+            voiceSynthesisRequestRepository.save(savedRequest)
+            logger.info("합성 요청 상태 업데이트: jobId={}, status={}", savedRequest.jobId, SynthesisStatus.PROCESSING)
 
-        try {
-            withContext(Dispatchers.IO) { // 네트워크 호출은 IO 스레드에서
-                httpClient.post(awsLambdaSynthesisEndpoint) {
-                    contentType(ContentType.Application.Json)
-                    setBody(lambdaPayload)
-                }
-                // Lambda는 비동기 호출이므로 응답 본문은 중요하지 않을 수 있음 (202 Accepted 등 상태 코드 확인 가능)
-            }
-            logger.info("AWS Lambda 호출 성공: jobId={}", synthesisRequest.jobId)
-            synthesisRequest.status = SynthesisStatus.PROCESSING
-            synthesisRequest.updatedAt = OffsetDateTime.now()
-            voiceSynthesisRequestRepository.save(synthesisRequest)
-
-            // 3. 요청 제출 성공 응답 반환
-            return VoicepackSynthesisSubmitResponse(
-                jobId = synthesisRequest.jobId,
+            val response = VoicepackSynthesisSubmitResponse(
+                jobId = savedRequest.jobId,
                 message = "음성 합성 요청이 성공적으로 제출되었습니다. 완료 시 알림이 전송됩니다."
             )
+            logger.info("합성 요청 성공 응답 반환: jobId={}", savedRequest.jobId)
+            return response
+        } else {
+            // 실패 시 처리
+            logger.error("RabbitMQ 메시지 전송 실패: jobId={}", savedRequest.jobId)
+            savedRequest.status = SynthesisStatus.FAILED
+            savedRequest.errorMessage = "MQ 메시지 전송 실패"
+            savedRequest.updatedAt = OffsetDateTime.now()
+            voiceSynthesisRequestRepository.save(savedRequest)
+            logger.info("합성 요청 상태 업데이트: jobId={}, status={}, errorMessage={}", savedRequest.jobId, SynthesisStatus.FAILED, savedRequest.errorMessage)
 
+            val response = VoicepackSynthesisSubmitResponse(
+                jobId = savedRequest.jobId,
+                message = "음성 합성 요청 처리 중 오류가 발생했습니다. 나중에 다시 시도해주세요."
+            )
+            logger.warn("합성 요청 실패 응답 반환: jobId={}", savedRequest.jobId)
+            return response
+        }
+    }
+
+    /**
+     * RabbitMQ로 음성 합성 메시지 전송
+     * @return 전송 성공 여부 (true: 성공, false: 실패)
+     */
+    private fun sendSynthesisMessageToRabbitMQ(synthesisRequest: VoiceSynthesisRequest, voicepack: Voicepack, prompt: String): Boolean {
+        try {
+            // 메시지 생성
+            val messageJson = objectMapper.writeValueAsString(
+                mapOf(
+                    "jobId" to synthesisRequest.jobId,
+                    "voicepackName" to voicepack.name,
+                    "prompt" to prompt,
+                    "callbackUrl" to "/api/voicepack/synthesis/callback"
+                )
+            )
+
+            // MQ로 메시지 전송
+            logger.info("RabbitMQ 전송 시작: jobId={}", synthesisRequest.jobId)
+            rabbitTemplate.convertAndSend("synthesis", messageJson)
+            logger.info("MQ 메시지 전송 완료: jobId={}, queue={}", synthesisRequest.jobId, "synthesis")
+            
+            return true
         } catch (e: Exception) {
-            logger.error("AWS Lambda 호출 실패: jobId={}, error={}", synthesisRequest.jobId, e.message, e)
-            // Lambda 호출 실패 시 요청 상태 FAILED로 변경 및 저장
-            synthesisRequest.status = SynthesisStatus.FAILED
-            synthesisRequest.errorMessage = "Lambda 호출 실패: ${e.message}"
-            synthesisRequest.updatedAt = OffsetDateTime.now()
-            voiceSynthesisRequestRepository.save(synthesisRequest)
-            throw RuntimeException("음성 합성 요청 제출 중 오류 발생 (Lambda 호출 실패)", e)
+            logger.error("MQ 메시지 전송 중 오류 발생: ${e.message}", e)
+            return false
         }
     }
 
@@ -442,6 +474,42 @@ class VoicepackService(
             resultUrl = synthesisRequest.resultUrl,
             errorMessage = synthesisRequest.errorMessage
         )
+    }
+
+
+    // 디버그용 보이스팩 생성 메소드. 브랜치 병합 후 삭제 필요.
+    @Transactional
+    fun createVoicepackForDebug(userId: Long, voicepackId: Long) {
+        val user = try {
+            findUser(userId)
+        } catch (e: Exception) {
+            // 새 유저 생성
+            val newUser = User(
+                email = "test@test.com",
+                password = "test"
+            )
+            userRepository.save(newUser)
+            newUser
+        }
+        val voicepack = try {
+            findVoicepack(voicepackId)
+        } catch (e: Exception) {
+            // 새 보이스팩 생성
+            val newVoicepack = Voicepack(
+                name = "test",
+                author = user as User,
+                s3Path = "test",
+                createdAt = OffsetDateTime.now()
+            )
+            voicepackRepository.save(newVoicepack)
+            newVoicepack
+        }
+        // 사용권 정보 생성 및 저장
+        val usageRight = VoicepackUsageRight(
+            user = user as User,
+            voicepack = voicepack as Voicepack
+        )
+        voicepackUsageRightRepository.save(usageRight)
     }
 
 }
