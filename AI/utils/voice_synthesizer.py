@@ -156,10 +156,7 @@ class VoiceSynthesizer:
             if not audio_url:
                 raise HTTPException(status_code=500, detail="Failed to save generated audio")
 
-            return {
-                "audio_url": audio_url,
-                "duration": duration
-            }
+            return audio_url, duration
             
         except Exception as e:
             logger.error(f"failed to generate speech: {str(e)}")

@@ -52,9 +52,8 @@ class StorageManager:
                 Body=audio_data
             )
 
-            url = f"https://{self.bucket_name}.s3.{AWS_CONFIG['region']}.amazonaws.com/{file_path}"
-            logger.info(f"audio file saved: {url}")
-            return url
+            logger.info(f"audio file saved: {file_path}")
+            return file_path
         
         except Exception as e:
             logger.error(f"failed to save audio file: {str(e)}")
