@@ -22,4 +22,5 @@ aws:
     secret-key: YOUR_AWS_SECRET_KEY_HERE
     bucket-name: your-voicepack-bucket
   sqs:
-    voicepack-callback-queue-url: YOUR_VOICEPACK_CREATION_CALLBACK_URL_HERE
+    voicepack-creation-callback-queue-url: YOUR_CREATION_CALLBACK_QUEUE_URL
+    voicepack-synthesis-callback-queue-url: YOUR_SYNTHESIS_CALLBACK_QUEUE_URL

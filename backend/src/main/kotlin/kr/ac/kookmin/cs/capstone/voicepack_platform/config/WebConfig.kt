@@ -18,6 +18,7 @@ class WebConfig(
             )
             .allowedMethods("*")
             .allowedHeaders("*")
+            .exposedHeaders("Location")
             .allowCredentials(true)
     }
     

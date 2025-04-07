@@ -75,7 +75,6 @@ dependencies {
 	// AWS SDK SQS 의존성 추가
 	implementation("software.amazon.awssdk:sqs:2.21.42")
 	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
-
 }
 
 kotlin {
