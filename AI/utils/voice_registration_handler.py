@@ -36,7 +36,6 @@ async def process_voice_registration(
         
         # 성공 메시지 전송
         await sqs_handler.send_register_message(
-            voicepackId=voicepackId,
             voicepackRequestId=voicepackRequestId,
             status="success"
         )
