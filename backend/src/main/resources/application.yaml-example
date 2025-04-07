@@ -16,11 +16,10 @@ ai:
 
 # AWS S3 설정
 aws:
+  region: your-aws-region
   s3:
     access-key: YOUR_AWS_ACCESS_KEY_HERE
     secret-key: YOUR_AWS_SECRET_KEY_HERE
-    region: your-aws-region
     bucket-name: your-voicepack-bucket
-  lambda:
-    endpoint:
-      synthesis: YOUR_SYNTHESIS_LAMBDA_ENDPOINT_HERE
+  sqs:
+    voicepack-callback-queue-url: YOUR_VOICEPACK_CREATION_CALLBACK_URL_HERE

@@ -19,6 +19,10 @@ import org.slf4j.LoggerFactory
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisStatusDto
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import java.net.URI
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackConvertResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.VoicepackSynthesisResponse
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -155,6 +159,7 @@ class VoicepackController(
             )
         ]
     )
+
     @GetMapping("/{voicepackId}")
     fun getVoicepack(
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
