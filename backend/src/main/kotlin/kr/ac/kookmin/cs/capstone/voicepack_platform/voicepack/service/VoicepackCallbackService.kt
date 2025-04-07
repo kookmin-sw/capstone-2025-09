@@ -112,11 +112,10 @@ class VoicepackCallbackService(
             logger.info("[Creation] 메시지 처리 시작: messageId={}, requestId={}, status={}",
                 messageId, callbackMessage.voicepackRequestId, callbackMessage.status)
 
-            // voicepackService.handleCreationCallback(
-            //     callbackMessage.voicepackRequestId,
-            //     callbackMessage.status
-            // )
-            logger.warn("Creation 콜백 코드가 주석처리되어 있습니다. 브랜치 병합 후 처리 필요합니다.")
+            voicepackService.handleCreationCallback(
+                callbackMessage.voicepackRequestId,
+                callbackMessage.status
+            )
 
             deleteMessageFromQueue(creationQueueUrl, message.receiptHandle(), messageId, "Creation")
             logger.info("[Creation] 메시지 처리 완료 및 삭제: messageId={}", messageId)
