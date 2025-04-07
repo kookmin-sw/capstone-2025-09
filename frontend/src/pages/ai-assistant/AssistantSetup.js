@@ -12,15 +12,16 @@ const CATEGORIES = [
 ];
 
 const AssistantSetup = ({ setIsConfigured }) => {
-  // 유저가 소유한 보이스팩: API 연동 예정 (현재는 더미 데이터)
+  // 유저가 소유한 보이스팩: API(/api/voicepack/usage-right) 연동 예정 (현재는 더미 데이터)
   const [voicepacks] = useState([
-    '김종민',
-    '정찬우목소리',
-    '감미로운 목소리',
-    '활기찬 목소리',
+    { voicepackId: 58, voicepackName: '토요일 찬우 목소리' },
+    { voicepackId: 61, voicepackName: '사제동행세미나' },
+    { voicepackId: 62, voicepackName: '정찬우' },
+    { voicepackId: 63, voicepackName: '준교' },
+    { voicepackId: 64, voicepackName: '졸준' },
   ]);
 
-  const [selectedVoice, setSelectedVoice] = useState('');
+  const [selectedVoiceId, setSelectedVoiceId] = useState('');
   const [selectedWritingStyle, setSelectedWritingStyle] = useState('');
   const [selectedCategories, setSelectedCategories] = useState([]);
 
@@ -40,9 +41,9 @@ const AssistantSetup = ({ setIsConfigured }) => {
     );
 
     const config = {
-      voice: selectedVoice,
+      voicepackId: selectedVoiceId,
       writingStyle: writingStyleIndex,
-      categories: selectedCategories, // 이미 index 배열로 관리 중
+      categories: selectedCategories,
     };
 
     console.log('🧠 API 요청용 설정 데이터:', config);
@@ -59,16 +60,16 @@ const AssistantSetup = ({ setIsConfigured }) => {
         <div>
           <label className="block text-sm font-medium mb-1">보이스팩</label>
           <select
-            value={selectedVoice}
-            onChange={(e) => setSelectedVoice(e.target.value)}
+            value={selectedVoiceId}
+            onChange={(e) => setSelectedVoiceId(Number(e.target.value))}
             className="w-full border border-gray-300 rounded-md px-4 py-2 text-sm"
           >
-            <option value="" disabled hidden selected>
+            <option value="" disabled hidden>
               보이스팩을 선택해주세요.
             </option>
-            {voicepacks.map((name, i) => (
-              <option key={i} value={name}>
-                {name}
+            {voicepacks.map(({ voicepackId, voicepackName }) => (
+              <option key={voicepackId} value={voicepackId}>
+                {voicepackName}
               </option>
             ))}
           </select>
@@ -121,7 +122,7 @@ const AssistantSetup = ({ setIsConfigured }) => {
           className="px-6 py-3"
           onClick={handleSetting}
           disabled={
-            !selectedVoice ||
+            !selectedVoiceId ||
             !selectedWritingStyle ||
             selectedCategories.length === 0
           }
