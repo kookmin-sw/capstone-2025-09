@@ -14,7 +14,9 @@ class WebConfig(
         registry.addMapping("/**") // 모든 경로에 대해 CORS 설정 (추후 변경)
             .allowedOrigins(
                 "https://capstone-2025-09.vercel.app",
-                "https://vocalab.kro.kr"
+                "https://vocalab.kro.kr",
+                "http://localhost:3000",
+                "https://capstone-2025-09-zeta.vercel.app"
             )
             .allowedMethods("*")
             .allowedHeaders("*")
