@@ -1,6 +1,5 @@
-// hooks/useVoicepackUsage.js
 import { useEffect, useState } from 'react';
-import axiosInstance from '../utils/axiosInstance'; // 실제 axios 인스턴스 경로에 맞게 수정
+import axiosInstance from '../utils/axiosInstance';
 
 const useVoicepackUsage = () => {
   const [voicepacks, setVoicepacks] = useState([]);

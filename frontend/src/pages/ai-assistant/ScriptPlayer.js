@@ -1,4 +1,3 @@
-// src/pages/ai-assistant/ScriptPlayer.js
 import React from 'react';
 import GradientButton from '../../components/common/GradientButton';
 

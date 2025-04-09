@@ -1,4 +1,3 @@
-// src/pages/ai-assistant/index.js
 import React, { useState, useEffect } from 'react';
 import AssistantSetup from './AssistantSetup';
 import ScriptPlayer from './ScriptPlayer';

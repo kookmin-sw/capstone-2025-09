@@ -14,7 +14,7 @@ const CATEGORIES = [
 
 const AssistantSetup = ({ setIsConfigured }) => {
   // 유저가 소유한 보이스팩: API(/api/voicepack/usage-right) 연동 예정 (현재는 더미 데이터)
-  const { voicepacks } = useVoicepackUsage();
+  const { voicepacks = [] } = useVoicepackUsage();
 
   const [selectedVoiceId, setSelectedVoiceId] = useState('');
   const [selectedWritingStyle, setSelectedWritingStyle] = useState('');
@@ -62,11 +62,12 @@ const AssistantSetup = ({ setIsConfigured }) => {
             <option value="" disabled hidden>
               보이스팩을 선택해주세요.
             </option>
-            {voicepacks.map(({ voicepackId, voicepackName }) => (
-              <option key={voicepackId} value={voicepackId}>
-                {voicepackName}
-              </option>
-            ))}
+            {Array.isArray(voicepacks) &&
+              voicepacks.map(({ voicepackId, voicepackName }) => (
+                <option key={voicepackId} value={voicepackId}>
+                  {voicepackName}
+                </option>
+              ))}
           </select>
         </div>
         <div>

@@ -1,7 +1,5 @@
-// src/pages/ai-assistant/AssistantReadyScreen.js
 import React from 'react';
 import GradientButton from '../../components/common/GradientButton';
-//import { ReactComponent as AssistantIcon } from '../../assets/ai-assistant.svg'; // 있으면 사용
 
 const AssistantReadyScreen = ({ onStart, onEdit }) => {
   return (
