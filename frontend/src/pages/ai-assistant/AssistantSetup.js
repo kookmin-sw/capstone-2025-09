@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import GradientButton from '../../components/common/GradientButton';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 // 상수로 유지될 항목들
 const WRITING_STYLES = ['존댓말', '반말', '밝은 톤', '차분한 톤'];
@@ -13,13 +14,7 @@ const CATEGORIES = [
 
 const AssistantSetup = ({ setIsConfigured }) => {
   // 유저가 소유한 보이스팩: API(/api/voicepack/usage-right) 연동 예정 (현재는 더미 데이터)
-  const [voicepacks] = useState([
-    { voicepackId: 58, voicepackName: '토요일 찬우 목소리' },
-    { voicepackId: 61, voicepackName: '사제동행세미나' },
-    { voicepackId: 62, voicepackName: '정찬우' },
-    { voicepackId: 63, voicepackName: '준교' },
-    { voicepackId: 64, voicepackName: '졸준' },
-  ]);
+  const { voicepacks } = useVoicepackUsage();
 
   const [selectedVoiceId, setSelectedVoiceId] = useState('');
   const [selectedWritingStyle, setSelectedWritingStyle] = useState('');

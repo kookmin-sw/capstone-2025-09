@@ -15,7 +15,8 @@ const ScriptPlayer = ({ onEdit }) => {
       {/* 오디오 스크립트 */}
       <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
         <p className="text-sm">
-          “안녕하세요. 목소리를 제공합니다. 잘 들리시나요? 감사합니다.”
+          안녕하세요. 오늘 0월 0일 0요일 날씨는 맑음입니다. 오늘 주요 뉴스는 ~~
+          입니다.
         </p>
         <div className="flex items-center justify-between border-t pt-4">
           <div className="flex items-center gap-2">

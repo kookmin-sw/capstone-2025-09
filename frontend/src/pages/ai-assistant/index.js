@@ -2,24 +2,25 @@
 import React, { useState, useEffect } from 'react';
 import AssistantSetup from './AssistantSetup';
 import ScriptPlayer from './ScriptPlayer';
+import AssistantReadyScreen from './AssistantReadyScreen';
 
 const AiAssistant = () => {
-  const [isConfigured, setIsConfigured] = useState(false);
+  const [step, setStep] = useState('setup'); // setup → ready → play
 
   useEffect(() => {
     const config = localStorage.getItem('ai-assistant-config');
-    if (config) setIsConfigured(true);
+    if (config) setStep('ready');
   }, []);
 
-  const handleEdit = () => {
-    setIsConfigured(false); // 세팅 화면으로 되돌리기
-  };
+  const handleConfigured = () => setStep('ready');
+  const handleEdit = () => setStep('setup');
+  const handlePlay = () => setStep('play');
 
-  return isConfigured ? (
-    <ScriptPlayer onEdit={handleEdit} />
-  ) : (
-    <AssistantSetup setIsConfigured={setIsConfigured} />
-  );
+  if (step === 'setup')
+    return <AssistantSetup setIsConfigured={handleConfigured} />;
+  if (step === 'ready')
+    return <AssistantReadyScreen onStart={handlePlay} onEdit={handleEdit} />;
+  return <ScriptPlayer onEdit={handleEdit} />;
 };
 
 export default AiAssistant;
