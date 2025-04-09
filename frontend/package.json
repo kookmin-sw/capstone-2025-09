@@ -5,6 +5,7 @@
   "dependencies": {
     "@react-three/drei": "^10.0.5",
     "@react-three/fiber": "^9.1.1",
+    "axios": "^1.8.4",
     "cra-template": "1.2.0",
     "leva": "^0.10.0",
     "lucide-react": "^0.483.0",
