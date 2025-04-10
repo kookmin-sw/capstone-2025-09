@@ -1,10 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
-from utils.voice_synthesizer import VoiceSynthesizer
-from utils.voice_registration_handler import process_voice_registration
-from utils.synthesis_handler import process_synthesis_request
 import logging
 from fastapi.responses import JSONResponse
-from utils import voice_synthesizer
+from utils.voice_registration_handler import process_voice_registration
+from utils.synthesis_handler import process_synthesis_request
 
 logging.basicConfig(level=logging.INFO)
 
@@ -12,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 logging.info("Starting server... ----------------------------------------------------------------------------")
-voice_synthesizer = VoiceSynthesizer()
 
 @app.post("/register_speaker")
 async def register_speaker_endpoint(
