@@ -6,7 +6,7 @@ import Landing from './pages/Landing';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 import BasicVoice from './pages/BasicVoice';
-import AiAssistant from './pages/AiAssistant';
+import Index from './pages/ai-assistant';
 import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/MyPage';
@@ -20,7 +20,7 @@ function App() {
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />
           <Route path="/basic-voice" element={<BasicVoice />} />
-          <Route path="/ai-assistant" element={<AiAssistant />} />
+          <Route path="/ai-assistant" element={<Index />} />
           <Route path="/voice-create" element={<VoiceCreate />} />
           <Route path="/voice-store" element={<VoiceStore />} />
           <Route path="/mypage" element={<MyPage />} />
