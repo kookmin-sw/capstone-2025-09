@@ -1,11 +1,11 @@
 import logging
-from utils.voice_synthesizer import VoiceSynthesizer
-from utils.sqs_handler import SQSHandler
+from .voice_synthesizer import VoiceSynthesizer
+from .sqs_handler import SQSHandler
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)               
 voice_synthesizer = VoiceSynthesizer()
-sqs_handler = SQSHandler()
-
+sqs_handler = SQSHandler()      
+            
 async def process_voice_registration(
     voicepackId: str,
     file_content: bytes,

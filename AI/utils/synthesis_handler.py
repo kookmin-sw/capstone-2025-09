@@ -1,7 +1,7 @@
 import logging
-from utils.voice_synthesizer import VoiceSynthesizer
-from utils.storage_manager import StorageManager
-from utils.sqs_handler import SQSHandler
+from .voice_synthesizer import VoiceSynthesizer
+from .storage_manager import StorageManager
+from .sqs_handler import SQSHandler
 
 logger = logging.getLogger(__name__)
 voice_synthesizer = VoiceSynthesizer()

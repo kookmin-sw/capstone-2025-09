@@ -15,7 +15,6 @@ AWS_CONFIG = {
 
 # 모델 설정
 MODEL_CONFIG = {
-    'path': "./pretrained_models/CosyVoice2-0.5B",
-    'model_id': 'iic/CosyVoice2-0.5B',
-    'sample_rate': 16000
+    'path': "Zyphra/Zonos-v0.1-transformer",
+    'sample_rate': 22050
 } 
