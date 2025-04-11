@@ -185,7 +185,7 @@ function VoiceCreate() {
           value={voicePackName}
           onChange={(e) => setVoicePackName(e.target.value)}
           className="w-full px-4 py-2 border-none rounded-md mb-6 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
-          placeholder="보이스팩 이름 입력해주세요."
+          placeholder="보이스팩 이름을 입력해주세요."
         />
         <div className="flex flex-col mb-2">
           <h2 className="text-l font-bold text-gray-900">
@@ -199,7 +199,7 @@ function VoiceCreate() {
                 !
               </div>
               <div
-                className="absolute z-10 w-80 p-3 bg-white text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
+                className="absolute z-10 w-80 p-3 bg-white/60 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
                 🎙️ <b>조용한 환경</b>에서 녹음해 주세요.<br/><br/>
                 💡 <b>이어폰이나 외부 마이크</b> 사용을 권장합니다.<br/><br/>
                 🔇 <b>TV, 음악, 대화 등</b> 소음을 줄여 주세요.
