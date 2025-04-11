@@ -15,6 +15,11 @@ const useVoiceConvert = () => {
     formData.append('userId', 7);
     formData.append('name', voicePackName);
     formData.append('voiceFile', new File([audioBlob], 'voice.wav', { type: 'audio/wav' }));
+    console.log('🔼 전송할 formData', formData.get('name'), formData.get('userId'));
+
+    const url = 'voicepack/convert';
+    console.log('🌐 전송할 API URL:', axiosInstance.defaults.baseURL + url);
+
 
     try {
       setLoading(true);
