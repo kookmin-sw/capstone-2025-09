@@ -1,11 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Mic, Play, Pause } from 'lucide-react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
+import React, {useState, useRef, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
+import {Mic, Play, Pause} from 'lucide-react';
+import {FFmpeg} from '@ffmpeg/ffmpeg';
 import WaveSurfer from 'wavesurfer.js';
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone';
 import useVoiceConvert from '../hooks/useVoicepackConvert';
-import { ScaleLoader } from 'react-spinners';
+import {ScaleLoader} from 'react-spinners';
+import GradientButton from "../components/common/GradientButton";
 
 
 function VoiceCreate() {
@@ -17,7 +18,7 @@ function VoiceCreate() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState('00:00');
   const [currentTime, setCurrentTime] = useState(0);
-  const { convertVoice, loading } = useVoiceConvert();
+  const {convertVoice, loading} = useVoiceConvert();
   const navigate = useNavigate();
 
   const ffmpegRef = useRef(null);
@@ -79,7 +80,7 @@ function VoiceCreate() {
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) return alert('FFmpeg 로딩 중입니다.');
 
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
     audioStreamRef.current = stream;
     setAudioBlob(null);
     setTimer(0);
@@ -87,7 +88,7 @@ function VoiceCreate() {
 
     wavesurferRef.current.microphone.start();
 
-    mediaRecorderRef.current = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+    mediaRecorderRef.current = new MediaRecorder(stream, {mimeType: 'audio/webm'});
     mediaRecorderRef.current.ondataavailable = (e) => {
       audioChunksRef.current.push(e.data);
     };
@@ -96,7 +97,7 @@ function VoiceCreate() {
       audioStreamRef.current?.getTracks().forEach((track) => track.stop());
       wavesurferRef.current.microphone.stop();
 
-      const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const webmBlob = new Blob(audioChunksRef.current, {type: 'audio/webm'});
 
       try {
         const ffmpeg = ffmpegRef.current;
@@ -106,7 +107,7 @@ function VoiceCreate() {
         await ffmpeg.exec(['-i', 'input.webm', 'output.wav']);
         const outputData = await ffmpeg.readFile('output.wav');
 
-        const wavBlob = new Blob([outputData.buffer], { type: 'audio/wav' });
+        const wavBlob = new Blob([outputData.buffer], {type: 'audio/wav'});
         setAudioBlob(wavBlob);
 
         const audioUrl = URL.createObjectURL(wavBlob);
@@ -153,7 +154,7 @@ function VoiceCreate() {
       });
 
       alert('보이스팩 생성 완료!');
-      navigate('/voicestore');
+      navigate('/voice-store');
     } catch {
       alert('보이스팩 생성 실패');
     }
@@ -168,66 +169,86 @@ function VoiceCreate() {
 
   return (
     <>
-      {loading ? (
-        <div className="flex justify-center items-center h-[300px]">
-          <ScaleLoader color="#6366F1" height={35} width={4} radius={2} margin={2} />
+      {loading && (
+        <div
+          className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
+          <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3}/>
         </div>
-      ) : (
-        <>
-          <h1 className="text-xl font-bold text-gray-900 mb-6">보이스팩 생성</h1>
+      )}
+      <>
+        <h1 className="text-xl font-bold text-gray-900 mb-6">보이스팩 생성</h1>
 
-          <h1 className="text-l font-bold text-gray-900 mb-2">보이스팩 이름 *</h1>
-          <input
-            value={voicePackName}
-            onChange={(e) => setVoicePackName(e.target.value)}
-            className="w-full px-4 py-2 border rounded-md mb-6 bg-slate-50"
-            placeholder="보이스팩 이름 입력"
-          />
+        <h1 className="text-l font-bold text-gray-900 mb-2">
+          보이스팩 이름 <span className="text-red-500">*</span>
+        </h1>
+        <input
+          value={voicePackName}
+          onChange={(e) => setVoicePackName(e.target.value)}
+          className="w-full px-4 py-2 border-none rounded-md mb-6 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          placeholder="보이스팩 이름을 입력해주세요."
+        />
+        <div className="flex flex-col mb-2">
+          <h2 className="text-l font-bold text-gray-900">
+            보이스팩 샘플 녹음 <span className="text-red-500">*</span>
+          </h2>
 
-          <h2 className="text-l font-bold text-gray-900 mb-2">보이스팩 샘플 녹음 *</h2>
-          <p className="text-sm text-gray-500 mb-4">녹음 버튼을 누르고 각 문장을 따라 읽어주세요.</p>
-
-          <div className="bg-slate-50 rounded-md p-6">
-            <p className="text-lg font-medium text-gray-800 mb-4">
-              “안녕하세요. 목소리를 제공합니다. 잘 들리시나요? 감사합니다.”
-            </p>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={isRecording ? handleStopRecording : handleStartRecording}
-                className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg transition-colors duration-300 ${
-                  isRecording ? 'bg-indigo-500 ' : 'bg-gray-300 hover:bg-indigo-300'
-                }`}
-                disabled={!isFFmpegLoaded}
-              >
-                <Mic />
-              </button>
-
-              <button
-                onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition disabled:bg-gray-300"
-                disabled={!audioBlob}
-              >
-                {isPlaying ? <Pause /> : <Play />}
-              </button>
-
-              <div ref={waveformRef} className="flex-1 h-[60px]" />
-
-              <span className="text-sm w-24 text-right text-indigo-500">
-              {audioBlob ? `${formatTime(currentTime)} / ${duration}` : formatTime(timer)}
-            </span>
+          <div className="flex items-center text-sm text-gray-600 mb-4">
+            <p>녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라 읽어주세요.</p>
+            <div className="relative group ml-2">
+              <div className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
+                !
+              </div>
+              <div
+                className="absolute z-10 w-80 p-3 bg-white/60 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
+                🎙️ <b>조용한 환경</b>에서 녹음해 주세요.<br/><br/>
+                💡 <b>이어폰이나 외부 마이크</b> 사용을 권장합니다.<br/><br/>
+                🔇 <b>TV, 음악, 대화 등</b> 소음을 줄여 주세요.
+              </div>
             </div>
           </div>
+        </div>
 
-          <button
+        <div className="bg-slate-50 rounded-md p-6">
+          <p className="text-lg font-medium text-gray-800 mb-4">
+            “안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요? 감사합니다.”
+          </p>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={isRecording ? handleStopRecording : handleStartRecording}
+              className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg transition-colors duration-300 ${
+                isRecording ? 'bg-indigo-500 ' : 'bg-gray-300 hover:bg-indigo-300'
+              }`}
+              disabled={!isFFmpegLoaded}
+            >
+              <Mic/>
+            </button>
+
+            <button
+              onClick={togglePlay}
+              className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition disabled:bg-gray-300"
+              disabled={!audioBlob}
+            >
+              {isPlaying ? <Pause/> : <Play/>}
+            </button>
+
+            <div ref={waveformRef} className="flex-1 h-[60px]"/>
+
+            <span className="text-sm w-24 text-right text-indigo-500">
+              {audioBlob ? `${formatTime(currentTime)} / ${duration}` : formatTime(timer)}
+            </span>
+          </div>
+        </div>
+        <div className="mt-6 flex justify-end">
+          <GradientButton
+            className="px-6 py-3"
             onClick={handleCreateVoicePack}
-            className="mt-6 w-1/6 py-3 text-white rounded-md text-sm font-semibold bg-gradient-to-r from-violet-400 to-indigo-500 hover:opacity-80"
             disabled={loading}
           >
             생성하기
-          </button>
-        </>
-      )}
+          </GradientButton>
+        </div>
+      </>
     </>
   );
 }
