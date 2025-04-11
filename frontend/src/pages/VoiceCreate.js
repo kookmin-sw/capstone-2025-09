@@ -109,6 +109,8 @@ function VoiceCreate() {
 
         const wavBlob = new Blob([outputData.buffer], {type: 'audio/wav'});
         setAudioBlob(wavBlob);
+        console.log('🔊 WAV 변환 완료:', wavBlob);
+
 
         const audioUrl = URL.createObjectURL(wavBlob);
         wavesurferRef.current.load(audioUrl);
@@ -199,7 +201,7 @@ function VoiceCreate() {
                 !
               </div>
               <div
-                className="absolute z-10 w-80 p-3 bg-white/60 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
+                className="absolute z-10 w-80 p-3 bg-slate-50 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
                 🎙️ <b>조용한 환경</b>에서 녹음해 주세요.<br/><br/>
                 💡 <b>이어폰이나 외부 마이크</b> 사용을 권장합니다.<br/><br/>
                 🔇 <b>TV, 음악, 대화 등</b> 소음을 줄여 주세요.
