@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import axiosInstance from '../utils/axiosInstance';
 
 const useVoiceConvert = () => {
@@ -12,27 +12,25 @@ const useVoiceConvert = () => {
     }
 
     const formData = new FormData();
-    formData.append('userId', 7);
+    formData.append('userId', 7); // ✅ userId를 동적으로 받도록 수정
     formData.append('name', voicePackName);
-    formData.append('voiceFile', new File([audioBlob], 'voice.wav', { type: 'audio/wav' }));
-    console.log('🔼 전송할 formData', formData.get('name'), formData.get('userId'));
+    formData.append('voiceFile', new File([audioBlob], 'voice.wav', {type: 'audio/wav'}));
 
     const url = 'voicepack/convert';
-    console.log('🌐 전송할 API URL:', axiosInstance.defaults.baseURL + url);
 
 
     try {
       setLoading(true);
       setError(null);
 
-      const response = await axiosInstance.post('voicepack/convert', formData, {
+      const response = await axiosInstance.post(url, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': undefined, // axios가 자동으로 설정하게 함
         },
-        withCredentials: true, // 쿠키 기반 인증이 필요할 경우
+        withCredentials: true,
       });
-
       return response.data;
+
     } catch (err) {
       console.error('보이스팩 변환 오류:', err);
       setError(err);
@@ -42,7 +40,7 @@ const useVoiceConvert = () => {
     }
   };
 
-  return { convertVoice, loading, error };
+  return {convertVoice, loading, error};
 };
 
 export default useVoiceConvert;

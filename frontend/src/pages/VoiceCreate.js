@@ -6,6 +6,7 @@ import WaveSurfer from 'wavesurfer.js';
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone';
 import useVoiceConvert from '../hooks/useVoicepackConvert';
 import {ScaleLoader} from 'react-spinners';
+import axiosInstance from '../utils/axiosInstance';
 import GradientButton from "../components/common/GradientButton";
 
 
@@ -19,6 +20,7 @@ function VoiceCreate() {
   const [duration, setDuration] = useState('00:00');
   const [currentTime, setCurrentTime] = useState(0);
   const {convertVoice, loading} = useVoiceConvert();
+  const [isPolling, setIsPolling] = useState(false);
   const navigate = useNavigate();
 
   const ffmpegRef = useRef(null);
@@ -109,7 +111,6 @@ function VoiceCreate() {
 
         const wavBlob = new Blob([outputData.buffer], {type: 'audio/wav'});
         setAudioBlob(wavBlob);
-        console.log('🔊 WAV 변환 완료:', wavBlob);
 
 
         const audioUrl = URL.createObjectURL(wavBlob);
@@ -142,6 +143,31 @@ function VoiceCreate() {
     setIsPlaying((prev) => !prev);
   };
 
+  const pollStatus = async (id, interval = 2000, maxAttempts = 20) => {
+    let attempts = 0;
+
+    return new Promise((resolve, reject) => {
+      const checkStatus = async () => {
+        try {
+          const { data } = await axiosInstance.get(`/voicepack/convert/status/${id}`);
+          console.log(data)
+          if (data.status === 'COMPLETED') {
+            resolve(data);
+          } else if (attempts >= maxAttempts) {
+            reject(new Error('폴링 최대 횟수 초과'));
+          } else {
+            attempts++;
+            setTimeout(checkStatus, interval);
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      checkStatus();
+    });
+  };
+
   const handleCreateVoicePack = async () => {
     if (!voicePackName.trim() || !audioBlob) {
       alert('이름과 녹음이 필요합니다.');
@@ -149,18 +175,23 @@ function VoiceCreate() {
     }
 
     try {
-      await convertVoice({
-        name: voicePackName,
-        blob: audioBlob,
-        userId: sessionStorage.getItem('userId'),
-      });
+      setIsPolling(true); // 폴링 시작 시점
+      const res = await convertVoice(voicePackName, audioBlob, 7);
 
-      alert('보이스팩 생성 완료!');
-      navigate('/voice-store');
-    } catch {
+      if (res?.id) {
+        const result = await pollStatus(res.id); // 폴링 시작
+        console.log('✅ 최종 상태:', result);
+        alert('보이스팩 생성 완료!');
+        navigate('/voice-store');
+      }
+    } catch (error) {
+      console.error('보이스팩 생성 오류:', error);
       alert('보이스팩 생성 실패');
+    } finally {
+      setIsPolling(false); // ✅ 무조건 꺼짐
     }
   };
+
 
   const formatTime = (time) => {
     if (typeof time !== 'number' || isNaN(time)) return '00:00';
@@ -171,7 +202,7 @@ function VoiceCreate() {
 
   return (
     <>
-      {loading && (
+      {(loading || isPolling) && (
         <div
           className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
           <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3}/>
@@ -197,7 +228,8 @@ function VoiceCreate() {
           <div className="flex items-center text-sm text-gray-600 mb-4">
             <p>녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라 읽어주세요.</p>
             <div className="relative group ml-2">
-              <div className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
+              <div
+                className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
                 !
               </div>
               <div
@@ -212,7 +244,7 @@ function VoiceCreate() {
 
         <div className="bg-slate-50 rounded-md p-6">
           <p className="text-lg font-medium text-gray-800 mb-4">
-            “안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요? 감사합니다.”
+            “ 안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요? 감사합니다. ”
           </p>
 
           <div className="flex items-center space-x-4">
@@ -243,9 +275,9 @@ function VoiceCreate() {
         </div>
         <div className="mt-6 flex justify-end">
           <GradientButton
-            className="px-6 py-3"
+            className="px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleCreateVoicePack}
-            disabled={loading}
+            disabled={loading || !voicePackName.trim() || !audioBlob}
           >
             생성하기
           </GradientButton>
