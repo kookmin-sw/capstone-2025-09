@@ -16,7 +16,8 @@ class WebConfig(
                 "https://capstone-2025-09.vercel.app",
                 "https://vocalab.kro.kr",
                 "http://localhost:3000",
-                "https://capstone-2025-09-zeta.vercel.app"
+                "https://capstone-2025-09-zeta.vercel.app",
+                "https://voice-six-gamma.vercel.app"
             )
             .allowedMethods("*")
             .allowedHeaders("*")
