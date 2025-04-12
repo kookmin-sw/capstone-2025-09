@@ -143,7 +143,7 @@ function VoiceCreate() {
     setIsPlaying((prev) => !prev);
   };
 
-  const pollStatus = async (id, interval = 2000, maxAttempts = 20) => {
+  const pollStatus = async (id, interval = 2000, maxAttempts = 90) => {
     let attempts = 0;
 
     return new Promise((resolve, reject) => {
