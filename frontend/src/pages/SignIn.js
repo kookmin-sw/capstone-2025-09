@@ -1,74 +1,63 @@
 import React, { useState } from 'react';
 import { useSignin } from '../hooks/useSignin';
 import GradientButton from '../components/common/GradientButton';
+import { useNavigate } from 'react-router-dom';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { signin, loading } = useSignin();
+  const navigate = useNavigate();
 
-  const handleSignin = () => {
+  const handleSignIn = () => {
     signin({ email, password });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="text-3xl font-bold absolute top-40">로그인</h1>
+    <div className="max-w-md mx-auto p-8 space-y-6">
+      <h1 className="text-2xl font-bold text-center">로그인</h1>
 
-      <form className="w-full max-w-sm" onSubmit={(e) => e.preventDefault()}>
-        <div className="mb-4">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="email"
-          >
-            이메일
-          </label>
+      <div className="space-y-4">
+        <label className="block">
+          <span className="text-sm text-gray-700">이메일</span>
           <input
-            className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="email"
             type="email"
+            className="w-full border px-3 py-2 rounded mt-1"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-        </div>
-        <div className="mb-6">
-          <label
-            className="block text-gray-700 text-sm font-bold mb-2"
-            htmlFor="password"
-          >
-            비밀번호
-          </label>
+        </label>
+        <label className="block">
+          <span className="text-sm text-gray-700">비밀번호</span>
           <input
-            className="bg-[#F8FAFC] rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="password"
             type="password"
+            className="w-full border px-3 py-2 rounded mt-1"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-        </div>
+        </label>
+      </div>
 
-        <p className="text-center text-gray-500 text-xs mt-4 mb-2">
-          계정이 없으신가요?{' '}
-          <button
-            type="button"
-            className="text-blue-500 underline"
-            onClick={() => (window.location.href = '/sign-up')}
-          >
-            회원가입하기
-          </button>
-        </p>
+      <div className="flex justify-center">
+        <GradientButton
+          onClick={handleSignIn}
+          className="w-1/2 py-2 px-4 text-sm"
+          type="button"
+          disabled={loading}
+        >
+          {loading ? '로그인 중...' : '로그인'}
+        </GradientButton>
+      </div>
 
-        <div className="flex items-center justify-center">
-          <GradientButton
-            onClick={handleSignin}
-            className="w-1/2 py-2 px-4 text-sm"
-            type="button"
-            disabled={loading}
-          >
-            {loading ? '로그인 중...' : '로그인'}
-          </GradientButton>
-        </div>
-      </form>
+      <p className="text-center text-sm text-gray-600">
+        계정이 없으신가요?{' '}
+        <button
+          onClick={() => navigate('/sign-up')}
+          className="text-blue-500 underline"
+        >
+          회원가입하기
+        </button>
+      </p>
     </div>
   );
 };
