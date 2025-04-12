@@ -1,6 +1,6 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.notification
 
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.convert.VoicepackRequest
 import org.springframework.stereotype.Service
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

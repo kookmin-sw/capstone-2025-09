@@ -306,6 +306,47 @@ class VoicepackController(
     }
 
     @Operation(
+        summary = "보이스팩 변환 상태 조회 (Polling)",
+        description = "보이스팩 변환 요청의 현재 상태와 결과(완료 시)를 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200",
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = VoicepackSynthesisStatusDto::class))]
+            ),
+            ApiResponse(
+                responseCode = "404",
+                description = "해당 Job ID의 요청을 찾을 수 없음"
+            ),
+            ApiResponse(
+                responseCode = "500",
+                description = "서버 오류"
+            )
+        ]
+    )
+    @GetMapping("/convert/status/{id}")
+    fun getConvertStatus(
+        @Parameter(description = "조회할 요청의 ID") @PathVariable id: Long
+    ): ResponseEntity<Any> = runCatching {
+        voicepackService.getConvertStatus(id)
+    }.fold(
+        onSuccess = { ResponseEntity.ok(it) }, // it은 성공 시 리턴값
+        onFailure = { e ->
+            when (e) {
+                is IllegalArgumentException -> {
+                    logger.warn("보이스팩 변환 상태 조회 실패: {}", e.message)
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+                }
+                else -> {
+                    logger.error("보이스팩 변환 상태 조회 중 오류 발생: id={}, error={}", id, e.message, e)
+                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(mapOf("error" to "상태 조회 중 오류 발생"))
+                }
+            }
+        }
+    )
+
+    @Operation(
         summary = "음성 합성 상태 조회 (Polling)",
         description = "제출된 음성 합성 요청의 현재 상태와 결과(완료 시)를 조회합니다.",
         responses = [

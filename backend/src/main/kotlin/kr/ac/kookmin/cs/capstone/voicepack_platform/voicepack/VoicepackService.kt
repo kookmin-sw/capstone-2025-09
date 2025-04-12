@@ -1,24 +1,20 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.ktor.client.*
-import io.ktor.client.call.body
 import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.plugins.logging.*
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.FormDataContent
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.UserRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.dto.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestRepository
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.request.VoicepackRequestStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.convert.VoicepackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.convert.VoicepackConvertRequestRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.convert.VoicepackRequestStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.convert.dto.VoicepackConvertStatusDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.SynthesisStatus
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequestRepository
@@ -40,16 +36,16 @@ import java.util.*
 
 @Service
 class VoicepackService(
-        private val voicepackRepository: VoicepackRepository,
-        private val voicepackRequestRepository: VoicepackRequestRepository,
-        private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
-        private val voiceSynthesisRequestRepository: VoiceSynthesisRequestRepository,
-        private val userRepository: UserRepository,
-        private val notificationService: NotificationService,
+    private val voicepackRepository: VoicepackRepository,
+    private val voicepackConvertRequestRepository: VoicepackConvertRequestRepository,
+    private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
+    private val voiceSynthesisRequestRepository: VoiceSynthesisRequestRepository,
+    private val userRepository: UserRepository,
+    private val notificationService: NotificationService,
         // private val creditService: CreditService,
-        @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
-        private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
-        private val rabbitTemplate: RabbitTemplate
+    @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
+    private val rabbitTemplate: RabbitTemplate
 ) {
 
     private val httpClient = HttpClient(Java) {
@@ -105,7 +101,7 @@ class VoicepackService(
             author = user,
             status = VoicepackRequestStatus.PROCESSING
         )
-        return voicepackRequestRepository.save(voicepackRequest)
+        return voicepackConvertRequestRepository.save(voicepackRequest)
     }
 
     // AI 모델 서비스 호출
@@ -154,7 +150,7 @@ class VoicepackService(
         voicepackRequest.status = VoicepackRequestStatus.COMPLETED
         voicepackRequest.s3Path = outputPath
         voicepackRequest.completedAt = finishedTime
-        voicepackRequestRepository.save(voicepackRequest)
+        voicepackConvertRequestRepository.save(voicepackRequest)
         
         // 완성된 보이스팩 생성
         val voicepack = Voicepack(
@@ -177,7 +173,7 @@ class VoicepackService(
         // 실패 상태로 업데이트
         voicepackRequest.status = VoicepackRequestStatus.FAILED
         voicepackRequest.completedAt = OffsetDateTime.now()
-        voicepackRequestRepository.save(voicepackRequest)
+        voicepackConvertRequestRepository.save(voicepackRequest)
         
         // 알림 전송
         notificationService.notifyVoicepackFailed(voicepackRequest)
@@ -204,7 +200,7 @@ class VoicepackService(
 
     // 진행 중인 요청이 있는지 확인
     private fun checkOngoingRequests(userId: Long) {
-        val existingRequests = voicepackRequestRepository.findByAuthorId(userId)
+        val existingRequests = voicepackConvertRequestRepository.findByAuthorId(userId)
             val hasOngoingRequest = existingRequests.any { req ->
                 req.status == VoicepackRequestStatus.PROCESSING
             }
@@ -399,7 +395,7 @@ class VoicepackService(
     // 보이스팩 생성 결과 콜백 처리
     @Transactional
     fun handleCreationCallback(voicepackRequestId: Long, status: String) {
-        val voicepackRequest = voicepackRequestRepository.findById(voicepackRequestId).orElseThrow {
+        val voicepackRequest = voicepackConvertRequestRepository.findById(voicepackRequestId).orElseThrow {
             IllegalArgumentException("Voicepack request not found")
         }
         when (status) {
@@ -457,6 +453,25 @@ class VoicepackService(
         logger.info("사용자의 보이스팩 목록 조회: userId={}", userId)
         return voicepackUsageRightRepository.findVoicepackDtosByUserId(userId)
     }
+
+    /**
+     * 보이스팩 변환 상태 조회
+     */
+    @Transactional(readOnly = true)
+    fun getConvertStatus(id: Long): VoicepackConvertStatusDto =
+        voicepackConvertRequestRepository.findById(id)
+            .orElseThrow {
+                logger.warn("변환 조회 실패: 해당 id의 요청을 찾을 수 없음 - id={}", id)
+                IllegalArgumentException("해당 id의 변환 요청을 찾을 수 없습니다.")
+            }.run {
+                logger.debug("보이스팩 변환 상태 조회 성공: id={}, status={}", id, status)
+                VoicepackConvertStatusDto(
+                    id = id,
+                    status = status.name,
+                )
+            }
+
+
 
     /**
      * 음성 합성 상태 조회
