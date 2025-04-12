@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axiosInstance from '../utils/axiosInstance';
 import useUserStore from '../utils/userStore';
+import { getVoicepacksByUserId } from '../api/getVoicepacks';
 
 export const useSignin = () => {
   const navigate = useNavigate();
@@ -16,22 +17,23 @@ export const useSignin = () => {
         email,
         password,
       });
-      let data = response.data;
 
-      if (typeof data === 'string') {
-        try {
-          data = JSON.parse(data);
-        } catch (err) {
-          console.warn('JSON 변환 실패, 원본 응답:', data);
-          data = { message: data };
-        }
-      }
+      const data = response.data;
+
+      sessionStorage.setItem('userInfo', JSON.stringify(data));
 
       if (response.status === 200) {
-        sessionStorage.setItem('userId', data.userId);
+        const voicepacks = await getVoicepacksByUserId(data);
+
+        // 전역 상태 설정
+        setUser({
+          id: data,
+          email: email,
+          voicepacks,
+        });
 
         alert(data.message || '로그인 성공!');
-        navigate('/voice-crate');
+        navigate('/voice-store');
       } else {
         alert(`로그인 실패: ${data.message || '알 수 없는 오류 발생'}`);
       }

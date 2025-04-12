@@ -22,7 +22,8 @@
     "three": "^0.175.0",
     "three-custom-shader-material": "^6.3.1",
     "usehooks-ts": "^3.1.1",
-    "wavesurfer.js": "^5.2.0"
+    "wavesurfer.js": "^5.2.0",
+    "zustand": "^5.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
