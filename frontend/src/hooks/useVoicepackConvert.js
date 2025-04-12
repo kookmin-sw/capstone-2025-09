@@ -27,7 +27,6 @@ const useVoiceConvert = () => {
         headers: {
           'Content-Type': undefined, // axios가 자동으로 설정하게 함
         },
-        withCredentials: true,
       });
       return response.data;
 
