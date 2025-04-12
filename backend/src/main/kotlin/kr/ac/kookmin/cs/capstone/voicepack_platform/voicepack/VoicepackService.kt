@@ -43,7 +43,6 @@ class VoicepackService(
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
         // private val creditService: CreditService,
-    @Value("\${ai.model.service.voicepack_creation}") private val voicepackCreationEndpoint: String,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate
 ) {
