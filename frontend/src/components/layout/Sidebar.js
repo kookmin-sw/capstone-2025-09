@@ -1,16 +1,30 @@
-// components/Sidebar.js
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Mic, BotMessageSquare, ShoppingBag, LogOut, AudioLines } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Mic,
+  BotMessageSquare,
+  ShoppingBag,
+  LogOut,
+  AudioLines,
+} from 'lucide-react';
 import logo from '../../assets/logo-new.svg';
+import useUserStore from '../../utils/userStore';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const clearUser = useUserStore((state) => state.clearUser);
 
   const isActive = (path) =>
     location.pathname.startsWith(path)
       ? 'bg-slate-50 text-indigo-500'
       : 'text-gray-400';
+
+  const handleLogout = () => {
+    clearUser();
+    sessionStorage.removeItem('user-storage');
+    navigate('/'); // 랜딩 페이지로 이동
+  };
 
   return (
     <div className="w-48 bg-white p-4 flex flex-col justify-between h-screen">
@@ -23,28 +37,28 @@ const Sidebar = () => {
           <img src={logo} alt="COVOS" width={120} />
         </Link>
         <Link
-          to={"/voice-create"}
+          to="/voice-create"
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/voice-create')}`}
         >
           <Mic size={20} />
           <span>보이스팩 생성</span>
         </Link>
         <Link
-          to={"/voice-store"}
+          to="/voice-store"
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/voice-store')}`}
         >
           <ShoppingBag size={20} />
           <span>마켓플레이스</span>
         </Link>
         <Link
-          to={"/basic-voice"}
+          to="/basic-voice"
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/basic-voice')}`}
         >
           <AudioLines size={20} />
           <span>베이직 보이스</span>
         </Link>
         <Link
-          to={"/ai-assistant"}
+          to="/ai-assistant"
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/ai-assistant')}`}
         >
           <BotMessageSquare size={20} />
@@ -53,13 +67,13 @@ const Sidebar = () => {
       </div>
 
       {/* 하단: 로그아웃 버튼 */}
-      <Link
-        to={"/sign-in"} // 실제 로그아웃 로직 연결 필요 시 수정
+      <button
+        onClick={handleLogout}
         className="flex items-center space-x-2 p-2 rounded text-gray-400"
       >
         <LogOut size={20} />
         <span>로그아웃</span>
-      </Link>
+      </button>
     </div>
   );
 };
