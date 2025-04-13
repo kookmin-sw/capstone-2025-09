@@ -22,7 +22,7 @@ const SignIn = () => {
           <span className="text-sm text-gray-700">이메일</span>
           <input
             type="email"
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="w-full px-4 py-2 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -31,7 +31,7 @@ const SignIn = () => {
           <span className="text-sm text-gray-700">비밀번호</span>
           <input
             type="password"
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="w-full px-4 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -53,9 +53,9 @@ const SignIn = () => {
         계정이 없으신가요?{' '}
         <button
           onClick={() => navigate('/sign-up')}
-          className="text-blue-500 underline"
+          className="text-indigo-400 underline font-semibold"
         >
-          회원가입하기
+          회원가입
         </button>
       </p>
     </div>
