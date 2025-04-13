@@ -7,7 +7,6 @@ const useVoiceConvert = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  console.log('🧍 user 상태:', user);
 
   const convertVoice = async (voicePackName, audioBlob) => {
     if (!voicePackName || !audioBlob) {
@@ -16,7 +15,7 @@ const useVoiceConvert = () => {
     }
 
     const formData = new FormData();
-    formData.append('userId', user.id); // ✅ Zustand에서 가져온 userId 사용
+    formData.append('userId', user.id);
     formData.append('name', voicePackName);
     formData.append(
       'voiceFile',

@@ -1,14 +1,13 @@
-import React, {useState, useRef, useEffect} from 'react';
-import {useNavigate} from 'react-router-dom';
-import {Mic, Play, Pause} from 'lucide-react';
-import {FFmpeg} from '@ffmpeg/ffmpeg';
+import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Mic, Play, Pause } from 'lucide-react';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
 import WaveSurfer from 'wavesurfer.js';
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone';
 import useVoiceConvert from '../hooks/useVoicepackConvert';
-import {ScaleLoader} from 'react-spinners';
+import { ScaleLoader } from 'react-spinners';
 import axiosInstance from '../utils/axiosInstance';
-import GradientButton from "../components/common/GradientButton";
-
+import GradientButton from '../components/common/GradientButton';
 
 function VoiceCreate() {
   const [isRecording, setIsRecording] = useState(false);
@@ -19,7 +18,7 @@ function VoiceCreate() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState('00:00');
   const [currentTime, setCurrentTime] = useState(0);
-  const {convertVoice, loading} = useVoiceConvert();
+  const { convertVoice, loading } = useVoiceConvert();
   const [isPolling, setIsPolling] = useState(false);
   const navigate = useNavigate();
 
@@ -31,7 +30,6 @@ function VoiceCreate() {
   const waveformRef = useRef(null);
   const wavesurferRef = useRef(null);
   const audioStreamRef = useRef(null);
-
 
   useEffect(() => {
     const loadFFmpeg = async () => {
@@ -82,7 +80,7 @@ function VoiceCreate() {
   const handleStartRecording = async () => {
     if (!isFFmpegLoaded) return alert('FFmpeg 로딩 중입니다.');
 
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     audioStreamRef.current = stream;
     setAudioBlob(null);
     setTimer(0);
@@ -91,7 +89,9 @@ function VoiceCreate() {
 
     wavesurferRef.current.microphone.start();
 
-    mediaRecorderRef.current = new MediaRecorder(stream, {mimeType: 'audio/webm'});
+    mediaRecorderRef.current = new MediaRecorder(stream, {
+      mimeType: 'audio/webm',
+    });
     mediaRecorderRef.current.ondataavailable = (e) => {
       audioChunksRef.current.push(e.data);
     };
@@ -100,7 +100,7 @@ function VoiceCreate() {
       audioStreamRef.current?.getTracks().forEach((track) => track.stop());
       wavesurferRef.current.microphone.stop();
 
-      const webmBlob = new Blob(audioChunksRef.current, {type: 'audio/webm'});
+      const webmBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
 
       try {
         const ffmpeg = ffmpegRef.current;
@@ -110,9 +110,8 @@ function VoiceCreate() {
         await ffmpeg.exec(['-i', 'input.webm', 'output.wav']);
         const outputData = await ffmpeg.readFile('output.wav');
 
-        const wavBlob = new Blob([outputData.buffer], {type: 'audio/wav'});
+        const wavBlob = new Blob([outputData.buffer], { type: 'audio/wav' });
         setAudioBlob(wavBlob);
-
 
         const audioUrl = URL.createObjectURL(wavBlob);
         wavesurferRef.current.load(audioUrl);
@@ -151,8 +150,10 @@ function VoiceCreate() {
     return new Promise((resolve, reject) => {
       const checkStatus = async () => {
         try {
-          const { data } = await axiosInstance.get(`/voicepack/convert/status/${id}`);
-          console.log(data)
+          const { data } = await axiosInstance.get(
+            `/voicepack/convert/status/${id}`
+          );
+          console.log(data);
           if (data.status === 'COMPLETED') {
             resolve(data);
           } else if (attempts >= maxAttempts) {
@@ -194,7 +195,6 @@ function VoiceCreate() {
     }
   };
 
-
   const formatTime = (time) => {
     if (typeof time !== 'number' || isNaN(time)) return '00:00';
     const mins = String(Math.floor(time / 60)).padStart(2, '0');
@@ -234,16 +234,21 @@ function VoiceCreate() {
           </h2>
 
           <div className="flex items-center text-sm text-gray-600 mb-4">
-            <p>녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라 읽어주세요.</p>
+            <p>
+              녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라
+              읽어주세요.
+            </p>
             <div className="relative group ml-2">
-              <div
-                className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
+              <div className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
                 !
               </div>
-              <div
-                className="absolute z-10 w-80 p-3 bg-slate-50 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
-                🎙️ <b>조용한 환경</b>에서 녹음해 주세요.<br/><br/>
-                💡 <b>이어폰이나 외부 마이크</b> 사용을 권장합니다.<br/><br/>
+              <div className="absolute z-10 w-80 p-3 bg-slate-50 backdrop-blur-sm text-sm text-gray-700 border border-indigo-200 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-1/2 left-full -translate-y-1/2 ml-2 pointer-events-none">
+                🎙️ <b>조용한 환경</b>에서 녹음해 주세요.
+                <br />
+                <br />
+                💡 <b>이어폰이나 외부 마이크</b> 사용을 권장합니다.
+                <br />
+                <br />
                 🔇 <b>TV, 음악, 대화 등</b> 소음을 줄여 주세요.
               </div>
             </div>
@@ -252,7 +257,8 @@ function VoiceCreate() {
 
         <div className="bg-slate-50 rounded-md p-6">
           <p className="text-lg font-medium text-gray-800 mb-4">
-            “ 안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요? 감사합니다. ”
+            “ 안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요?
+            감사합니다. ”
           </p>
 
           <div className="flex items-center space-x-4">
@@ -263,7 +269,7 @@ function VoiceCreate() {
               }`}
               disabled={!isFFmpegLoaded}
             >
-              <Mic/>
+              <Mic />
             </button>
 
             <button
@@ -271,13 +277,15 @@ function VoiceCreate() {
               className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition disabled:bg-gray-300"
               disabled={!audioBlob}
             >
-              {isPlaying ? <Pause/> : <Play/>}
+              {isPlaying ? <Pause /> : <Play />}
             </button>
 
-            <div ref={waveformRef} className="flex-1 h-[60px]"/>
+            <div ref={waveformRef} className="flex-1 h-[60px]" />
 
             <span className="text-sm w-24 text-right text-indigo-500">
-              {audioBlob ? `${formatTime(currentTime)} / ${duration}` : formatTime(timer)}
+              {audioBlob
+                ? `${formatTime(currentTime)} / ${duration}`
+                : formatTime(timer)}
             </span>
           </div>
         </div>
