@@ -7,15 +7,16 @@ const useVoiceConvert = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  console.log('🧍 user 상태:', user);
 
-  const convertVoice = async (voicePackName, audioBlob, userId) => {
+  const convertVoice = async (voicePackName, audioBlob) => {
     if (!voicePackName || !audioBlob) {
       alert('보이스팩 이름과 녹음 파일이 필요합니다.');
       return;
     }
 
     const formData = new FormData();
-    formData.append('userId', user.userId); // ✅ userId를 동적으로 받도록 수정
+    formData.append('userId', user.id); // ✅ Zustand에서 가져온 userId 사용
     formData.append('name', voicePackName);
     formData.append(
       'voiceFile',
@@ -23,7 +24,6 @@ const useVoiceConvert = () => {
     );
 
     const url = 'voicepack/convert';
-
     try {
       setLoading(true);
       setError(null);
