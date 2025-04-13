@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import GradientButton from '../components/common/GradientButton';
 import axiosInstance from '../utils/axiosInstance';
+import { Eye, EyeOff } from 'lucide-react';
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -58,23 +61,39 @@ const SignUp = () => {
             onChange={(e) => setEmail(e.target.value)}
           />
         </label>
-        <label className="block">
+
+        <label className="block relative">
           <span className="text-sm text-gray-700">비밀번호</span>
           <input
-            type="password"
-            className="w-full px-4 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            type={showPassword ? 'text' : 'password'}
+            className="w-full px-3 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400 pr-10"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute top-10 right-3 text-gray-500"
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </label>
-        <label className="block">
+
+        <label className="block relative">
           <span className="text-sm text-gray-700">비밀번호 확인</span>
           <input
-            type="password"
-            className="w-full px-4 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+            type={showPasswordConfirm ? 'text' : 'password'}
+            className="w-full px-3 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400 pr-10"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
           />
+          <button
+            type="button"
+            onClick={() => setShowPasswordConfirm((prev) => !prev)}
+            className="absolute top-10 right-3 text-gray-500"
+          >
+            {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </label>
       </div>
 
