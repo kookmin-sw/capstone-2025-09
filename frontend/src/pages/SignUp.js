@@ -53,7 +53,7 @@ const SignUp = () => {
           <span className="text-sm text-gray-700">이메일</span>
           <input
             type="text"
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="w-full px-3 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -62,7 +62,7 @@ const SignUp = () => {
           <span className="text-sm text-gray-700">비밀번호</span>
           <input
             type="password"
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="w-full px-4 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -71,7 +71,7 @@ const SignUp = () => {
           <span className="text-sm text-gray-700">비밀번호 확인</span>
           <input
             type="password"
-            className="w-full border px-3 py-2 rounded mt-1"
+            className="w-full px-4 py-2 mt-1 border-none rounded-md bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
           />
@@ -92,9 +92,9 @@ const SignUp = () => {
         이미 계정이 있으신가요?{' '}
         <button
           onClick={() => navigate('/sign-in')}
-          className="text-blue-500 underline"
+          className="text-indigo-400 underline font-semibold"
         >
-          로그인하기
+          로그인
         </button>
       </p>
     </div>
