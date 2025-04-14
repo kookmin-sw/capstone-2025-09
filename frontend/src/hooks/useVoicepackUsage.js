@@ -1,28 +1,33 @@
 import { useEffect, useState } from 'react';
-import axiosInstance from '../utils/axiosInstance';
+import useUserStore from '../utils/userStore';
+import { getVoicepacksByUserId } from '../api/getVoicepacks';
 
 const useVoicepackUsage = () => {
   const [voicepacks, setVoicepacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const user = useUserStore((state) => state.user);
+
   useEffect(() => {
-    const fetchVoicepacks = async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    const fetch = async () => {
       try {
-        const response = await axiosInstance.get('voicepack/usage-right', {
-          params: { userId: 7 },
-        });
-        setVoicepacks(response.data);
+        const data = await getVoicepacksByUserId(user.id);
+        setVoicepacks(data);
       } catch (err) {
         setError(err);
-        console.error('보이스팩 불러오기 실패:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVoicepacks();
-  }, []);
+    fetch();
+  }, [user?.id]);
 
   return { voicepacks, loading, error };
 };
