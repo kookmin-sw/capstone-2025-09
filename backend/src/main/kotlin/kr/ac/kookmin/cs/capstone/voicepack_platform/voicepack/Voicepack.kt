@@ -2,6 +2,8 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import jakarta.persistence.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRight
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
 import java.time.OffsetDateTime
 
 @Entity
@@ -23,7 +25,13 @@ data class Voicepack(
     val s3Path: String,
 
     @Column(name = "created_at", nullable = false)
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
+
+    @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
+
+    @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val synthesisRequests: MutableList<VoiceSynthesisRequest> = mutableListOf()
 ) 
 
 /**
