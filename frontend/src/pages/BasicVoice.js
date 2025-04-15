@@ -1,30 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, {useState} from "react";
 import GradientButton from "../components/common/GradientButton";
 import useVoicepackUsage from "../hooks/useVoicepackUsage";
 import SelectBox from "../components/common/SelectBox";
 import useVoicepackSynthesis from "../hooks/useVoicepackSynthesis";
-import { ScaleLoader } from "react-spinners";
-import WaveSurfer from "wavesurfer.js";
-import { Play, Pause } from "lucide-react";
+import {ScaleLoader} from "react-spinners";
+import AudioPlayer from "../components/common/AudioPlayer";
 
 const BasicVoice = () => {
-  const { voicepacks } = useVoicepackUsage();
-  const { synthesize } = useVoicepackSynthesis();
+  const {voicepacks} = useVoicepackUsage();
+  const {synthesize} = useVoicepackSynthesis();
 
   const [selectedVoiceId, setSelectedVoiceId] = useState("");
   const [scriptText, setScriptText] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState("00:00");
-  const [currentTime, setCurrentTime] = useState("00:00");
-  const waveformRef = useRef(null);
-  const wavesurfer = useRef(null);
-
   const POLLING_INTERVAL = 2000;
 
-  const voicepackOptions = voicepacks.map(({ voicepackId, voicepackName }) => ({
+  const voicepackOptions = voicepacks.map(({voicepackId, voicepackName}) => ({
     label: voicepackName,
     value: voicepackId,
   }));
@@ -32,7 +25,7 @@ const BasicVoice = () => {
   const pollSynthesisStatus = async (statusUrl) => {
     const poll = async () => {
       try {
-        const res = await fetch(statusUrl, { method: "GET", credentials: "include" });
+        const res = await fetch(statusUrl, {method: "GET", credentials: "include"});
         const result = await res.json();
         console.log("📡 폴링 결과:", result);
 
@@ -85,67 +78,17 @@ const BasicVoice = () => {
     }
   };
 
-  const togglePlay = () => {
-    if (wavesurfer.current) {
-      wavesurfer.current.playPause();
-      setIsPlaying(wavesurfer.current.isPlaying());
-    }
-  };
-
-  const formatTime = (seconds) => {
-    if (isNaN(seconds)) return "00:00";
-    const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
-    const secs = String(Math.floor(seconds % 60)).padStart(2, "0");
-    return `${mins}:${secs}`;
-  };
-
-  useEffect(() => {
-    if (!audioUrl) return;
-
-    wavesurfer.current = WaveSurfer.create({
-      container: waveformRef.current,
-      waveColor: "#c7d2fe",
-      progressColor: "#6366f1",
-      cursorColor: "#6366f1",
-      height: 80,
-      barWidth: 2,
-      barGap: 1.5,
-      responsive: true,
-    });
-
-    wavesurfer.current.load(audioUrl);
-
-    wavesurfer.current.on("ready", () => {
-      const dur = wavesurfer.current.getDuration();
-      setDuration(formatTime(dur));
-      setCurrentTime("00:00");
-    });
-
-    wavesurfer.current.on("audioprocess", () => {
-      const time = wavesurfer.current.getCurrentTime();
-      setCurrentTime(formatTime(time));
-    });
-
-    wavesurfer.current.on("finish", () => {
-      setIsPlaying(false);
-      setCurrentTime(duration);
-    });
-
-    return () => {
-      wavesurfer.current?.destroy();
-    };
-  }, [audioUrl,duration]);
-
   return (
     <div className="space-y-6">
       {isGenerating && (
-        <div className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
-          <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3} />
+        <div
+          className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
+          <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3}/>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
             보이스 변환 중...
           </p>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
-            "페이지를 벗어나면 보이스 변환이 취소될 수 있어요!"
+            "페이지를 벗어나면 보이스 변환이 취소될 수 있습니다."
           </p>
         </div>
       )}
@@ -182,40 +125,26 @@ const BasicVoice = () => {
       </div>
 
       {audioUrl && (
-        <div className="mt-12 px-2 py-2 bg-white backdrop-blur-sm rounded-xl  space-y-4">
-          <div className="rounded-xl px-6 py-5 flex items-center justify-between space-x-4">
-            <div className="flex items-center">
-              <button
-                onClick={togglePlay}
-                className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition disabled:bg-gray-300"
-              >
-                {isPlaying ? <Pause /> : <Play />}
-              </button>
+        <div className="mt-12 px-2 py-2 bg-white backdrop-blur-sm rounded-xl">
+          {/* 한 줄로 재생바 + 다운로드 버튼 정렬 */}
+          <div className="flex items-center space-x-4 px-6 py-5">
+            <div className="flex-1">
+              <AudioPlayer audioUrl={audioUrl}/>
             </div>
-
-            <div className="flex-1 mx-4">
-              <div ref={waveformRef} className="w-full h-[80px] overflow-hidden scrollbar-hide" />
-            </div>
-
-            <span className="text-indigo-500 font-semibold whitespace-nowrap w-[110px] text-right">
-              {currentTime} / {duration}
-            </span>
-
             <GradientButton
-              className="px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-3"
               onClick={() => {
                 const fileName = prompt("저장할 파일 이름을 입력해주세요.");
                 if (!fileName) return;
 
                 const link = document.createElement("a");
                 link.href = audioUrl;
-                link.download = `${fileName}.mp3`; // 사용자가 입력한 이름 + 확장자
+                link.download = `${fileName}.mp3`;
                 link.click();
               }}
             >
               다운로드
             </GradientButton>
-
           </div>
         </div>
       )}
