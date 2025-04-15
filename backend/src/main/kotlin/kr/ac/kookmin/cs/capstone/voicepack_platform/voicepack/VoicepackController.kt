@@ -166,6 +166,21 @@ class VoicepackController(
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null)
         }
     }
+
+    @Operation(
+        summary = "보이스팩 삭제",
+        description = "보이스팩을 삭제합니다.",
+        responses = [
+            ApiResponse(responseCode = "204", description = "삭제 성공 (콘텐츠 없음)")
+        ]
+    )
+    @DeleteMapping("/{voicepackId}")
+    fun deleteVoicepack(
+        @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
+    ): ResponseEntity<Any> {
+        voicepackService.deleteVoicepack(voicepackId)
+        return ResponseEntity.noContent().build()
+    }
     
     // 보이스팩 예시 음성 파일 조회
     @Operation(

@@ -216,6 +216,17 @@ class VoicepackService(
      * =========== END ===========
      */
 
+
+    /**
+     * 보이스팩 삭제
+     */
+    @Transactional
+    fun deleteVoicepack(voicepackId: Long) {
+        logger.info("보이스팩 삭제 시작: voicepackId={}", voicepackId)
+        voicepackRepository.deleteById(voicepackId)
+        logger.info("보이스팩 삭제 완료: voicepackId={}", voicepackId)
+    }
+
     /**
      * 보이스팩 합성 요청 (비동기 방식)
      * =========== START ===========
