@@ -209,10 +209,10 @@ function VoiceCreate() {
           className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
           <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3}/>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
-            보이스 생성 중...
+            보이스팩 생성 중...
           </p>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
-            "페이지를 벗어나면 보이스 생성이 취소될 수 있어요!"
+            "페이지를 벗어나면 보이스팩 생성이 취소될 수 있어요!"
           </p>
         </div>
       )}
