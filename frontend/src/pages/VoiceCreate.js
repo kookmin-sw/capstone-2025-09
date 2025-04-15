@@ -84,6 +84,7 @@ function VoiceCreate() {
     audioStreamRef.current = stream;
     setAudioBlob(null);
     setTimer(0);
+    setIsPlaying(false);
     audioChunksRef.current = [];
 
     wavesurferRef.current.microphone.start();
@@ -134,6 +135,7 @@ function VoiceCreate() {
   const handleStopRecording = () => {
     mediaRecorderRef.current?.stop();
     setIsRecording(false);
+    setIsPlaying(false);
   };
 
   const togglePlay = () => {
@@ -142,7 +144,7 @@ function VoiceCreate() {
     setIsPlaying((prev) => !prev);
   };
 
-  const pollStatus = async (id, interval = 2000, maxAttempts = 90) => {
+  const pollStatus = async (id, interval = 2000, maxAttempts = 200) => {
     let attempts = 0;
 
     return new Promise((resolve, reject) => {
@@ -203,14 +205,15 @@ function VoiceCreate() {
   return (
     <>
       {(loading || isPolling) && (
-        <div className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex items-center justify-center z-50">
-          <ScaleLoader
-            color="#615FFF"
-            height={40}
-            width={4}
-            radius={2}
-            margin={3}
-          />
+        <div
+          className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
+          <ScaleLoader color="#615FFF" height={40} width={4} radius={2} margin={3}/>
+          <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
+            보이스 생성 중...
+          </p>
+          <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
+            "페이지를 벗어나면 보이스 생성이 취소될 수 있어요!"
+          </p>
         </div>
       )}
       <>
@@ -262,9 +265,7 @@ function VoiceCreate() {
             <button
               onClick={isRecording ? handleStopRecording : handleStartRecording}
               className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg transition-colors duration-300 ${
-                isRecording
-                  ? 'bg-indigo-500 '
-                  : 'bg-gray-300 hover:bg-indigo-300'
+                isRecording ? 'bg-indigo-500 hover:bg-indigo-300' : 'bg-gray-300 hover:bg-indigo-300'
               }`}
               disabled={!isFFmpegLoaded}
             >
