@@ -212,7 +212,7 @@ function VoiceCreate() {
             보이스팩 생성 중...
           </p>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
-            "페이지를 벗어나면 보이스팩 생성이 취소될 수 있어요!"
+            "페이지를 벗어나면 보이스팩 생성이 취소될 수 있습니다."
           </p>
         </div>
       )}
@@ -235,8 +235,7 @@ function VoiceCreate() {
 
           <div className="flex items-center text-sm text-gray-600 mb-4">
             <p>
-              녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라
-              읽어주세요.
+              녹음 가이드를 참고하여, 녹음 버튼을 누르고 아래 문장을 따라 읽어주세요.
             </p>
             <div className="relative group ml-2">
               <div className="w-4 h-4 flex items-center justify-center rounded-full bg-indigo-400 text-white text-xs cursor-default">
