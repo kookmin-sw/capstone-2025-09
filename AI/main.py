@@ -3,6 +3,8 @@ import logging
 from fastapi.responses import JSONResponse
 from utils.voice_registration_handler import process_voice_registration
 from utils.synthesis_handler import process_synthesis_request
+from .config.settings import MODEL_CONFIG
+import torch
 
 logging.basicConfig(level=logging.INFO)
 
@@ -10,6 +12,8 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI()
 logging.info("Starting server... ----------------------------------------------------------------------------")
+torch.manual_seed(MODEL_CONFIG['seed'])
+torch.cuda.manual_seed_all(MODEL_CONFIG['seed'])
 
 @app.post("/register_speaker")
 async def register_speaker_endpoint(
