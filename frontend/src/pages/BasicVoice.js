@@ -88,7 +88,7 @@ const BasicVoice = () => {
             보이스 변환 중...
           </p>
           <p className="mt-4 text-indigo-500 font-semibold text-lg animate-pulse">
-            "페이지를 벗어나면 보이스 변환이 취소될 수 있습니다."
+            페이지를 벗어나면 보이스 변환이 취소될 수 있어요!
           </p>
         </div>
       )}
