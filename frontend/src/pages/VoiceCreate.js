@@ -217,7 +217,7 @@ function VoiceCreate() {
         </div>
       )}
       <>
-        <h1 className="text-xl font-bold text-gray-900 mb-6">보이스팩 생성</h1>
+        <h1 className="text-xl font-bold mb-6">보이스팩 생성</h1>
 
         <h1 className="text-l font-bold text-gray-900 mb-2">
           보이스팩 이름 <span className="text-red-500">*</span>
