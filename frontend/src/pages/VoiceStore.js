@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import useBuyVoicepack from '../hooks/useBuyVoicepack';
 import useVoicepackDetail from '../hooks/useVoicepackDetail';
+import SelectBox from "../components/common/SelectBox";
 import axiosInstance from '../utils/axiosInstance';
-import { Search } from 'lucide-react';
+import {Search} from 'lucide-react';
 import LP from '../assets/lp.svg';
 
 function VoiceStore() {
@@ -15,10 +16,11 @@ function VoiceStore() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [sortOption, setSortOption] = useState('latest');
   const [searchQuery, setSearchQuery] = useState('');
+  const [committedQuery, setCommittedQuery] = useState('');
 
   const audioRef = useRef(null);
-  const { buy } = useBuyVoicepack();
-  const { getVoicepackAudio } = useVoicepackDetail();
+  const {buy} = useBuyVoicepack();
+  const {getVoicepackAudio} = useVoicepackDetail();
 
   const closeModal = () => {
     setSelectedPack(null);
@@ -26,6 +28,16 @@ function VoiceStore() {
     setDuration(0);
     setCurrentTime(0);
     setIsPlaying(false);
+  };
+
+  const handleSearch = () => {
+    setCommittedQuery(searchQuery);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
   };
 
   useEffect(() => {
@@ -42,11 +54,11 @@ function VoiceStore() {
 
   useEffect(() => {
     let result = [...voicePacks];
-    if (searchQuery) {
+    if (committedQuery) {
       result = result.filter(
         (pack) =>
-          pack.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          pack.author.toLowerCase().includes(searchQuery.toLowerCase())
+          pack.name.toLowerCase().includes(committedQuery.toLowerCase()) ||
+          pack.author.toLowerCase().includes(committedQuery.toLowerCase())
       );
     }
     if (sortOption === 'name') {
@@ -57,7 +69,7 @@ function VoiceStore() {
       result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // 오래된순
     }
     setFilteredPacks(result);
-  }, [voicePacks, sortOption, searchQuery]);
+  }, [voicePacks, sortOption, committedQuery]);
 
   const handleCardClick = async (pack) => {
     setSelectedPack(pack);
@@ -112,49 +124,57 @@ function VoiceStore() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-xl font-bold">마켓 플레이스</h1>
         <div className="flex gap-2">
-          <select
-            className="border px-2 py-1 rounded-lg text-sm"
+          <SelectBox
+            label=""
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
-          >
-            <option value="name">이름순</option>
-            <option value="latest">최근 등록순</option>
-            <option value="oldest">오래된 등록순</option>
-          </select>
-          <div className="flex items-center border px-2 py-1 rounded-lg text-sm bg-white">
-            <Search className="w-4 h-4 text-gray-400 mr-2"/>
+            options={[
+              {label: '이름순', value: 'name'},
+              {label: '최근 등록순', value: 'latest'},
+              {label: '오래된 등록순', value: 'oldest'},
+            ]}
+            placeholder="정렬"
+          />
+          <div className="flex items-center border border-[#D9D9D9] px-2 rounded-lg text-sm bg-white mt-1">
+            <button onClick={handleSearch} className="mr-2">
+              <Search className="w-5 h-5 text-gray-400"/>
+            </button>
             <input
               type="text"
               placeholder="보이스팩을 검색해보세요."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="outline-none w-full text-sm"
             />
           </div>
-
         </div>
       </div>
 
       <div className="w-full px-8 min-h-screen">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 justify-items-center">
-          {filteredPacks.map((pack) => (
-            <div
-              key={pack.id}
-              className="bg-violet-50 p-4 border border-indigo-300 rounded-xl shadow-md hover:shadow-xl w-full max-w-[240px] text-center cursor-pointer"
-              onClick={() => handleCardClick(pack)}
-            >
-              <div className="max-w-[180px] max-h-[180px] mx-auto mb-2">
-                <img src={LP} alt="LP"/>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 justify-items-center">
+          {filteredPacks.length === 0 ? (
+            <p className="col-span-full text-gray-500 text-md mt-12">검색 결과가 없습니다.</p>
+          ) : (
+            filteredPacks.map((pack) => (
+              <div
+                key={pack.id}
+                className="bg-violet-50 p-4 border border-indigo-300 rounded-xl shadow-md hover:shadow-xl w-full max-w-[240px] text-center cursor-pointer"
+                onClick={() => handleCardClick(pack)}
+              >
+                <div className="max-w-[180px] max-h-[180px] mx-auto mb-2">
+                  <img src={LP} alt="LP"/>
+                </div>
+                <h2 className="text-lg font-semibold mb-1">{pack.name}</h2>
+                <p className="text-xs text-slate-600">{pack.author}</p>
+                <p className="text-xs text-slate-600">{formatDate(pack.createdAt)}</p>
+                <div className="flex justify-center gap-2 mt-2">
+                  <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
+                  <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
+                </div>
               </div>
-              <h2 className="text-lg font-semibold mb-1">{pack.name}</h2>
-              <p className="text-xs text-slate-600">{pack.author}</p>
-              <p className="text-xs text-slate-600">{formatDate(pack.createdAt)}</p>
-              <div className="flex justify-center gap-2 mt-2">
-                <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
-                <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {selectedPack && (
@@ -168,7 +188,7 @@ function VoiceStore() {
                 &times;
               </button>
               <div className="sm:w-1/2 flex flex-col items-center justify-center bg-violet-50 rounded-xl p-4">
-                <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4" />
+                <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4"/>
                 {audioUrl && (
                   <>
                     <audio
@@ -181,7 +201,7 @@ function VoiceStore() {
                         setCurrentTime(0);
                       }}
                       onTimeUpdate={(e) => setCurrentTime(e.target.currentTime)}
-                      style={{ display: 'none' }}
+                      style={{display: 'none'}}
                     />
                     <input
                       type="range"
