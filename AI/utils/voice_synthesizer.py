@@ -154,3 +154,44 @@ class VoiceSynthesizer:
         except Exception as e:
             logger.error(f"failed to generate speech: {str(e)}")
             raise
+        
+            
+    async def synthesize_assistant(
+        self,
+        prompt: str,
+        voicepackName: str,
+        category: str,
+        writingStyle: str,
+        nowTime: str,
+        speed: float = 1.0
+        ):
+            """AI 비서용 음성 합성"""
+            try:
+                if not self.storage_manager.speaker_exists(voicepackName):
+                    raise HTTPException(status_code=404, detail="Speaker not found")
+                
+                features = self.storage_manager.get_speaker_features(voicepackName)
+                if features is None:
+                    raise HTTPException(status_code=500, detail="Failed to load speaker features")
+                
+                audio_data, duration = self._synthesize_speech_internal(
+                    text=prompt,
+                    features=features,
+                    speed=speed
+                )
+                
+                if audio_data is None:
+                    raise ValueError("Failed to synthesize assistant speech")
+                
+                # S3에 저장
+                file_path = f"ai_assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
+                audio_url = self.storage_manager.save_audio(audio_data, file_path)
+                
+                if not audio_url:
+                    raise HTTPException(status_code=500, detail="Failed to save assistant audio")
+                
+                return audio_url, duration
+            
+            except Exception as e:
+                logger.error(f"failed to synthesize assistant speech: {str(e)}")
+                raise
