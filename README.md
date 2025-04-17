@@ -60,6 +60,4 @@ Covos은 누구나 자신의 목소리를 디지털 자산으로 만들고, 이�
 
 ### 🔗 주요 링크
 •	공식 웹사이트 (출시 예정)  
-•	데모 영상 (업로드 예정)  
-•	백엔드 API 문서 :  [https://vocalab.kro.kr/swagger-ui/index.html](https://vocalab.kro.kr/swagger-ui/index.html)
-  
+•	데모 영상 (업로드 예정)    
