@@ -27,7 +27,7 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-48 bg-white p-4 flex flex-col justify-between h-screen">
+    <div className="fixed top-0 left-0 w-48 bg-white p-4 flex flex-col justify-between h-screen shadow-md z-20">
       {/* 상단: 로고 + 메뉴들 */}
       <div className="space-y-4">
         <Link
