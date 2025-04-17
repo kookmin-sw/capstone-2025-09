@@ -122,7 +122,7 @@ function VoiceStore() {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-xl font-bold">마켓 플레이스</h1>
+        <h1 className="text-xl font-bold">마켓플레이스</h1>
         <div className="flex gap-2">
           <SelectBox
             label=""
