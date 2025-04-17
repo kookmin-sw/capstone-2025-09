@@ -1,4 +1,4 @@
-package kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request
+package kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.setting
 
 
 data class AiAssistantSettingRequest (
