@@ -250,8 +250,7 @@ class AiAssistantService(
             // InputStream을 UTF-8 인코딩으로 텍스트를 읽을 수 있는 BufferedReader로 변환
             BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8)).use { reader ->
                 // 파일 전체 내용을 문자열로 읽어서 반환
-                val rawText = reader.readText()
-                rawText.replace(Regex("\\r?\\n"), "") // 모든 개행 제거
+                reader.readText()
             }
         }
     }
