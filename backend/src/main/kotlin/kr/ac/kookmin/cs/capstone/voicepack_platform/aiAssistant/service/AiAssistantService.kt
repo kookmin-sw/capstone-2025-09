@@ -40,7 +40,6 @@ class AiAssistantService(
     private val aiAssistantSettingRepository: AiAssistantSettingRepository,
     private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
     private val aiAssistantSynthesisRequestRepository: AiAssistantSynthesisRequestRepository,
-    @Value("\${aws.sqs.voicepack-synthesis-callback-queue-url}") private val synthesisQueueUrl: String,
     @Value("\${aws.s3.bucket-name}") private val bucketName: String,
     private val objectMapper: ObjectMapper,
     private val rabbitTemplate: RabbitTemplate,
@@ -96,7 +95,7 @@ class AiAssistantService(
 
         val user = userRepository.findById(userId).orElseThrow{
             IllegalArgumentException("User not found")
-        };
+        }
 
         val voicepack =  voicepackRepository.findById(request.voicepackId).orElseThrow {
             IllegalArgumentException("Voicepack not found")
