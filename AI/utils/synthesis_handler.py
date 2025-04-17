@@ -74,7 +74,7 @@ async def process_assistant_request(
     nowTime: str,
     speed: float
 ):
-    """비동기로 AI 비서용 음성 합성 및 SQS 메시지 전송
+    """AI 비서용 음성 합성 및 SQS 메시지 전송
     
     Args:
         prompt (str): 합성 프롬프트
@@ -89,7 +89,11 @@ async def process_assistant_request(
     try:
         logger.info(f"starting assistant synthesis: voicepackName={voicepackName}, prompt={prompt}, userId={userId}, jobId={jobId}, category={category}, writingStyle={writingStyle}, nowTime={nowTime}, speed={speed}")
         
-        # 음성 합성 시작
+        # 프롬프트를 개행 문자로 분리하고 첫 번째 문장만 선택
+        sentences = prompt.split('\\n')
+        prompt = sentences[0] if sentences else ""
+
+        # 음성 합성 시작 (첫 문장 사용)
         audio_url, duration = await voice_synthesizer.synthesize_assistant(
             prompt=prompt,
             voicepackName=voicepackName,
