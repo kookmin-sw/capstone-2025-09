@@ -184,7 +184,7 @@ class VoiceSynthesizer:
                     raise ValueError("Failed to synthesize assistant speech")
                 
                 # S3에 저장
-                file_path = f"ai_assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
+                file_path = f"ai-assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
                 audio_url = self.storage_manager.save_audio(audio_data, file_path)
                 
                 if not audio_url:
