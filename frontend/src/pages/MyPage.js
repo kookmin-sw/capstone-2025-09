@@ -88,7 +88,7 @@ const DashboardContent = ({
           <div className="text-gray-500">
             총 수입
             <div className="font-bold text-sm text-black">
-              {user.totalEarnings.toLocaleString()}원
+              {user.totalEarnings} 크레딧
             </div>
           </div>
           <div className="text-gray-500">
@@ -109,7 +109,11 @@ const DashboardContent = ({
       <Section title="월별 수익 통계" icon="📊">
         <Line
           data={earningsChart}
-          options={{ responsive: true, maintainAspectRatio: false }}
+          options={{
+            responsive: true,
+            plugins: { legend: { display: false }, title: { display: false } },
+            maintainAspectRatio: false,
+          }}
           height={100}
         />
       </Section>
@@ -254,7 +258,7 @@ const MyRevenue = () => {
     datasets: [
       {
         label: '판매 건수',
-        data: [2, 1, 0], // 실제 계산 가능
+        data: [2, 1, 0],
         backgroundColor: 'rgba(99, 102, 241, 0.6)',
       },
     ],
@@ -275,48 +279,73 @@ const MyRevenue = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
-      <RevenueStatCards total={320} month={200} count={3} />
+      {/* 요약 카드 */}
+      <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
+        <div className="bg-indigo-100 p-4 rounded shadow text-center">
+          <p className="text-gray-500">총 수익</p>
+          <p className="font-bold">320 크레딧</p>
+        </div>
+        <div className="bg-indigo-100 p-4 rounded shadow text-center">
+          <p className="text-gray-500">이번 달 수익</p>
+          <p className="font-bold">200 크레딧</p>
+        </div>
+        <div className="bg-indigo-100 p-4 rounded shadow text-center">
+          <p className="text-gray-500">판매 수</p>
+          <p className="font-bold">3건</p>
+        </div>
+      </div>
 
+      {/* 시각화 차트 2개: col로 정렬 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* 보이스팩별 판매 건수 */}
-        <div>
+        <div className="overflow-x-auto">
           <h3 className="text-sm font-semibold mb-2">보이스팩별 판매 건수</h3>
-          <Bar data={salesByVoicepack} options={{ responsive: true }} />
+          <div className="min-w-[500px]">
+            <Bar
+              data={salesByVoicepack}
+              options={{
+                responsive: true,
+                scales: {
+                  y: {
+                    beginAtZero: true,
+                    suggestedMax: 5,
+                    ticks: { stepSize: 1 },
+                  },
+                },
+                plugins: {
+                  legend: { display: false },
+                  title: { display: false },
+                },
+              }}
+              height={100}
+            />
+          </div>
         </div>
 
         {/* 월별 수익 추이 */}
         <div>
           <h3 className="text-sm font-semibold mb-2">월별 수익 추이</h3>
-          <Line data={monthlyRevenue} options={{ responsive: true }} />
+          <Line
+            data={monthlyRevenue}
+            options={{
+              responsive: true,
+              elements: {
+                line: { tension: 0.4 },
+                point: { radius: 3 },
+              },
+              plugins: {
+                legend: { display: false },
+                title: { display: false },
+              },
+            }}
+            height={100}
+          />
         </div>
-      </div>
-
-      <div>
-        <h3 className="text-sm font-semibold mt-6 mb-2">판매 상세 내역</h3>
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="py-1">날짜</th>
-              <th>보이스팩</th>
-              <th>구매자</th>
-              <th>판매가</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dummySales.map((sale) => (
-              <tr key={sale.id} className="border-b">
-                <td className="py-1">{sale.date}</td>
-                <td>{sale.name}</td>
-                <td>{sale.buyer}</td>
-                <td>{sale.amount} 크레딧</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   );
 };
+
 const CreditStatCards = ({ current, charged, used, onRequestExchange }) => (
   <div className="grid grid-cols-3 gap-4 mb-6 text-sm relative">
     <div className="bg-purple-100 p-4 rounded shadow text-center relative">
