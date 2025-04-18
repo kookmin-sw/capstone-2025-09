@@ -35,7 +35,7 @@ const Landing = () => {
         style={{ minHeight: 'calc(100vh - 96px)' }}
       >
         <div className="flex justify-center items-center h-full w-full">
-          <div className="w-[80vh] h-[80vh] min-h-[300px] flex items-end ml-32">
+          <div className="w-[50%] h-[80vh] flex justify-end items-end pl-20">
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
               <ambientLight intensity={0.3} />
               <directionalLight
@@ -53,7 +53,7 @@ const Landing = () => {
             </Canvas>
           </div>
 
-          <div className="flex-1 flex flex-col items-start justify-start text-left px-4 text-black">
+          <div className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-black">
             <h1 className="text-4xl font-bold mb-4">나만의 AI 보이스를</h1>
             <h1 className="text-4xl font-bold mb-20 ">
               만들고 공유하고 활용하세요
