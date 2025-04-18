@@ -11,7 +11,7 @@ const GradientButton = ({
     <button
       type={type}
       onClick={onClick}
-      className={`bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold rounded-lg shadow-sm hover:opacity-90 transition ${className}`}
+      className={`bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold rounded-lg shadow-sm hover:opacity-70 transition ${className}`}
     >
       {children}
     </button>

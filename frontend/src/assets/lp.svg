@@ -1,0 +1,20 @@
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="180" height="180" rx="16" fill="url(#paint0_linear_119_4227)"/>
+<circle cx="90" cy="90" r="47.7887" stroke="black" stroke-width="30.4225"/>
+<path opacity="0.2" d="M90.874 37.125C120.076 37.125 143.749 60.5461 143.749 89.4375C143.749 118.329 120.076 141.75 90.874 141.75" stroke="#F1F5F9" stroke-width="0.450704"/>
+<path opacity="0.2" d="M51.3686 88.8751C51.3686 67.6449 68.5791 50.4344 89.8093 50.4344C111.04 50.4344 128.25 67.6449 128.25 88.8751" stroke="#F1F5F9" stroke-width="0.450704"/>
+<path opacity="0.2" d="M131.625 90C131.625 112.989 112.989 131.625 90 131.625C67.0111 131.625 48.375 112.989 48.375 90" stroke="#F1F5F9" stroke-width="0.450704"/>
+<path opacity="0.2" d="M47.3829 106.767C37.7586 82.7032 49.4641 55.3937 73.5278 45.7694C97.5916 36.1451 124.901 47.8506 134.525 71.9143" stroke="#F1F5F9" stroke-width="0.450704"/>
+<path d="M124.339 90.1695C124.339 109.041 109.041 124.339 90.1695 124.339C71.2982 124.339 56 109.041 56 90.1695C56 71.2982 71.2982 56 90.1695 56C109.041 56 124.339 71.2982 124.339 90.1695Z" fill="url(#paint1_radial_119_4227)"/>
+<circle cx="90.5" cy="90.5" r="18.5" fill="white"/>
+<defs>
+<linearGradient id="paint0_linear_119_4227" x1="3.51562" y1="-152.5" x2="195.541" y2="-111.095" gradientUnits="userSpaceOnUse">
+<stop stop-color="#C4B4FF"/>
+<stop offset="1" stop-color="#A3B3FF"/>
+</linearGradient>
+<radialGradient id="paint1_radial_119_4227" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(90.1695 90.1695) rotate(90) scale(34.1695)">
+<stop stop-color="#D4DCFF"/>
+<stop offset="1" stop-color="#C6BAFF"/>
+</radialGradient>
+</defs>
+</svg>
