@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 
-interface AiAssistantSynthesisRequestRepository : JpaRepository<AiAssistantSynthesisRequest, Long> {}
+interface AiAssistantSynthesisRequestRepository : JpaRepository<AiAssistantSynthesisRequest, Long> {
+    fun findByIdOrNull(id: Long): AiAssistantSynthesisRequest?
+}

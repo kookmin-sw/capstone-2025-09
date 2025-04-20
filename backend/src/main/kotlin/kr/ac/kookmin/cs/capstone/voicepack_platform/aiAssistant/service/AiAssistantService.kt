@@ -107,8 +107,6 @@ class AiAssistantService(
         if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, request.voicepackId)) {
             logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, request.voicepackId)
             throw SecurityException("해당 보이스팩에 대한 사용 권한이 없습니다.")
-        } else {
-            logger.info("사용 권한 확인 완료: userId={}, voicepackId={}", userId, request.voicepackId)
         }
 
         /**
@@ -291,13 +289,11 @@ class AiAssistantService(
     fun handleAiAssistantCallback(callbackRequest: AiAssistantCallbackRequest) {
         logger.info("AI 비서 음성 합성 콜백 수신: id={}", callbackRequest.id)
 
-        val aiAssistantRequestOpt = aiAssistantSynthesisRequestRepository.findById(callbackRequest.id)
-        if (aiAssistantRequestOpt.isEmpty) {
-            logger.error("콜백 처리 실패: 해당 id의 요청을 찾을 수 없음 - id={}", callbackRequest.id)
-            // TODO: 적절한 오류 처리 (예: 로깅만 할지, 예외를 던질지)
-            return // 혹은 예외 발생
-        }
-        val synthesisRequest = aiAssistantRequestOpt.get()
+        val synthesisRequest = aiAssistantSynthesisRequestRepository.findByIdOrNull(callbackRequest.id)
+            ?: run {
+                logger.error("콜백 처리 실패: 해당 id의 요청을 찾을 수 없음 - id={}", callbackRequest.id)
+                return // 혹은 예외 던지기
+            }
 
         // 이미 처리된 콜백인지 확인 (멱등성)
         if (synthesisRequest.status == AiAssistantStatus.COMPLETED || synthesisRequest.status == AiAssistantStatus.FAILED) {
