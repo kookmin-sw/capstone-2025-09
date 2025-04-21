@@ -159,7 +159,10 @@ class VoicepackService(
             createdAt = finishedTime
         )
         voicepackRepository.save(voicepack)
-        
+
+        // 사용권 부여
+        grantUsageRight(voicepackRequest.author.id, voicepack.id)
+
         // 알림 전송
         notificationService.notifyVoicepackComplete(voicepackRequest)
     }
