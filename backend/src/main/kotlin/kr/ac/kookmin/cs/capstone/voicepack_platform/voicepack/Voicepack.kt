@@ -37,7 +37,8 @@ data class VoicepackDto(
     val id: Long,
     val name: String,
     val author: String,
-    val createdAt: OffsetDateTime
+    val createdAt: OffsetDateTime,
+    val price: Int
 ) {
     companion object {
         fun fromEntity(voicepack: Voicepack): VoicepackDto {
@@ -45,7 +46,8 @@ data class VoicepackDto(
                 id = voicepack.id,
                 name = voicepack.name,
                 author = voicepack.author.email,
-                createdAt = voicepack.createdAt
+                createdAt = voicepack.createdAt,
+                price = voicepack.price
             )
         }
     }
