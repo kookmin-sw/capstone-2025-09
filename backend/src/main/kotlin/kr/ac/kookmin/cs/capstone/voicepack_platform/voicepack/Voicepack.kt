@@ -28,7 +28,7 @@ data class Voicepack(
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column(name = "price", nullable = false)
-    val price: Int = 100
+    val price: Int = 100,
 
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
