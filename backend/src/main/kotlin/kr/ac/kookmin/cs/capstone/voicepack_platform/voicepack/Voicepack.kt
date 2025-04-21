@@ -2,6 +2,8 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
 
 import jakarta.persistence.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRight
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
 import java.time.OffsetDateTime
 
 @Entity
@@ -27,6 +29,13 @@ data class Voicepack(
 
     @Column(name = "price", nullable = false)
     val price: Int = 100
+
+    @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
+
+    @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
+    val synthesisRequests: MutableList<VoiceSynthesisRequest> = mutableListOf()
+
 ) 
 
 /**
