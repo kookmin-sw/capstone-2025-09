@@ -25,6 +25,11 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.Voicepa
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightDto
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.dto.UseCreditsRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.ReferenceType
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.service.CreditService
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.TransactionStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.dto.ChargeCreditsRequest
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Value
@@ -42,7 +47,7 @@ class VoicepackService(
     private val voiceSynthesisRequestRepository: VoiceSynthesisRequestRepository,
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
-        // private val creditService: CreditService,
+    private val creditService: CreditService,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate
 ) {
@@ -427,13 +432,32 @@ class VoicepackService(
         }
 
         // 2. (선택 사항) 가격 확인 및 크레딧 차감 (제작자가 아닌 경우에만)
-        // if (voicepack.author.id != userId) {
-        //     // TODO: 보이스팩 가격 확인 및 크레딧 차감 로직
-        //     /*
-        //     val voicepackPrice = voicepack.price ?: 0
-        //     if (voicepackPrice > 0) { ... }
-        //     */
-        // }
+        if (voicepack.author.id != userId) {
+            // TODO: 보이스팩 가격 확인 및 크레딧 차감 로직
+            
+            val voicepackPrice = voicepack.price
+            if (voicepackPrice > 0) {
+                // 크레딧 차감 로직 추가
+                val result = creditService.useCredits(UseCreditsRequest(
+                    userId = userId,
+                    amount = voicepackPrice,
+                    referenceId = voicepackId,
+                    referenceType = ReferenceType.VOICEPACK,
+                    description = "보이스팩 구매"
+                ))
+                if (result.status == TransactionStatus.FAILED.name) {
+                    logger.error("크레딧 차감 실패: ${result.message}")
+                    throw IllegalStateException("크레딧 차감 실패: ${result.message}")
+                }
+                // 판매자에게 크레딧 충전
+                creditService.chargeCredits(ChargeCreditsRequest(
+                    userId = voicepack.author.id,
+                    amount = voicepackPrice,
+                    paymentMethod = "voicepack",
+                    paymentReference = voicepack.id.toString()
+                ))
+            }
+        }
 
         // 3. 사용권 정보 생성 및 저장
         val usageRight = VoicepackUsageRight(

@@ -23,7 +23,10 @@ data class Voicepack(
     val s3Path: String,
 
     @Column(name = "created_at", nullable = false)
-    val createdAt: OffsetDateTime = OffsetDateTime.now()
+    val createdAt: OffsetDateTime = OffsetDateTime.now(),
+
+    @Column(name = "price", nullable = false)
+    val price: Int = 100
 ) 
 
 /**
