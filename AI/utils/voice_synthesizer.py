@@ -18,7 +18,7 @@ class VoiceSynthesizer:
     def __init__(self):
         self._initialize_model()
         self.storage_manager = StorageManager()
-        self.sample_rate = MODEL_CONFIG['sample_rate']  # Zonos 모델의 샘플링 레이트에 맞게 설정
+        self.sample_rate = MODEL_CONFIG['sample_rate']
 
     def _initialize_model(self):
         """모델 초기화 및 로드"""
@@ -40,7 +40,7 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
-            # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가가
+            # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
             cond_dict = make_cond_dict(text=text, speaker=features, language=language)
             conditioning = self.model.prepare_conditioning(cond_dict)
 
@@ -124,7 +124,7 @@ class VoiceSynthesizer:
         userId: int,
         speed: float = 1.0,
     ) -> dict:
-        """기능 1: 베이직 기능에 사용되는 음성 합성"""
+        """베이직 보이스에 사용되는 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):
                 raise HTTPException(status_code=404, detail="Speaker not found")
