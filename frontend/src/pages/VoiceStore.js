@@ -1,9 +1,8 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import useBuyVoicepack from '../hooks/useBuyVoicepack';
-import useVoicepackDetail from '../hooks/useVoicepackDetail';
-import SelectBox from "../components/common/SelectBox";
 import axiosInstance from '../utils/axiosInstance';
-import {Search} from 'lucide-react';
+import { Search } from 'lucide-react';
+import SelectBox from '../components/common/SelectBox';
 import VoicePackCard from '../components/common/VoicePack';
 import VoicePackModal from '../components/common/VoicePackModal';
 
@@ -11,24 +10,14 @@ function VoiceStore() {
   const [voicePacks, setVoicePacks] = useState([]);
   const [filteredPacks, setFilteredPacks] = useState([]);
   const [selectedPack, setSelectedPack] = useState(null);
-  const [audioUrl, setAudioUrl] = useState('');
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [sortOption, setSortOption] = useState('latest');
   const [searchQuery, setSearchQuery] = useState('');
   const [committedQuery, setCommittedQuery] = useState('');
 
-  const audioRef = useRef(null);
-  const {buy} = useBuyVoicepack();
-  const {getVoicepackAudio} = useVoicepackDetail();
+  const { buy } = useBuyVoicepack();
 
   const closeModal = () => {
     setSelectedPack(null);
-    setAudioUrl('');
-    setDuration(0);
-    setCurrentTime(0);
-    setIsPlaying(false);
   };
 
   const handleSearch = () => {
@@ -47,7 +36,6 @@ function VoiceStore() {
       .catch(err => console.error('❌ 보이스팩 불러오기 실패:', err));
   }, []);
 
-
   useEffect(() => {
     let result = [...voicePacks];
     if (committedQuery) {
@@ -60,22 +48,15 @@ function VoiceStore() {
     if (sortOption === 'name') {
       result.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortOption === 'latest') {
-      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)); // 최신순
+      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortOption === 'oldest') {
-      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)); // 오래된순
+      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     }
     setFilteredPacks(result);
   }, [voicePacks, sortOption, committedQuery]);
 
-  const handleCardClick = async (pack) => {
+  const handleCardClick = (pack) => {
     setSelectedPack(pack);
-    try {
-      const url = await getVoicepackAudio(pack.id);
-      setAudioUrl(url);
-    } catch (err) {
-      console.error('❌ 오디오 로딩 실패:', err);
-      setAudioUrl('');
-    }
   };
 
   const handlePurchase = async () => {
@@ -90,39 +71,7 @@ function VoiceStore() {
     }
   };
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-    } else {
-      audioRef.current.play();
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleSeek = (e) => {
-    const value = e.target.value;
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = value;
-    setCurrentTime(value);
-  };
-
-  const formatSeconds = (seconds) => {
-    const min = String(Math.floor(seconds / 60)).padStart(2, '0');
-    const sec = String(Math.floor(seconds % 60)).padStart(2, '0');
-    return `${min}:${sec}`;
-  };
-
   const formatDate = (isoString) => new Date(isoString).toISOString().split('T')[0];
-
-  const handleLoadedMetadata = (e) => {
-    setDuration(e.target.duration);
-    setCurrentTime(0);
-  };
-
-  const handleTimeUpdate = (e) => {
-    setCurrentTime(e.target.currentTime);
-  };
 
   return (
     <>
@@ -134,15 +83,15 @@ function VoiceStore() {
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
             options={[
-              {label: '이름순', value: 'name'},
-              {label: '최근 등록순', value: 'latest'},
-              {label: '오래된 등록순', value: 'oldest'},
+              { label: '이름순', value: 'name' },
+              { label: '최근 등록순', value: 'latest' },
+              { label: '오래된 등록순', value: 'oldest' },
             ]}
             placeholder="정렬"
           />
           <div className="flex items-center border border-[#D9D9D9] px-2 rounded-lg text-sm bg-white mt-1">
             <button onClick={handleSearch} className="mr-2">
-              <Search className="w-5 h-5 text-gray-400"/>
+              <Search className="w-5 h-5 text-gray-400" />
             </button>
             <input
               type="search"
@@ -174,19 +123,9 @@ function VoiceStore() {
 
         {selectedPack && (
           <VoicePackModal
-            selectedPack={selectedPack}
-            audioUrl={audioUrl}
-            audioRef={audioRef}
-            duration={duration}
-            currentTime={currentTime}
-            isPlaying={isPlaying}
-            handleSeek={handleSeek}
-            togglePlay={togglePlay}
-            formatSeconds={formatSeconds}
-            closeModal={closeModal}
-            handlePurchase={handlePurchase}
-            handleLoadedMetadata={handleLoadedMetadata}
-            handleTimeUpdate={handleTimeUpdate}
+            pack={selectedPack}
+            onClose={closeModal}
+            onBuy={handlePurchase}
           />
         )}
       </div>
