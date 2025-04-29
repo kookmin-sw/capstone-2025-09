@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LP from '../../assets/lp.svg';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
+import useBuyVoicepack from '../../hooks/useBuyVoicepack'; // 여기서 import
 
-function VoicePackModal({ pack, onClose, onBuy }) {
+function VoicePackModal({pack, onClose, type = 'voicestore'}) {
   const audioRef = useRef(null);
-  const { getVoicepackAudio } = useVoicepackDetail();
+  const {getVoicepackAudio} = useVoicepackDetail();
+  const {buy} = useBuyVoicepack();
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);
@@ -22,7 +24,7 @@ function VoicePackModal({ pack, onClose, onBuy }) {
       }
     };
     fetchAudio();
-  }, [pack.id]);
+  }, [pack.id, getVoicepackAudio]);
 
   const togglePlay = () => {
     if (!audioRef.current) return;
@@ -56,8 +58,28 @@ function VoicePackModal({ pack, onClose, onBuy }) {
     return `${min}:${sec}`;
   };
 
+  const handlePurchase = async () => {
+    try {
+      const result = await buy(pack.id);
+      alert(`${result.message || '성공적으로 구매되었습니다.'}`);
+      onClose(); // 구매 성공하면 모달 닫기
+    } catch (err) {
+      console.error('구매 실패:', err);
+      alert('구매에 실패했습니다. 다시 시도해주세요.');
+    }
+  };
+
+  // ⭐ 수정/삭제 버튼 핸들러 (아직 동작은 alert로)
+  const handleEdit = () => {
+    alert('수정 기능은 추후 구현 예정입니다.');
+  };
+
+  const handleDelete = () => {
+    alert('삭제 기능은 추후 구현 예정입니다.');
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed top-0 left-48 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-[600px] flex flex-col sm:flex-row gap-6 relative">
         <button
           onClick={onClose}
@@ -108,19 +130,40 @@ function VoicePackModal({ pack, onClose, onBuy }) {
         </div>
         <div className="sm:w-1/2 flex flex-col justify-start py-2">
           <div className="px-3 gap-2 flex flex-col">
-            <h2 className="text-xl font-bold text-left">{pack.name}</h2>
-            <p className="text-sm text-slate-600 text-left">{pack.author}</p>
-            <div className="flex gap-2 mt-2">
-              <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
-              <span className="text-xs text-indigo-700 bg-indigo-100 px-3 py-1 rounded-lg">#카테고리</span>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-left">{pack.name}</h2>
+            <p className="text-[11px] sm:text-sm text-slate-600 text-left">{pack.author}</p>
+
+            <div className="flex gap-2 mt-2 flex-wrap">
+              <span
+                className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">#카테고리</span>
+              <span
+                className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">#카테고리</span>
             </div>
+
+            {type === 'voicestore' ? (
+              <button
+                className="mt-6 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-70 transition"
+                onClick={handlePurchase}
+              >
+                구매하기
+              </button>
+            ) : (
+              <div className="mt-6 flex flex-wrap gap-4">
+                <button
+                  className="flex-1 bg-yellow-400 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-80 transition"
+                  onClick={handleEdit}
+                >
+                  수정하기
+                </button>
+                <button
+                  className="flex-1 bg-red-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-80 transition"
+                  onClick={handleDelete}
+                >
+                  삭제하기
+                </button>
+              </div>
+            )}
           </div>
-          <button
-            className="mt-6 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold py-2 rounded-full hover:opacity-70 transition"
-            onClick={onBuy}
-          >
-            구매하기
-          </button>
         </div>
       </div>
     </div>
