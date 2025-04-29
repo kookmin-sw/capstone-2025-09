@@ -3,10 +3,10 @@ import LP from '../../assets/lp.svg';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack'; // 여기서 import
 
-function VoicePackModal({pack, onClose, type = 'voicestore'}) { // ⭐ type 추가
+function VoicePackModal({pack, onClose, type = 'voicestore'}) {
   const audioRef = useRef(null);
   const {getVoicepackAudio} = useVoicepackDetail();
-  const {buy} = useBuyVoicepack(); // 여기서 바로 buy 함수 사용
+  const {buy} = useBuyVoicepack();
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);

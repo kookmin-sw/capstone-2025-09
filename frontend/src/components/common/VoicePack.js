@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 
-function VoicePack({pack, type = 'voicestore'}) { // ← type 추가하고 기본값은 marketplace
+function VoicePack({pack, type = 'voicestore'}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleCardClick = () => {
