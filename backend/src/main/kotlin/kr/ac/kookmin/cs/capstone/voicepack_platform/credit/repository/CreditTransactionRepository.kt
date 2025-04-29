@@ -38,4 +38,7 @@ interface CreditTransactionRepository : JpaRepository<CreditTransaction, Long> {
         referenceType: ReferenceType,
         pageable: Pageable
     ): Page<CreditTransaction>
+
+    // 사용자 ID와 상태로 조회 (최신순 정렬)
+    fun findByUserIdAndStatusOrderByCreatedAtDesc(userId: Long, status: TransactionStatus): List<CreditTransaction>
 } 

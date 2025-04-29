@@ -55,7 +55,8 @@ enum class TransactionType {
     PURCHASE,    // 보이스팩 구매 등에 사용
     REFUND,      // 환불
     EXCHANGE,    // 크레딧을 현금으로 환전
-    SYSTEM       // 시스템 조정 (관리자 조정 등)
+    SYSTEM,      // 시스템 조정 (관리자 조정 등)
+    SALE_INCOME  // 판매 수익 (충전과 유사)
 }
 
 enum class TransactionStatus {
@@ -65,11 +66,8 @@ enum class TransactionStatus {
 }
 
 enum class ReferenceType {
-    VOICEPACK,  // 보이스팩 관련
-    ORDER,      // 주문 관련
-    PAYMENT,    // 결제 관련
-    BANK_ACCOUNT, // 계좌 정보 관련
-    PROMOTION,  // 프로모션 관련
-    USER,       // 사용자 관련
-    SYSTEM      // 시스템 관련
+    PAYMENT,       // 결제 (충전)
+    VOICEPACK,     // 보이스팩 구매
+    CREDIT_EXCHANGE // 크레딧 환전
+    // 필요에 따라 추가 (예: TTS_SYNTHESIS)
 } 

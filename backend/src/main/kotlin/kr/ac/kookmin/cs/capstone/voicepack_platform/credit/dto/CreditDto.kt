@@ -63,12 +63,12 @@ data class ChargeCreditsRequest(
     val userId: Long,
     val amount: Int,
     val paymentMethod: String? = null,
-    val paymentReference: String? = null
+    val paymentReference: Long? = null
 )
 
 @Serializable
 data class UseCreditsRequest(
-    val userId: Long,
+    // val userId: Long,
     val amount: Int,
     val referenceId: Long? = null,
     val referenceType: ReferenceType? = null,

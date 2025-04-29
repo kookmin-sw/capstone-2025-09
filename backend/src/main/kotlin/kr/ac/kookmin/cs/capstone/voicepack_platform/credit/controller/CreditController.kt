@@ -11,6 +11,9 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.TransactionStat
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.service.CreditService
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Sort
+import org.springframework.data.web.PageableDefault
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -56,6 +59,7 @@ class CreditController(
     }
     
     @Operation(
+        deprecated = true,
         summary = "크레딧 충전",
         description = "사용자의 크레딧을 충전합니다.",
         responses = [
@@ -121,12 +125,13 @@ class CreditController(
             )
         ]
     )
-    @PostMapping("/use")
+    @PostMapping("/use/{userId}")
     fun useCredits(
+        @Parameter(description = "사용자 ID") @PathVariable userId: Long,
         @RequestBody request: UseCreditsRequest
     ): ResponseEntity<Any> {
         try {
-            val result = creditService.useCredits(request)
+            val result = creditService.useCredits(userId, request)
             
             // 상태에 따라 다른 HTTP 응답 코드 반환
             return when (result.status) {
@@ -151,6 +156,7 @@ class CreditController(
     }
     
     @Operation(
+        deprecated = true,
         summary = "크레딧 환전",
         description = "사용자의 크레딧을 현금으로 환전합니다.",
         responses = [
@@ -179,84 +185,156 @@ class CreditController(
     )
     @PostMapping("/exchange")
     fun exchangeCredits(
-        @RequestBody request: ExchangeCreditsRequest
+        @RequestBody request: CreditExchangeRequestRequestDto
     ): ResponseEntity<Any> {
         try {
-            val result = creditService.exchangeCredits(request)
+            val result = creditService.requestCreditExchange(1L, request)
             
-            // 상태에 따라 다른 HTTP 응답 코드 반환
-            return when (result.status) {
-                TransactionStatus.COMPLETED.name -> ResponseEntity.ok(result)
-                TransactionStatus.FAILED.name -> {
-                    if (result.message?.contains("크레딧이 부족") == true) {
-                        ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(result)
-                    } else {
-                        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result)
-                    }
-                }
-                else -> ResponseEntity.status(HttpStatus.PROCESSING).body(result)
-            }
+            // 성공 응답 처리 (CreditExchangeResponseDto 반환)
+            return ResponseEntity.ok(result)
+
+        } catch (e: IllegalStateException) {
+            logger.warn("환전 신청 실패: {}", e.message)
+            // 크레딧 부족 또는 기타 비즈니스 로직 예외
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
         } catch (e: IllegalArgumentException) {
-            logger.error("환전 요청 실패: {}", e.message)
+            logger.error("환전 요청 실패 (잘못된 인자): {}", e.message)
             return ResponseEntity.badRequest().body(mapOf("error" to e.message))
-        } catch (e: Exception) {
-            logger.error("크레딧 환전 중 오류 발생: {}", e.message, e)
+        } catch (e: RuntimeException) {
+            logger.error("환전 처리 중 내부 오류 발생: {}", e.message, e)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(mapOf("error" to "크레딧 환전 중 오류가 발생했습니다"))
+                .body(mapOf("error" to "환전 처리 중 오류가 발생했습니다"))
+        } catch (e: Exception) {
+            logger.error("알 수 없는 환전 오류 발생: {}", e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(mapOf("error" to "알 수 없는 오류가 발생했습니다"))
         }
     }
     
     @Operation(
-        summary = "거래 내역 조회",
-        description = "사용자의 크레딧 거래 내역을 조회합니다.",
+        summary = "크레딧 거래 내역 조회 (충전/사용)",
+        description = "사용자의 크레딧 충전 및 사용 내역을 조회합니다.",
         responses = [
             ApiResponse(
                 responseCode = "200",
-                description = "조회 성공"
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = CreditHistoryDto::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청"
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "사용자를 찾을 수 없음"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류"
-            )
+            ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
         ]
     )
-    @GetMapping("/transactions")
-    fun getTransactions(
-        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
-        @Parameter(description = "거래 유형 (CHARGE, PURCHASE, REFUND, SYSTEM)") @RequestParam(required = false) type: String?,
-        @Parameter(description = "거래 상태 (PENDING, COMPLETED, FAILED)") @RequestParam(required = false) status: String?,
-        @Parameter(description = "시작 날짜 (ISO-8601 형식)") @RequestParam(required = false) startDate: String?,
-        @Parameter(description = "종료 날짜 (ISO-8601 형식)") @RequestParam(required = false) endDate: String?,
-        @Parameter(description = "페이지 번호 (0부터 시작)") @RequestParam(defaultValue = "0") page: Int,
-        @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") size: Int
-    ): ResponseEntity<Page<CreditTransactionDto>> {
-        try {
-            val request = GetTransactionsRequest(
-                userId = userId,
-                type = type,
-                status = status,
-                startDate = startDate,
-                endDate = endDate,
-                page = page,
-                size = size
-            )
-            
-            val transactions = creditService.getTransactionHistory(request)
-            return ResponseEntity.ok(transactions)
-        } catch (e: IllegalArgumentException) {
-            logger.error("거래 내역 조회 실패: {}", e.message)
-            return ResponseEntity.badRequest().build()
+    @GetMapping("/history/{userId}")
+    fun getCreditHistory(
+        @Parameter(description = "사용자 ID") @PathVariable userId: Long
+    ): ResponseEntity<CreditHistoryDto> {
+        return try {
+            val history = creditService.getTransactionHistory(userId)
+            ResponseEntity.ok(history)
+        } catch (e: NoSuchElementException) {
+            logger.warn("크레딧 내역 조회 실패: 사용자를 찾을 수 없음 - userId={}", userId)
+            ResponseEntity.status(HttpStatus.NOT_FOUND).build()
         } catch (e: Exception) {
-            logger.error("거래 내역 조회 중 오류 발생: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+            logger.error("크레딧 내역 조회 중 오류 발생: userId={}, error={}", userId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    // API 요구사항 8번: 환전 신청 내역 조회
+    @Operation(
+        summary = "크레딧 환전 신청 내역 조회",
+        description = "사용자의 크레딧 환전 신청 내역 목록을 조회합니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "조회 성공"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
+        ]
+    )
+    @GetMapping("/exchange-requests/{userId}")
+    fun getCreditExchangeRequests(
+        @Parameter(description = "사용자 ID") @PathVariable userId: Long,
+        @Parameter(required = false, description = "페이지 정보", example = """
+        {
+            "page": 0,
+            "size": 10,
+            "sort": [
+                "requestDate"
+            ]
+        }
+    """
+    ) @PageableDefault(size = 10, sort = ["requestDate"], direction = Sort.Direction.DESC) pageable: Pageable
+    ): ResponseEntity<Page<CreditExchangeRequestDto>> {
+        return try {
+            val history = creditService.getCreditExchangeRequests(userId, pageable)
+            ResponseEntity.ok(history)
+        } catch (e: Exception) {
+            logger.error("환전 신청 내역 조회 중 오류 발생: userId={}, error={}", userId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    // API 요구사항 9번: 크레딧 환전 신청 요청
+    @Operation(
+        summary = "크레딧 환전 신청",
+        description = "사용자의 크레딧을 현금으로 환전 신청합니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "신청 성공", content = [Content(schema = Schema(implementation = CreditExchangeResponseDto::class))]),
+            ApiResponse(responseCode = "400", description = "잘못된 요청 (금액 오류 등)"),
+            ApiResponse(responseCode = "402", description = "크레딧 부족"),
+            ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
+        ]
+    )
+    @PostMapping("/exchange-request/{userId}")
+    fun requestCreditExchange(
+        @Parameter(description = "사용자 ID") @PathVariable userId: Long,
+        @RequestBody request: CreditExchangeRequestRequestDto
+    ): ResponseEntity<Any> {
+        return try {
+            val response = creditService.requestCreditExchange(userId, request)
+            ResponseEntity.ok(response)
+        } catch (e: IllegalStateException) {
+            logger.warn("환전 신청 실패: userId={}, error={}", userId, e.message)
+            ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(mapOf("error" to e.message))
+        } catch (e: IllegalArgumentException) {
+            logger.warn("환전 신청 실패 (잘못된 요청): userId={}, error={}", userId, e.message)
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        } catch (e: NoSuchElementException) {
+            logger.warn("환전 신청 실패: 사용자를 찾을 수 없음 - userId={}", userId)
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("환전 신청 처리 중 오류 발생: userId={}, error={}", userId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "환전 신청 처리 중 오류가 발생했습니다."))
+        }
+    }
+    
+    // API 요구사항 10번: 크레딧 충전 요청
+    @Operation(
+        summary = "크레딧 충전 요청 생성",
+        description = "크레딧 충전을 위한 결제 요청을 생성합니다. (실제 결제 처리는 별도)",
+        responses = [
+            ApiResponse(responseCode = "200", description = "결제 요청 생성 성공"),
+            ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
+        ]
+    )
+    @PostMapping("/charge/{userId}")
+    fun requestCreditCharge(
+        @Parameter(description = "사용자 ID") @PathVariable userId: Long,
+        @RequestBody request: CreditChargeRequestDto
+    ): ResponseEntity<Any> {
+        return try {
+            val response = creditService.requestCreditCharge(userId, request)
+            ResponseEntity.ok(response)
+        } catch (e: IllegalArgumentException) {
+            logger.warn("충전 요청 생성 실패 (잘못된 요청): userId={}, error={}", userId, e.message)
+            ResponseEntity.badRequest().body(mapOf("error" to e.message))
+        } catch (e: NoSuchElementException) {
+            logger.warn("충전 요청 생성 실패: 사용자를 찾을 수 없음 - userId={}", userId)
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("충전 요청 생성 중 오류 발생: userId={}, error={}", userId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "충전 요청 처리 중 오류가 발생했습니다."))
         }
     }
 } 
