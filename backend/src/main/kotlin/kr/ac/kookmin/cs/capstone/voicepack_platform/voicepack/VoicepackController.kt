@@ -128,10 +128,19 @@ class VoicepackController(
     )
     @GetMapping("")
     fun getVoicepacks(
-        @Parameter(description = "사용자 ID (선택적)") @RequestParam(required = false) userId: Long?
+        @Parameter(description = "사용자 ID ('mine', 'purchased' 필터 사용 시 필요)") @RequestParam(required = false) userId: Long?,
+        @Parameter(description = "필터 (all | mine | purchased), 기본값: all(공개된 보이스팩)") @RequestParam(required = false, defaultValue = "all") filter: String?
     ): ResponseEntity<List<VoicepackDto>> {
-        val voicepacks = voicepackService.getVoicepacks(userId)
-        return ResponseEntity.ok(voicepacks)
+        try {
+            val voicepacks = voicepackService.getVoicepacks(userId, filter)
+            return ResponseEntity.ok(voicepacks)
+        } catch (e: IllegalArgumentException) {
+            // userId 누락 등 서비스 레벨에서 발생한 오류 처리
+            return ResponseEntity.badRequest().body(listOf()) // 혹은 에러 메시지 반환
+        } catch (e: Exception) {
+            logger.error("보이스팩 목록 조회 중 오류 발생: {}", e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
+        }
     }
   
     // 보이스팩 1개만 조회
@@ -176,10 +185,20 @@ class VoicepackController(
     )
     @DeleteMapping("/{voicepackId}")
     fun deleteVoicepack(
+        @Parameter(description = "삭제 요청하는 사용자 ID (로그인 필요)") @RequestParam userId: Long, // TODO: 추후 SecurityContextHolder에서 가져오도록 변경
         @Parameter(description = "보이스팩 ID") @PathVariable voicepackId: Long
     ): ResponseEntity<Any> {
-        voicepackService.deleteVoicepack(voicepackId)
-        return ResponseEntity.noContent().build()
+        return try {
+            voicepackService.deleteVoicepack(userId, voicepackId)
+            ResponseEntity.noContent().build()
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to "보이스팩을 찾을 수 없습니다."))
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("보이스팩 삭제 중 오류 발생: voicepackId={}, error={}", voicepackId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "서버 처리 중 오류가 발생했습니다."))
+        }
     }
     
     // 보이스팩 예시 음성 파일 조회
@@ -410,5 +429,38 @@ class VoicepackController(
         voicepackService.createVoicepackForDebug(userId, voicepackId)
         return ResponseEntity.ok().build()
     }
-    
+
+    @Operation(
+        summary = "보이스팩 공개 여부 변경",
+        description = "특정 보이스팩의 공개 여부를 변경합니다. 작성자 본인만 요청 가능합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", 
+                description = "변경 성공", 
+                content = [Content(schema = Schema(implementation = VoicepackDto::class))]
+            ),
+            ApiResponse(responseCode = "400", description = "잘못된 요청"),
+            ApiResponse(responseCode = "403", description = "권한 없음"),
+            ApiResponse(responseCode = "404", description = "보이스팩을 찾을 수 없음"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
+        ]
+    )
+    @PatchMapping("/{voicepackId}")
+    fun updateVoicepackPublicStatus(
+        @Parameter(description = "수정 요청하는 사용자 ID (로그인 필요)") @RequestParam userId: Long, // TODO: 추후 SecurityContextHolder에서 가져오도록 변경
+        @Parameter(description = "수정할 보이스팩 ID") @PathVariable voicepackId: Long,
+        @RequestBody request: UpdateVoicepackPublicRequest
+    ): ResponseEntity<Any> {
+        return try {
+            val updatedVoicepackDto = voicepackService.updateVoicepackPublicStatus(userId, voicepackId, request.isPublic)
+            ResponseEntity.ok(updatedVoicepackDto)
+        } catch (e: NoSuchElementException) { // findVoicepack에서 발생 가능 (orElseThrow 사용 시 다른 예외)
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to "보이스팩을 찾을 수 없습니다."))
+        } catch (e: SecurityException) {
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            logger.error("보이스팩 공개 여부 변경 중 오류 발생: voicepackId={}, error={}", voicepackId, e.message, e)
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "서버 처리 중 오류가 발생했습니다."))
+        }
+    }
 } 

@@ -27,11 +27,18 @@ data class Voicepack(
     @Column(name = "created_at", nullable = false)
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
+    @Column(name = "price")
+    var price: Int? = 1000,
+
+    @Column(name = "is_public", nullable = false)
+    var isPublic: Boolean = true,
+
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
 
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val synthesisRequests: MutableList<VoiceSynthesisRequest> = mutableListOf()
+
 ) 
 
 /**
@@ -42,7 +49,9 @@ data class VoicepackDto(
     val id: Long,
     val name: String,
     val author: String,
-    val createdAt: OffsetDateTime
+    val createdAt: OffsetDateTime,
+    val price: Int?,
+    val isPublic: Boolean
 ) {
     companion object {
         fun fromEntity(voicepack: Voicepack): VoicepackDto {
@@ -50,7 +59,9 @@ data class VoicepackDto(
                 id = voicepack.id,
                 name = voicepack.name,
                 author = voicepack.author.email,
-                createdAt = voicepack.createdAt
+                createdAt = voicepack.createdAt,
+                price = voicepack.price,
+                isPublic = voicepack.isPublic
             )
         }
     }
