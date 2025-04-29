@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 interface VoicepackRepository : JpaRepository<Voicepack, Long> {
     fun existsByName(name: String): Boolean
     fun findByAuthorId(authorId: Long): List<Voicepack>
+    fun findByIsPublicTrue(): List<Voicepack>
+    fun countByAuthorId(authorId: Long): Int
 } 

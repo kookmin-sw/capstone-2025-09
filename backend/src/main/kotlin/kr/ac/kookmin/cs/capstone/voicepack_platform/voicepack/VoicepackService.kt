@@ -30,6 +30,8 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.ReferenceType
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.service.CreditService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.model.TransactionStatus
 import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.dto.ChargeCreditsRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.sale.Sale
+import kr.ac.kookmin.cs.capstone.voicepack_platform.sale.SaleRepository
 import org.slf4j.LoggerFactory
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Value
@@ -48,6 +50,7 @@ class VoicepackService(
     private val userRepository: UserRepository,
     private val notificationService: NotificationService,
     private val creditService: CreditService,
+    private val saleRepository: SaleRepository,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate
 ) {
@@ -229,8 +232,16 @@ class VoicepackService(
      * 보이스팩 삭제
      */
     @Transactional
-    fun deleteVoicepack(voicepackId: Long) {
-        logger.info("보이스팩 삭제 시작: voicepackId={}", voicepackId)
+    fun deleteVoicepack(userId: Long, voicepackId: Long) {
+        logger.info("보이스팩 삭제 시작: userId={}, voicepackId={}", userId, voicepackId)
+        
+        // 권한 확인: 요청한 사용자가 보이스팩 작성자인지 확인
+        val voicepack = findVoicepack(voicepackId)
+        if (voicepack.author.id != userId) {
+            logger.warn("보이스팩 삭제 권한 없음: userId={}, voicepackId={}, authorId={}", userId, voicepackId, voicepack.author.id)
+            throw SecurityException("해당 보이스팩을 삭제할 권한이 없습니다.")
+        }
+        
         voicepackRepository.deleteById(voicepackId)
         logger.info("보이스팩 삭제 완료: voicepackId={}", voicepackId)
     }
@@ -380,17 +391,23 @@ class VoicepackService(
     /**
      * 보이스팩 목록 조회
      */
-    fun getVoicepacks(userId: Long?): List<VoicepackDto> {
-        logger.info("보이스팩 목록 조회: userId={}", userId)
-        
-        val voicepacks = if (userId != null) {
-            // 특정 사용자의 보이스팩만 조회
-            voicepackRepository.findByAuthorId(userId)
-        } else {
-            // 모든 보이스팩 조회
-            voicepackRepository.findAll()
+    fun getVoicepacks(userId: Long?, filter: String?): List<VoicepackDto> {
+        logger.info("보이스팩 목록 조회: userId={}, filter={}", userId, filter ?: "all")
+
+        val voicepacks = when (filter?.lowercase()) {
+            "mine" -> {
+                if (userId == null) throw IllegalArgumentException("'mine' 필터 사용 시 userId는 필수입니다.")
+                voicepackRepository.findByAuthorId(userId)
+            }
+            "purchased" -> {
+                if (userId == null) throw IllegalArgumentException("'purchased' 필터 사용 시 userId는 필수입니다.")
+                voicepackUsageRightRepository.findDistinctPurchasedVoicepacksByUserId(userId)
+            }
+            else -> { // "all" 또는 그 외 (기본값)
+                voicepackRepository.findByIsPublicTrue() // 공개된 것만 조회
+            }
         }
-        
+
         return voicepacks.map { VoicepackDto.fromEntity(it) }
     }
 
@@ -435,6 +452,7 @@ class VoicepackService(
 
         val user = findUser(userId)
         val voicepack = findVoicepack(voicepackId)
+        val seller = voicepack.author
 
         // 1. 이미 사용권을 가지고 있는지 확인
         if (voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, voicepackId)) {
@@ -443,30 +461,41 @@ class VoicepackService(
         }
 
         // 2. (선택 사항) 가격 확인 및 크레딧 차감 (제작자가 아닌 경우에만)
-        if (voicepack.author.id != userId) {
+        if (seller.id != userId) {
             // TODO: 보이스팩 가격 확인 및 크레딧 차감 로직
             
-            val voicepackPrice = voicepack.price
+            val voicepackPrice = voicepack.price ?: 0 // Nullable price 처리: null이면 0으로 간주
             if (voicepackPrice > 0) {
                 // 크레딧 차감 로직 추가
-                val result = creditService.useCredits(UseCreditsRequest(
-                    userId = userId,
+                val result = creditService.useCredits(userId, UseCreditsRequest(
                     amount = voicepackPrice,
                     referenceId = voicepackId,
                     referenceType = ReferenceType.VOICEPACK,
-                    description = "보이스팩 구매"
+                    description = "보이스팩 구매: ${voicepack.name}"
                 ))
                 if (result.status == TransactionStatus.FAILED.name) {
-                    logger.error("크레딧 차감 실패: ${result.message}")
                     throw IllegalStateException("크레딧 차감 실패: ${result.message}")
                 }
-                // 판매자에게 크레딧 충전
+                // 판매자에게 크레딧 지급 (구매 가격만큼)
+                // TODO: 판매 수수료 정책 적용 필요 시 여기에 로직 추가 (예: amount * 0.9)
                 creditService.chargeCredits(ChargeCreditsRequest(
-                    userId = voicepack.author.id,
-                    amount = voicepackPrice,
-                    paymentMethod = "voicepack",
-                    paymentReference = voicepack.id.toString()
+                    userId = seller.id,
+                    amount = voicepackPrice, // 수수료 적용 시 수정 필요
+                    paymentMethod = "보이스팩 판매: ${voicepack.name}", // 판매 수익임을 명시
+                    paymentReference = voicepackId
                 ))
+                
+                // 판매 기록 생성
+                val saleRecord = Sale(
+                    seller = seller,
+                    buyer = user,
+                    voicepack = voicepack,
+                    amount = voicepackPrice // 실제 판매 금액 기록
+                    // transactionDate는 기본값 사용 (현재 시간)
+                )
+                saleRepository.save(saleRecord)
+                logger.info("판매 기록 저장 완료: saleId={}, sellerId={}, buyerId={}, voicepackId={}, amount={}",
+                    saleRecord.id, seller.id, user.id, voicepack.id, voicepackPrice)
             }
         }
 
@@ -566,6 +595,29 @@ class VoicepackService(
             voicepack = voicepack as Voicepack
         )
         voicepackUsageRightRepository.save(usageRight)
+    }
+
+    /**
+     * 보이스팩 공개 여부 변경
+     */
+    @Transactional
+    fun updateVoicepackPublicStatus(userId: Long, voicepackId: Long, isPublic: Boolean): VoicepackDto {
+        logger.info("보이스팩 공개 여부 변경 요청: userId={}, voicepackId={}, isPublic={}", userId, voicepackId, isPublic)
+
+        val voicepack = findVoicepack(voicepackId) // voicepackId로 조회
+
+        // 권한 확인: 요청한 사용자가 보이스팩 작성자인지 확인
+        if (voicepack.author.id != userId) {
+            logger.warn("보이스팩 공개 여부 변경 권한 없음: userId={}, voicepackId={}, authorId={}", userId, voicepackId, voicepack.author.id)
+            throw SecurityException("해당 보이스팩을 수정할 권한이 없습니다.")
+        }
+
+        // 상태 업데이트
+        voicepack.isPublic = isPublic
+        val updatedVoicepack = voicepackRepository.save(voicepack)
+        logger.info("보이스팩 공개 여부 변경 완료: voicepackId={}, isPublic={}", voicepackId, isPublic)
+
+        return VoicepackDto.fromEntity(updatedVoicepack)
     }
 
 }
