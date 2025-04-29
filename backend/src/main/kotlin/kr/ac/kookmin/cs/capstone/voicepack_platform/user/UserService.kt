@@ -3,13 +3,26 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 import jakarta.servlet.http.HttpSession
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
+import kr.ac.kookmin.cs.capstone.voicepack_platform.credit.service.CreditService
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.VoicepackRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightRepository
+import kr.ac.kookmin.cs.capstone.voicepack_platform.sale.SaleRepository
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.NoSuchElementException
 
 @Service
 class UserService(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val creditService: CreditService,
+    private val voicepackRepository: VoicepackRepository,
+    private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
+    private val saleRepository: SaleRepository
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     @Transactional
     fun signup(request: UserSignupRequest): Long {
         if (userRepository.findByEmail(request.email) != null) {
@@ -36,5 +49,37 @@ class UserService(
         session.setAttribute("userId", user.id)
 
         return user.id;
+    }
+
+    @Transactional(readOnly = true)
+    fun getUserProfile(userId: Long): UserProfileDto {
+        logger.info("사용자 프로필 조회 요청: userId={}", userId)
+        
+        val user = userRepository.findById(userId)
+            .orElseThrow { 
+                logger.warn("사용자 프로필 조회 실패: 사용자를 찾을 수 없음 - userId={}", userId)
+                NoSuchElementException("사용자를 찾을 수 없습니다.") 
+            }
+        
+        // 크레딧 정보 조회 (CreditService 필요)
+        val creditBalance = creditService.getUserBalance(userId).balance
+        // TODO: CreditService에 총 수입 계산 로직 구현 필요 -> SaleRepository 직접 사용으로 변경
+        val totalEarnings = saleRepository.sumAmountBySellerId(userId) ?: 0 // SaleRepository 사용
+        
+        // 보이스팩 통계 조회
+        val createdPacks = voicepackRepository.countByAuthorId(userId)
+        val boughtPacks = voicepackUsageRightRepository.countPurchasedVoicepacksByUserId(userId)
+        
+        logger.info("사용자 프로필 조회 성공: userId={}", userId)
+        return UserProfileDto(
+            id = user.id,
+            name = user.name,
+            email = user.email,
+            profileImageUrl = user.profileImageUrl,
+            credit = creditBalance,
+            totalEarnings = totalEarnings,
+            createdPacks = createdPacks,
+            boughtPacks = boughtPacks
+        )
     }
 } 

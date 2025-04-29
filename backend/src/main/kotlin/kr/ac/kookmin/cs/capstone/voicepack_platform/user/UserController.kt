@@ -8,9 +8,18 @@ import jakarta.validation.Valid
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.Content
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
+import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
+import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "사용자", description = "사용자 관련 API")
 class UserController(
     private val userService: UserService
 ) {
@@ -40,4 +49,30 @@ class UserController(
         return ResponseEntity.ok("현재 쿠키 값: $sessionCookie")
     }
 
+    @Operation(
+        summary = "내 정보 조회",
+        description = "로그인한 사용자의 정보와 활동 통계를 조회합니다.",
+        responses = [
+            ApiResponse(
+                responseCode = "200", 
+                description = "조회 성공",
+                content = [Content(schema = Schema(implementation = UserProfileDto::class))]
+            ),
+            ApiResponse(responseCode = "404", description = "사용자를 찾을 수 없음"),
+            ApiResponse(responseCode = "500", description = "서버 오류")
+        ]
+    )
+    @GetMapping("/me/{userId}")
+    fun getMyProfile(
+        @Parameter(description = "조회할 사용자 ID") @PathVariable userId: Long
+    ): ResponseEntity<Any> {
+        return try {
+            val userProfile = userService.getUserProfile(userId)
+            ResponseEntity.ok(userProfile)
+        } catch (e: NoSuchElementException) {
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+        } catch (e: Exception) {
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "프로필 조회 중 오류 발생"))
+        }
+    }
 } 
