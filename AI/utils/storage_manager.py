@@ -52,17 +52,17 @@ class StorageManager:
                 Body=audio_data
             )
 
-            url = f"https://{self.bucket_name}.s3.{AWS_CONFIG['region']}.amazonaws.com/{file_path}"
-            logger.info(f"음성 파일 저장 완료: {url}")
-            return url
+            logger.info(f"audio file saved: {file_path}")
+            return file_path
         
         except Exception as e:
-            logger.error(f"음성 파일 저장 실패: {str(e)}")
+            logger.error(f"failed to save audio file: {str(e)}")
             return None
 
-    def save_speaker_features(self, voicepackId: str, features: dict) -> bool:
+    def save_speaker_features(self, voicepackId: str, features: torch.Tensor) -> bool:
         """화자의 특징을 S3에 저장"""
         try:
+            features = features.float()
             json_features = self._convert_tensor_to_list(features)
             features_json = json.dumps(json_features)
             
@@ -74,14 +74,13 @@ class StorageManager:
                 Body=features_json
             )
 
-            logger.info(f"화자 특징 저장 완료: {voicepackId}")
             return True
         
         except Exception as e:
-            logger.error(f"화자 특징 저장 실패: {str(e)}")
+            logger.error(f"failed to save speaker features to s3: {str(e)}")
             return False
 
-    def get_speaker_features(self, voicepackId: str) -> dict:
+    def get_speaker_features(self, voicepackId: str) -> torch.Tensor:
         """S3에서 화자의 특징 불러오기"""
         try:
             key = f"speakers/{voicepackId}/features.json"
@@ -92,10 +91,11 @@ class StorageManager:
             
             json_features = json.loads(response['Body'].read().decode('utf-8'))
             features = self._convert_list_to_tensor(json_features)
+            features = features.to(torch.bfloat16)
             return features
         
         except Exception as e:
-            logger.error(f"화자 특징 로드 실패: {str(e)}")
+            logger.error(f"failed to load speaker features: {str(e)}")
             return None
 
     def save_generated_audio(self, 
