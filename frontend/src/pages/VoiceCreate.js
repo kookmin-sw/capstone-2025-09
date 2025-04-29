@@ -217,7 +217,7 @@ function VoiceCreate() {
         </div>
       )}
       <>
-        <h1 className="text-xl font-bold text-gray-900 mb-6">보이스팩 생성</h1>
+        <h1 className="text-xl font-bold mb-6">보이스팩 생성</h1>
 
         <h1 className="text-l font-bold text-gray-900 mb-2">
           보이스팩 이름 <span className="text-red-500">*</span>
@@ -225,7 +225,7 @@ function VoiceCreate() {
         <input
           value={voicePackName}
           onChange={(e) => setVoicePackName(e.target.value)}
-          className="w-full px-4 py-2 border-none rounded-md mb-6 bg-slate-50 focus:outline-none focus:ring-1 focus:ring-indigo-400"
+          className="w-full px-4 py-2 border-none rounded-md mb-6 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
           placeholder="보이스팩 이름을 입력해주세요."
         />
         <div className="flex flex-col mb-2">
@@ -254,10 +254,9 @@ function VoiceCreate() {
           </div>
         </div>
 
-        <div className="bg-slate-50 rounded-md p-6">
+        <div className="bg-white rounded-md p-6">
           <p className="text-lg font-medium text-gray-800 mb-4">
-            “ 안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요?
-            감사합니다. ”
+            “안녕하세요. 지금 제 목소리를 녹음하고 있어요. 또렷하게 들리시나요? 감사합니다.”
           </p>
 
           <div className="flex items-center space-x-4">
