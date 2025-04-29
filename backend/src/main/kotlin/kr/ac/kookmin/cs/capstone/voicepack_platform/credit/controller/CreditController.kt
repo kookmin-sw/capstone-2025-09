@@ -249,7 +249,7 @@ class CreditController(
             ApiResponse(responseCode = "500", description = "서버 오류")
         ]
     )
-    @GetMapping("/exchange-requests/{userId}")
+    @GetMapping("/exchange-request/{userId}")
     fun getCreditExchangeRequests(
         @Parameter(description = "사용자 ID") @PathVariable userId: Long,
         @Parameter(required = false, description = "페이지 정보", example = """
