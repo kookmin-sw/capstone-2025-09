@@ -11,8 +11,8 @@ from .storage_manager import StorageManager
 import tempfile
 import os
 from config.settings import MODEL_CONFIG
-import re
-from .text_processor import sentences_split, convert_text
+from .sentence_splitter import sentences_split
+from .number_converter import convert_text
 
 logger = logging.getLogger(__name__)
 
