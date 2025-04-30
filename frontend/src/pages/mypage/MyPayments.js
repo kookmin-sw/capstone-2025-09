@@ -1,5 +1,4 @@
 import React from 'react';
-import CreditStats from '../../components/mypage/CreditStats';
 import CreditTransactionTabs from '../../components/mypage/CreditTransactionTabs';
 import CreditExchangeList from '../../components/mypage/CreditExchangeList';
 
@@ -12,15 +11,32 @@ const MyPayments = () => {
       `💸 ${currentCredit} 크레딧은 ${won.toLocaleString()}원으로 환전됩니다.`
     );
   };
+  const charged = 10000;
+  const used = 1000;
 
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
-      <CreditStats
-        current={currentCredit}
-        charged={500}
-        used={150}
-        onExchange={handleExchange}
-      />
+      <div className="grid grid-cols-3 gap-4 text-sm relative">
+        <div className="bg-purple-100 p-4 rounded shadow text-center relative">
+          <p className="text-gray-500">보유 크레딧</p>
+          <p className="font-bold text-base">{currentCredit} 크레딧</p>
+          <button
+            onClick={handleExchange}
+            className="absolute right-3 top-7 text-xs bg-indigo-300 px-2 py-1 rounded"
+          >
+            환전 신청
+          </button>
+        </div>
+        <div className="bg-purple-100 p-4 rounded shadow text-center">
+          <p className="text-gray-500">총 충전</p>
+          <p className="font-bold text-base">{charged} 크레딧</p>
+        </div>
+        <div className="bg-purple-100 p-4 rounded shadow text-center">
+          <p className="text-gray-500">이번 달 사용</p>
+          <p className="font-bold text-base">{used} 크레딧</p>
+        </div>
+      </div>
+
       <CreditTransactionTabs />
       <CreditExchangeList />
       <div className="mt-6 text-sm">
