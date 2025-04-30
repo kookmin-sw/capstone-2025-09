@@ -11,6 +11,7 @@ from .storage_manager import StorageManager
 import tempfile
 import os
 from config.settings import MODEL_CONFIG
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,13 @@ class VoiceSynthesizer:
         except Exception as e:
             logger.error(f"Failed to load Zonos model: {e}")
             raise
+        
+    def _sentences_split(self, text: str) -> list[str]:
+        """문장 분리 함수"""
+        pattern = r'(?<=[.!?])\s+'
+        sentences = re.split(pattern, text)
+        sentences = [sentence.strip() for sentence in sentences if sentence.strip()]
+        return sentences
 
     def _synthesize_speech_internal(
         self,
@@ -40,22 +48,35 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
-            # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가가
-            cond_dict = make_cond_dict(text=text, speaker=features, language=language)
-            conditioning = self.model.prepare_conditioning(cond_dict)
+            sentences = self._sentences_split(text)
+            audio_tensors = []
+            duration = 0
+            
+            for sentence in sentences:
+                # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
+                cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
+                conditioning = self.model.prepare_conditioning(cond_dict)
 
-            # 음성 생성
-            codes = self.model.generate(conditioning)
-            wavs = self.model.autoencoder.decode(codes).cpu()
+                # 음성 생성
+                codes = self.model.generate(conditioning)
+                wavs = self.model.autoencoder.decode(codes).cpu()
 
-            # 오디오 버퍼 생성 및 저장
-            buffer = io.BytesIO()
-            torchaudio.save(buffer, wavs[0], self.model.autoencoder.sampling_rate, format="wav")
-            buffer.seek(0)
+                audio_tensors.append(wavs[0])
+                duration += wavs[0].shape[1] / self.model.autoencoder.sampling_rate
 
-            duration = wavs[0].shape[1] / self.model.autoencoder.sampling_rate
+            # 모든 오디오 텐서 합치기
+            if not audio_tensors:
+                # 생성된 오디오가 없는 경우 빈 바이트와 0초 반환
+                return b"", 0.0
+                
+            combined_wav = torch.cat(audio_tensors, dim=1)
 
-            return buffer.getvalue(), duration
+            # 최종 WAV 데이터를 저장할 버퍼 생성
+            final_buffer = io.BytesIO()
+            torchaudio.save(final_buffer, combined_wav, self.model.autoencoder.sampling_rate, format="wav")
+            final_buffer.seek(0)
+
+            return final_buffer.getvalue(), duration
 
         except Exception as e:
             logger.error(f"Error during synthesis: {e}")
