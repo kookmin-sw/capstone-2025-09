@@ -50,9 +50,16 @@ class VoiceSynthesizer:
         try:
             sentences = self._sentences_split(text)
             audio_tensors = []
-            duration = 0
+            total_duration = 0
             
-            for sentence in sentences:
+            # 정적(silence) 설정
+            sample_rate = self.model.autoencoder.sampling_rate
+            silence_duration_seconds = 0.7 # 0.7초 정적
+            num_silence_samples = int(silence_duration_seconds * sample_rate)
+            # 정적 텐서 생성
+            silence_tensor = torch.zeros((1, num_silence_samples)) 
+
+            for i, sentence in enumerate(sentences):
                 # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
                 cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
                 conditioning = self.model.prepare_conditioning(cond_dict)
@@ -61,8 +68,15 @@ class VoiceSynthesizer:
                 codes = self.model.generate(conditioning)
                 wavs = self.model.autoencoder.decode(codes).cpu()
 
-                audio_tensors.append(wavs[0])
-                duration += wavs[0].shape[1] / self.model.autoencoder.sampling_rate
+                sentence_tensor = wavs[0]
+                sentence_duration = sentence_tensor.shape[1] / sample_rate
+
+                if i > 0:
+                    audio_tensors.append(silence_tensor)
+                    total_duration += silence_duration_seconds
+                
+                audio_tensors.append(sentence_tensor)
+                total_duration += sentence_duration
 
             # 모든 오디오 텐서 합치기
             if not audio_tensors:
@@ -76,7 +90,7 @@ class VoiceSynthesizer:
             torchaudio.save(final_buffer, combined_wav, self.model.autoencoder.sampling_rate, format="wav")
             final_buffer.seek(0)
 
-            return final_buffer.getvalue(), duration
+            return final_buffer.getvalue(), total_duration
 
         except Exception as e:
             logger.error(f"Error during synthesis: {e}")
