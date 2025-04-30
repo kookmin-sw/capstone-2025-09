@@ -36,7 +36,7 @@ class CreditService(
     /**
      * 사용자의 크레딧 잔액을 조회합니다.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     fun getUserBalance(userId: Long): CreditBalanceDto {
         logger.info("크레딧 잔액 조회: userId={}", userId)
         
