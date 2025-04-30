@@ -1,17 +1,21 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LP from '../../assets/lp.svg';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
-import useBuyVoicepack from '../../hooks/useBuyVoicepack'; // 여기서 import
+import useBuyVoicepack from '../../hooks/useBuyVoicepack';
 
-function VoicePackModal({pack, onClose, type = 'voicestore'}) {
+function VoicePackModal({ pack, onClose, type = 'voicestore', filter = null }) {
   const audioRef = useRef(null);
-  const {getVoicepackAudio} = useVoicepackDetail();
-  const {buy} = useBuyVoicepack();
+  const { getVoicepackAudio } = useVoicepackDetail();
+  const { buy } = useBuyVoicepack();
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const isMypage = type === 'mypage';
+  const showEditDelete = isMypage && filter === 'mine';
+  const showBuyButton = type === 'voicestore';
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -69,7 +73,6 @@ function VoicePackModal({pack, onClose, type = 'voicestore'}) {
     }
   };
 
-  // ⭐ 수정/삭제 버튼 핸들러 (아직 동작은 alert로)
   const handleEdit = () => {
     alert('수정 기능은 추후 구현 예정입니다.');
   };
@@ -79,7 +82,7 @@ function VoicePackModal({pack, onClose, type = 'voicestore'}) {
   };
 
   return (
-    <div className="fixed top-0 left-48 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-[600px] flex flex-col sm:flex-row gap-6 relative">
         <button
           onClick={onClose}
@@ -87,8 +90,10 @@ function VoicePackModal({pack, onClose, type = 'voicestore'}) {
         >
           &times;
         </button>
+
+        {/* 왼쪽: 이미지 및 플레이어 */}
         <div className="sm:w-1/2 flex flex-col items-center justify-center bg-violet-50 rounded-xl p-4">
-          <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4"/>
+          <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4" />
           {audioUrl && (
             <>
               <audio
@@ -98,7 +103,7 @@ function VoicePackModal({pack, onClose, type = 'voicestore'}) {
                 crossOrigin="anonymous"
                 onLoadedMetadata={handleLoadedMetadata}
                 onTimeUpdate={handleTimeUpdate}
-                style={{display: 'none'}}
+                style={{ display: 'none' }}
               />
               <input
                 type="range"
@@ -128,26 +133,37 @@ function VoicePackModal({pack, onClose, type = 'voicestore'}) {
             </>
           )}
         </div>
+
+        {/* 오른쪽: 텍스트 정보 및 액션 */}
         <div className="sm:w-1/2 flex flex-col justify-start py-2">
           <div className="px-3 gap-2 flex flex-col">
-            <h2 className="text-base sm:text-lg md:text-xl font-bold text-left">{pack.name}</h2>
-            <p className="text-[11px] sm:text-sm text-slate-600 text-left">{pack.author}</p>
+            <h2 className="text-base sm:text-lg md:text-xl font-bold text-left">
+              {pack.name}
+            </h2>
+            <p className="text-[11px] sm:text-sm text-slate-600 text-left">
+              {pack.author}
+            </p>
 
             <div className="flex gap-2 mt-2 flex-wrap">
-              <span
-                className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">#카테고리</span>
-              <span
-                className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">#카테고리</span>
+              <span className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
+                #카테고리
+              </span>
+              <span className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
+                #카테고리
+              </span>
             </div>
 
-            {type === 'voicestore' ? (
+            {/* 버튼 조건 처리 */}
+            {showBuyButton && (
               <button
                 className="mt-6 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-70 transition"
                 onClick={handlePurchase}
               >
                 구매하기
               </button>
-            ) : (
+            )}
+
+            {showEditDelete && (
               <div className="mt-6 flex flex-wrap gap-4">
                 <button
                   className="flex-1 bg-yellow-400 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-80 transition"
