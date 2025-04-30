@@ -30,7 +30,10 @@ data class VoicepackRequest(
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column(name = "completed_at", nullable = true)
-    var completedAt: OffsetDateTime? = null
+    var completedAt: OffsetDateTime? = null,
+
+    @Column(name = "voicepack_id", nullable = true)
+    var voicepackId: Long? = null
 )
 
 enum class VoicepackRequestStatus {
