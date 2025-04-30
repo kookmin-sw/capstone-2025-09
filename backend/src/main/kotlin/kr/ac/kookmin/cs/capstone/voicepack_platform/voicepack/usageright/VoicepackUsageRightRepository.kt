@@ -30,6 +30,7 @@ interface VoicepackUsageRightRepository : JpaRepository<VoicepackUsageRight, Lon
     @Query("SELECT COUNT(DISTINCT vur.voicepack.id) FROM VoicepackUsageRight vur WHERE vur.user.id = :userId AND vur.voicepack.author.id <> :userId")
     fun countPurchasedVoicepacksByUserId(@Param("userId") userId: Long): Int
 
-    // 특정 사용자가 보유한 모든 사용권 정보 조회 (페이지네이션 가능)
-    // fun findByUserId(userId: Long, pageable: Pageable): Page<VoicepackUsageRight>
+    // 특정 사용자가 사용 가능한 모든 보이스팩 엔티티 목록 조회
+    @Query("SELECT vur.voicepack FROM VoicepackUsageRight vur WHERE vur.user.id = :userId")
+    fun findByUserId(@Param("userId") userId: Long): List<Voicepack>
 } 

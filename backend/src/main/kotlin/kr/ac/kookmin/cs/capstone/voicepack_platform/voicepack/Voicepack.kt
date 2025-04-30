@@ -31,7 +31,7 @@ data class Voicepack(
     var price: Int? = 1000,
 
     @Column(name = "is_public", nullable = false)
-    var isPublic: Boolean = true,
+    var isPublic: Boolean = false,
 
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
