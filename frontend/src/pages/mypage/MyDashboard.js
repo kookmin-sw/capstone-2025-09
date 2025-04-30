@@ -1,15 +1,25 @@
 import React from 'react';
 import { Line } from 'react-chartjs-2';
 import Section from '../../components/mypage/Section';
+import VoicePack from '../../components/common/VoicePack';
 
 const MyDashboard = ({
-  user,
   earningsChart,
   recentCreated,
   recentBought,
   recentSales,
   recentPayments,
 }) => {
+  const user = {
+    name: '박수연',
+    email: 'suwith@kookmin.ac.kr',
+    profileImage: 'https://avatars.githubusercontent.com/u/85792738?v=4',
+    credit: 320,
+    totalEarnings: 120000,
+    createdPacks: 5,
+    soldPacks: 3,
+    boughtPacks: 7,
+  };
   return (
     <div className="max-w-full overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-1 flex flex-col gap-4">
@@ -70,19 +80,35 @@ const MyDashboard = ({
       {/* 보이스팩/수익 요약 */}
       <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 content-stretch">
         <Section title="최근 생성한 보이스팩" icon="🎤" className="h-full">
-          <ul className="list-disc pl-4">
-            {recentCreated.map((pack, idx) => (
-              <li key={idx}>{pack} - 100 크레딧</li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex flex-nowrap gap-3 pr-2 min-w-fit">
+              {recentCreated.length > 0 ? (
+                recentCreated.map((pack) => (
+                  <VoicePack key={pack.id} pack={pack} type="mypage" />
+                ))
+              ) : (
+                <p className="text-xs text-gray-400 text-center">
+                  생성한 보이스팩이 없습니다.
+                </p>
+              )}
+            </div>
+          </div>
         </Section>
 
         <Section title="최근 구매한 보이스팩" icon="🛒" className="h-full">
-          <ul className="list-disc pl-4">
-            {recentBought.map((pack, idx) => (
-              <li key={idx}>{pack} - 100 크레딧</li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto scrollbar-hide">
+            <div className="flex flex-nowrap gap-3 pr-2 min-w-fit">
+              {recentBought.length > 0 ? (
+                recentBought.map((pack) => (
+                  <VoicePack key={pack.id} pack={pack} type="mypage" />
+                ))
+              ) : (
+                <p className="text-xs text-gray-400 text-center">
+                  구매한 보이스팩이 없습니다.
+                </p>
+              )}
+            </div>
+          </div>
         </Section>
 
         <Section title="최근 판매 수익" icon="💰" className="h-full">

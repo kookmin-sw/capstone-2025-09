@@ -127,7 +127,7 @@ const MyPage = () => {
           recentPayments={recentPayments}
         />
       )}
-      {tab === 'voicepacks' && <MyVoicepacks userId={1} />}
+      {tab === 'voicepacks' && <MyVoicepacks />}
       {tab === 'revenue' && <MyRevenue credit={user.credit} />}
       {tab === 'payments' && <MyPayments />}
     </div>
