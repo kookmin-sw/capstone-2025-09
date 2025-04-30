@@ -18,15 +18,66 @@ const MyPage = () => {
     boughtPacks: 7,
   };
 
-  const recentCreated = ['감성 보이스', '낭독용 보이스', 'AI 비서용 보이스'];
-  const recentBought = ['아나운서 보이스', '밝은 감정 보이스'];
+  // 전체 보이스팩 더미데이터
+  const allVoicepacks = [
+    {
+      id: 127,
+      name: '감성 보이스',
+      author: 'suwith@kookmin.ac.kr',
+      createdAt: '2025-04-12T14:34:24.59599Z',
+      price: 100,
+      isPublic: true,
+    },
+    {
+      id: 128,
+      name: '낭독용 보이스',
+      author: 'suwith@kookmin.ac.kr',
+      createdAt: '2025-04-10T10:00:00.000Z',
+      price: 100,
+      isPublic: true,
+    },
+    {
+      id: 129,
+      name: 'AI 비서용 보이스',
+      author: 'suwith@kookmin.ac.kr',
+      createdAt: '2025-04-09T09:00:00.000Z',
+      price: 100,
+      isPublic: false,
+    },
+    {
+      id: 130,
+      name: '아나운서 보이스',
+      author: 'kim@naver.com',
+      createdAt: '2025-04-08T12:00:00.000Z',
+      price: 100,
+      isPublic: true,
+    },
+    {
+      id: 131,
+      name: '밝은 감정 보이스',
+      author: 'lee@daum.net',
+      createdAt: '2025-04-07T15:00:00.000Z',
+      price: 100,
+      isPublic: true,
+    },
+  ];
+  // 최근 생성한 보이스팩 (작성자 이메일이 현재 유저와 같음)
+  const recentCreated = allVoicepacks
+    .filter((pack) => pack.author === user.email)
+    .slice(0, 5);
+
+  // 최근 구매한 보이스팩 (작성자 이메일이 현재 유저와 다름)
+  const recentBought = allVoicepacks
+    .filter((pack) => pack.author !== user.email)
+    .slice(0, 5);
+
   const recentSales = [
-    { name: '감성 보이스', amount: 10000 },
-    { name: '낭독용 보이스', amount: 12000 },
+    { name: '감성 보이스', amount: 10000, createdAt: '2025-04-27T12:00:00Z' },
+    { name: '낭독용 보이스', amount: 12000, createdAt: '2025-04-17T12:00:00Z' },
   ];
   const recentPayments = [
-    { date: '2025-04-10', amount: 5000 },
-    { date: '2025-04-01', amount: 10000 },
+    { date: '2025-04-10', amount: 5000, createdAt: '2025-04-27T12:00:00Z' },
+    { date: '2025-04-01', amount: 10000, createdAt: '2025-04-14T12:00:00Z' },
   ];
 
   const earningsChart = {
