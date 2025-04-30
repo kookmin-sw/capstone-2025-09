@@ -128,8 +128,8 @@ class VoicepackController(
     )
     @GetMapping("")
     fun getVoicepacks(
-        @Parameter(description = "사용자 ID ('mine', 'purchased' 필터 사용 시 필요)") @RequestParam(required = false) userId: Long?,
-        @Parameter(description = "필터 (all | mine | purchased), 기본값: all(공개된 보이스팩)") @RequestParam(required = false, defaultValue = "all") filter: String?
+        @Parameter(description = "사용자 ID ('mine', 'purchased', 'available' 필터 사용 시 필요)") @RequestParam(required = false) userId: Long?,
+        @Parameter(description = "필터 (all | mine | purchased | available), 기본값: all(공개된 보이스팩)") @RequestParam(required = false, defaultValue = "all") filter: String?
     ): ResponseEntity<List<VoicepackDto>> {
         try {
             val voicepacks = voicepackService.getVoicepacks(userId, filter)

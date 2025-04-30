@@ -404,6 +404,10 @@ class VoicepackService(
                 if (userId == null) throw IllegalArgumentException("'purchased' 필터 사용 시 userId는 필수입니다.")
                 voicepackUsageRightRepository.findDistinctPurchasedVoicepacksByUserId(userId)
             }
+            "available" -> {
+                if (userId == null) throw IllegalArgumentException("'available' 필터 사용 시 userId는 필수입니다.")
+                voicepackUsageRightRepository.findByUserId(userId)
+            }
             else -> { // "all" 또는 그 외 (기본값)
                 voicepackRepository.findByIsPublicTrue() // 공개된 것만 조회
             }
