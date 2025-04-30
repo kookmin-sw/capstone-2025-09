@@ -1,59 +1,62 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 
-function VoicePack({pack, type = 'voicestore'}) {
+function VoicePack({ pack, type = 'voicestore' }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const formatDate = (isoString) =>
+    new Date(isoString).toISOString().split('T')[0];
 
-  const handleCardClick = () => {
-    setIsModalOpen(true);
-  };
+  const handleClick = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-  };
-
-  const formatDate = (isoString) => {
-    return new Date(isoString).toISOString().split('T')[0];
-  };
-
-  // ⭐ 여기 추가: type에 따라 카드 크기 클래스 구분
-  const cardSize = type === 'voicestore'
-    ? 'max-w-[240px]' // 마켓플레이스용 큰 카드
-    : 'max-w-[180px]'; // 마이페이지용 작은 카드
+  const isMypage = type === 'mypage';
 
   return (
     <>
       <div
-        className={`bg-violet-50 p-4 border border-indigo-300 rounded-xl shadow-md hover:shadow-xl w-full ${cardSize} text-center cursor-pointer`}
-        onClick={handleCardClick}
+        className={`bg-violet-50 p-4 border border-indigo-300 rounded-xl shadow-md hover:shadow-xl cursor-pointer
+          text-center ${isMypage ? 'w-36 h-auto' : 'max-w-[240px] w-full'}
+        `}
+        onClick={handleClick}
       >
-        <div className="max-w-[180px] max-h-[180px] mx-auto mb-2">
-          <img src={LP} alt="LP"/>
+        <div
+          className={`${isMypage ? 'w-[100px] h-[100px]' : 'max-w-[180px] max-h-[180px]'} mx-auto mb-2`}
+        >
+          <img src={LP} alt="LP" className="w-full h-full object-contain" />
         </div>
-        <h2 className="text-sm sm:text-md md:text-lg font-semibold mb-1">{pack.name}</h2>
-        <p className="text-[10px] sm:text-xs text-slate-600 break-all">{pack.author}</p>
-        <p className="text-[10px] sm:text-xs text-slate-600">{formatDate(pack.createdAt)}</p>
+        <h2
+          className={`${isMypage ? 'text-sm' : 'text-sm sm:text-md md:text-lg'} font-semibold mb-1`}
+        >
+          {pack.name}
+        </h2>
+        <p
+          className={`${isMypage ? 'text-[10px]' : 'text-xs sm:text-xs'} text-slate-600`}
+        >
+          {pack.author}
+        </p>
+        <p
+          className={`${isMypage ? 'text-[10px]' : 'text-xs sm:text-xs'} text-slate-600`}
+        >
+          {formatDate(pack.createdAt)}
+        </p>
 
         <div className="flex justify-center gap-2 mt-2 flex-wrap">
           <span
-            className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
+            className={`${isMypage ? 'text-[8px] px-2 py-0.5' : 'text-xs sm:text-xs px-3 py-1'} bg-indigo-100 text-indigo-700 rounded-lg`}
+          >
             #카테고리
           </span>
-                  <span
-                    className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
+          <span
+            className={`${isMypage ? 'text-[8px] px-2 py-0.5' : 'text-xs sm:text-xs px-3 py-1'} bg-indigo-100 text-indigo-700 rounded-lg`}
+          >
             #카테고리
           </span>
         </div>
-
       </div>
 
       {isModalOpen && (
-        <VoicePackModal
-          pack={pack}
-          onClose={closeModal}
-          type={type}
-        />
+        <VoicePackModal pack={pack} onClose={closeModal} type={type} />
       )}
     </>
   );
