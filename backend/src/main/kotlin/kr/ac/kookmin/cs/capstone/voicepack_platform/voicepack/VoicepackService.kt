@@ -157,7 +157,6 @@ class VoicepackService(
         voicepackRequest.status = VoicepackRequestStatus.COMPLETED
         voicepackRequest.s3Path = outputPath
         voicepackRequest.completedAt = finishedTime
-        voicepackConvertRequestRepository.save(voicepackRequest)
         
         // 완성된 보이스팩 생성
         val voicepack = Voicepack(
@@ -167,6 +166,8 @@ class VoicepackService(
             createdAt = finishedTime
         )
         voicepackRepository.save(voicepack)
+        voicepackRequest.voicepackId = voicepack.id
+        voicepackConvertRequestRepository.save(voicepackRequest)
 
         // 사용권 부여
         grantUsageRight(voicepackRequest.author.id, voicepack.id)
@@ -532,7 +533,7 @@ class VoicepackService(
             }.run {
                 logger.debug("보이스팩 변환 상태 조회 성공: id={}, status={}", id, status)
                 VoicepackConvertStatusDto(
-                    id = id,
+                    voicepackId = voicepackId,
                     status = status.name,
                 )
             }
