@@ -3,73 +3,19 @@ import MyDashboard from './MyDashboard';
 import MyVoicepacks from './MyVoicepacks';
 import MyRevenue from './MyRevenue';
 import MyPayments from './MyPayments';
+import useUserStore from '../../utils/userStore';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 const MyPage = () => {
   const [tab, setTab] = useState('dashboard');
 
-  const user = {
-    name: '박수연',
-    email: 'suwith@kookmin.ac.kr',
-    profileImage: 'https://avatars.githubusercontent.com/u/85792738?v=4',
-    credit: 320,
-    totalEarnings: 120000,
-    createdPacks: 5,
-    soldPacks: 3,
-    boughtPacks: 7,
-  };
+  const user = useUserStore((state) => state.user);
 
-  // 전체 보이스팩 더미데이터
-  const allVoicepacks = [
-    {
-      id: 127,
-      name: '감성 보이스',
-      author: 'suwith@kookmin.ac.kr',
-      createdAt: '2025-04-12T14:34:24.59599Z',
-      price: 100,
-      isPublic: true,
-    },
-    {
-      id: 128,
-      name: '낭독용 보이스',
-      author: 'suwith@kookmin.ac.kr',
-      createdAt: '2025-04-10T10:00:00.000Z',
-      price: 100,
-      isPublic: true,
-    },
-    {
-      id: 129,
-      name: 'AI 비서용 보이스',
-      author: 'suwith@kookmin.ac.kr',
-      createdAt: '2025-04-09T09:00:00.000Z',
-      price: 100,
-      isPublic: false,
-    },
-    {
-      id: 130,
-      name: '아나운서 보이스',
-      author: 'kim@naver.com',
-      createdAt: '2025-04-08T12:00:00.000Z',
-      price: 100,
-      isPublic: true,
-    },
-    {
-      id: 131,
-      name: '밝은 감정 보이스',
-      author: 'lee@daum.net',
-      createdAt: '2025-04-07T15:00:00.000Z',
-      price: 100,
-      isPublic: true,
-    },
-  ];
-  // 최근 생성한 보이스팩 (작성자 이메일이 현재 유저와 같음)
-  const recentCreated = allVoicepacks
-    .filter((pack) => pack.author === user.email)
-    .slice(0, 5);
+  const { voicepacks: createdVoicepacks } = useVoicepackUsage('mine');
+  const { voicepacks: boughtVoicepacks } = useVoicepackUsage('purchased');
 
-  // 최근 구매한 보이스팩 (작성자 이메일이 현재 유저와 다름)
-  const recentBought = allVoicepacks
-    .filter((pack) => pack.author !== user.email)
-    .slice(0, 5);
+  const recentCreated = createdVoicepacks.slice(0, 5);
+  const recentBought = boughtVoicepacks.slice(0, 5);
 
   const recentSales = [
     { name: '감성 보이스', amount: 10000, createdAt: '2025-04-27T12:00:00Z' },
