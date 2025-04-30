@@ -12,6 +12,7 @@ import tempfile
 import os
 from config.settings import MODEL_CONFIG
 import re
+from .text_processor import sentences_split, convert_text
 
 logger = logging.getLogger(__name__)
 
@@ -32,13 +33,6 @@ class VoiceSynthesizer:
             logger.error(f"Failed to load Zonos model: {e}")
             raise
         
-    def _sentences_split(self, text: str) -> list[str]:
-        """문장 분리 함수"""
-        pattern = r'(?<=[.!?])\s+'
-        sentences = re.split(pattern, text)
-        sentences = [sentence.strip() for sentence in sentences if sentence.strip()]
-        return sentences
-
     def _synthesize_speech_internal(
         self,
         text: str,
@@ -48,7 +42,8 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
-            sentences = self._sentences_split(text)
+            processed_text = convert_text(text)
+            sentences = sentences_split(processed_text)
             audio_tensors = []
             total_duration = 0
             
@@ -168,8 +163,10 @@ class VoiceSynthesizer:
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
+            # 텍스트 전처리 후 음성 합성
+            processed_prompt = convert_text(prompt)
             audio_data, duration = self._synthesize_speech_internal(
-                text=prompt,
+                text=processed_prompt,
                 features=features,
                 speed=speed
             )
