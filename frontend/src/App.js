@@ -9,7 +9,7 @@ import BasicVoice from './pages/BasicVoice';
 import Index from './pages/ai-assistant';
 import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
-import MyPage from './pages/MyPage';
+import MyPage from './pages/mypage/index';
 
 function App() {
   return (
