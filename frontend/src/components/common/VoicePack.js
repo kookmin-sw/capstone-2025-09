@@ -3,7 +3,7 @@ import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 import useUserStore from '../../utils/userStore';
 
-function VoicePack({ pack, type = 'voicestore' }) {
+const VoicePack = ({ pack, type = 'voicestore' }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   //const user = useUserStore((state) => state.user);
@@ -96,6 +96,6 @@ function VoicePack({ pack, type = 'voicestore' }) {
       )}
     </>
   );
-}
+};
 
 export default VoicePack;
