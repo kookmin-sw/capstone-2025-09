@@ -163,9 +163,8 @@ class VoiceSynthesizer:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
             # 텍스트 전처리 후 음성 합성
-            processed_prompt = convert_text(prompt)
             audio_data, duration = self._synthesize_speech_internal(
-                text=processed_prompt,
+                text=prompt,
                 features=features,
                 speed=speed
             )
