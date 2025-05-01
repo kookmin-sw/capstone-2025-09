@@ -29,9 +29,11 @@ const MyVoicepacks = () => {
       {loading ? (
         <p className="text-sm text-gray-500">불러오는 중...</p>
       ) : voicepacks.length === 0 ? (
-        <p className="text-sm text-gray-500">보여줄 보이스팩이 없습니다.</p>
+        <p className="col-span-full text-gray-500 text-md mt-12">
+          보이스팩이 없습니다.
+        </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gab-7">
           {voicepacks.map((pack) => (
             <VoicePack
               key={pack.id}
