@@ -54,7 +54,7 @@ class VoiceSynthesizer:
 
             for i, sentence in enumerate(sentences):
                 # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
-                logger.info(f'{i+1}/{len(sentences)} 번째 문장 생성: {sentence}')
+                logger.info(f'{i+1}/{len(sentences)} 번째 문장 합성: {sentence}')
                 cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
                 conditioning = self.model.prepare_conditioning(cond_dict)
 
