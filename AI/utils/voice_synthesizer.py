@@ -11,8 +11,7 @@ from .storage_manager import StorageManager
 import tempfile
 import os
 from config.settings import MODEL_CONFIG
-from .sentence_splitter import sentences_split
-from .number_converter import convert_text
+from .text_converter import convert_text
 
 logger = logging.getLogger(__name__)
 
@@ -42,20 +41,20 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
-            processed_text = convert_text(text)
-            sentences = sentences_split(processed_text)
+            sentences = convert_text(text)
             audio_tensors = []
             total_duration = 0
             
             # 정적(silence) 설정
             sample_rate = self.model.autoencoder.sampling_rate
-            silence_duration_seconds = 0.7 # 0.7초 정적
+            silence_duration_seconds = 0.3
             num_silence_samples = int(silence_duration_seconds * sample_rate)
             # 정적 텐서 생성
             silence_tensor = torch.zeros((1, num_silence_samples)) 
 
             for i, sentence in enumerate(sentences):
                 # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
+                logger.info(f'{i+1}/{len(sentences)} 번째 문장 생성: {sentence}')
                 cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
                 conditioning = self.model.prepare_conditioning(cond_dict)
 
