@@ -1,7 +1,6 @@
 name: "🚀 Fix Report"
 description: "버그 수정이나 개선 사항을 기록하는 템플릿"
 title: "fix: "
-labels: ["fix"]
 body:
   - type: input
     attributes:
