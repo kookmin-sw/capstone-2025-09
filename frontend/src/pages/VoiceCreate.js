@@ -21,7 +21,7 @@ function VoiceCreate() {
   const [duration, setDuration] = useState('00:00');
   const [currentTime, setCurrentTime] = useState(0);
   const {convertVoice, loading} = useVoiceConvert();
-  const {getVoicepackAudio} = useVoicepackDetail();
+  const {getVoicepackAudio,makePublic} = useVoicepackDetail();
   const {deleteVoicepack} = useVoicepackDelete();
   const [isPolling, setIsPolling] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -260,7 +260,16 @@ function VoiceCreate() {
                 보이스 삭제
               </button>
               <button
-                onClick={() => navigate('/voice-store')}
+                onClick={async () => {
+                  try {
+                    await makePublic(voicepackId);
+                    alert('보이스팩이 생성되었습니다!');
+                    navigate('/voice-store');
+                  } catch (err) {
+                    console.error('공개 실패:', err);
+                    alert('보이스 공개에 실패했습니다.');
+                  }
+                }}
                 className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
               >
                 보이스 생성
