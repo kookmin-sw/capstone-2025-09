@@ -213,7 +213,7 @@ function VoiceCreate() {
       const success = await deleteVoicepack(voicepackId);
       if (success) {
         alert('보이스팩이 삭제되었습니다.');
-        setIsModalOpen(false);
+        window.location.reload();
       }
     } catch (err) {
       alert('삭제 중 오류가 발생했습니다.');
