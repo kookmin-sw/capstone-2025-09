@@ -53,6 +53,11 @@ class VoiceSynthesizer:
             silence_tensor = torch.zeros((1, num_silence_samples)) 
 
             for i, sentence in enumerate(sentences):
+                if i == 0:
+                    seed = torch.randint(0, 2**32 - 1, (1,)).item()
+                    logger.info(f"seed: {seed}")
+                    
+                torch.manual_seed(seed)                
                 # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
                 logger.info(f'{i+1}/{len(sentences)} 번째 문장 합성: {sentence}')
                 cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
