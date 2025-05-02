@@ -14,9 +14,9 @@ const useVoicepackDetail = () => {
 
   const makePublic = async (voicepackId) => {
     const res = await axiosInstance.patch(
-      `/voicepack/${voicepackId}?userId=${user.id}`, // ✅ userId 쿼리로 추가
+      `/voicepack/${voicepackId}?userId=${user.id}`,
       {
-        isPublic: true, // ✅ CamelCase 그대로 사용
+        isPublic: true,
       }
     );
     return res.data;
