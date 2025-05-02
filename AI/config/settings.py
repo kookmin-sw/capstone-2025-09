@@ -13,6 +13,10 @@ AWS_CONFIG = {
     'synthesize_queue_url': os.getenv('AWS_SQS_SYNTHESIZE_QUEUE_URL')
 }
 
+OPENAI_CONFIG = {
+    'api_key': os.getenv('OPENAI_API_KEY')
+}
+
 # 모델 설정
 MODEL_CONFIG = {
     'path': "Zyphra/Zonos-v0.1-transformer",

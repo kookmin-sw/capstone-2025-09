@@ -220,7 +220,7 @@ class Zonos(nn.Module):
         self,
         prefix_conditioning: torch.Tensor,  # [bsz, cond_seq_len, d_model]
         audio_prefix_codes: torch.Tensor | None = None,  # [bsz, 9, prefix_audio_seq_len]
-        max_new_tokens: int = 86 * 30,
+        max_new_tokens: int = 86 * 40,
         cfg_scale: float = 2.0,
         batch_size: int = 1,
         sampling_params: dict = dict(min_p=0.1),
