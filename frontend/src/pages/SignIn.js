@@ -15,9 +15,11 @@ const SignIn = () => {
   const user = useUserStore((state) => state.user);
 
   // 로그인 상태라면 자동 리다이렉트
-  if (user) {
-    navigate('/voice-store');
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/voice-store');
+    }
+  }, [user, navigate]);
 
   const handleSignIn = () => {
     signin({ email, password });
