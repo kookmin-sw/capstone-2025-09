@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSignin } from '../hooks/useSignin';
 import GradientButton from '../components/common/GradientButton';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import useUserStore from '../utils/userStore';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -10,6 +11,13 @@ const SignIn = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signin, loading } = useSignin();
   const navigate = useNavigate();
+
+  const user = useUserStore((state) => state.user);
+
+  // 로그인 상태라면 자동 리다이렉트
+  if (user) {
+    navigate('/voice-store');
+  }
 
   const handleSignIn = () => {
     signin({ email, password });
