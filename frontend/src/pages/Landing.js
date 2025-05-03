@@ -81,7 +81,7 @@ const Landing = () => {
               만들고 공유하고 활용하세요
             </h1>
             <GradientButton
-              onClick={() => navigate('/sign-in')}
+              onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
               className="text-lg py-3 px-8"
             >
               COVOS 시작하기
@@ -123,7 +123,7 @@ const Landing = () => {
           당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
-          onClick={() => navigate('/sign-in')}
+          onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
