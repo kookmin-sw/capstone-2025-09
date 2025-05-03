@@ -2,34 +2,45 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import Section from '../../components/mypage/Section';
 import VoicePack from '../../components/common/VoicePack';
+import useFetchUserInfo from '../../hooks/useUserInfo';
+import { User } from 'lucide-react';
 
 const MyDashboard = ({
+  user,
   earningsChart,
   recentCreated,
   recentBought,
   recentSales,
   recentPayments,
 }) => {
-  const user = {
-    name: '박수연',
-    email: 'suwith@kookmin.ac.kr',
-    profileImage: 'https://avatars.githubusercontent.com/u/85792738?v=4',
-    credit: 320,
-    totalEarnings: 120000,
-    createdPacks: 5,
-    soldPacks: 3,
-    boughtPacks: 7,
-  };
+  const userId = user?.id;
+
+  useFetchUserInfo(userId);
+  console.log(user);
+
+  if (!user) {
+    return (
+      <div className="text-center py-10 text-gray-500 text-sm">
+        유저 정보를 불러오는 중입니다...
+      </div>
+    );
+  }
   return (
     <div className="max-w-full overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
       <div className="lg:col-span-1 flex flex-col gap-4">
         {/* 유저 프로필 정보 */}
         <div className="bg-white p-4 rounded-xl shadow flex flex-col items-center text-center">
-          <img
-            src={user.profileImage}
-            alt="유저 프로필"
-            className="w-20 h-20 rounded-full object-cover border mb-3"
-          />
+          {user.profileImage ? (
+            <img
+              src={user.profileImage}
+              alt="유저 프로필"
+              className="w-20 h-20 rounded-full object-cover border mb-3"
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center border mb-3">
+              <User className="w-10 h-10 text-gray-400" />
+            </div>
+          )}
           <h2 className="text-lg font-semibold">{user.name}</h2>
           <p className="text-xs text-gray-500 mb-4">{user.email}</p>
           <div className="grid grid-cols-2 gap-2 w-full text-xs">
