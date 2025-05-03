@@ -14,6 +14,10 @@ AWS_CONFIG = {
     'assistant_queue_url': os.getenv('AWS_SQS_ASSISTANT_QUEUE_URL')
 }
 
+OPENAI_CONFIG = {
+    'api_key': os.getenv('OPENAI_API_KEY')
+}
+
 # 모델 설정
 MODEL_CONFIG = {
     'path': "Zyphra/Zonos-v0.1-transformer",

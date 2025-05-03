@@ -11,7 +11,10 @@ WORKDIR /app
 
 COPY . ./
 
-RUN uv pip install --system -e .
+RUN uv pip install --system -e . && uv pip install --system -e .[compile]
+RUN pip install --upgrade openai
 
 EXPOSE 8080
+ENV TZ Asia/Seoul
+
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
