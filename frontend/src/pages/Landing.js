@@ -7,9 +7,19 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import WaveSphere from '../components/visual/WaveSphere';
 import GradientButton from '../components/common/GradientButton';
+import useUserStore from '../utils/userStore';
+import { LogOut } from 'lucide-react';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
+  const clearUser = useUserStore((state) => state.clearUser);
+
+  const handleLogout = () => {
+    clearUser();
+    sessionStorage.removeItem('userInfo');
+    navigate('/');
+  };
 
   return (
     <div className="relative  overflow-hidden">
@@ -19,14 +29,25 @@ const Landing = () => {
       </div>
 
       {/* Header */}
-      <header className="flex justify-between items-end h-[96px] px-28 z-10 relative ">
+      <header className="flex justify-between items-end h-[96px] px-28 z-10 relative">
         <img src={logo} alt="COVOS" width={150} />
-        <GradientButton
-          onClick={() => navigate('/sign-in')}
-          className="py-2 px-8 text-base"
-        >
-          로그인하기
-        </GradientButton>
+
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="flex items-center space-x-2 p-2 rounded text-gray-400 font-bold"
+          >
+            <LogOut size={20} />
+            <span>로그아웃</span>
+          </button>
+        ) : (
+          <GradientButton
+            onClick={() => navigate('/sign-in')}
+            className="py-2 px-8 text-base"
+          >
+            로그인하기
+          </GradientButton>
+        )}
       </header>
 
       {/* Section 1 - Hero*/}
@@ -55,14 +76,14 @@ const Landing = () => {
 
           <div className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-black">
             <h1 className="text-4xl font-bold mb-4">나만의 AI 보이스를</h1>
-            <h1 className="text-4xl font-bold mb-20 ">
+            <h1 className="text-4xl font-bold mb-10 ">
               만들고 공유하고 활용하세요
             </h1>
             <GradientButton
-              onClick={() => navigate('/sign-in')}
-              className="text-lg py-3 px-12"
+              onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
+              className="text-lg py-3 px-8"
             >
-              보이스팩 생성 시작하기
+              COVOS 시작하기
             </GradientButton>
           </div>
         </div>
@@ -101,7 +122,7 @@ const Landing = () => {
           당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
-          onClick={() => navigate('/sign-in')}
+          onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
