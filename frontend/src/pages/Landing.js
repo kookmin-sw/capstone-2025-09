@@ -13,7 +13,6 @@ import { LogOut } from 'lucide-react';
 const Landing = () => {
   const navigate = useNavigate();
   const user = useUserStore((state) => state.user);
-  console.log(user);
   const clearUser = useUserStore((state) => state.clearUser);
 
   const handleLogout = () => {
