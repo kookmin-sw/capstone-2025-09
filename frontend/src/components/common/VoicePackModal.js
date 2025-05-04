@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import LP from '../../assets/lp.svg';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 const VoicePackModal = ({
   pack,
@@ -12,6 +13,8 @@ const VoicePackModal = ({
   const audioRef = useRef(null);
   const { getVoicepackAudio } = useVoicepackDetail();
   const { buy } = useBuyVoicepack();
+  const { voicepacks: availableVoicepacks } = useVoicepackUsage('available');
+  const isAvailable = availableVoicepacks.some((v) => v.id === pack.id);
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);
@@ -19,8 +22,9 @@ const VoicePackModal = ({
   const [isPlaying, setIsPlaying] = useState(false);
 
   const isMypage = type === 'mypage';
+  const isVoicestore = type === 'voicestore';
   const showEditDelete = isMypage && filter === 'mine';
-  const showBuyButton = type === 'voicestore';
+  const showBuyButton = type === 'voicestore' && !isAvailable;
 
   useEffect(() => {
     const fetchAudio = async () => {
@@ -166,6 +170,12 @@ const VoicePackModal = ({
               >
                 구매하기
               </button>
+            )}
+            {/* 이미 보유한 경우 메시지 */}
+            {!showBuyButton && isVoicestore && (
+              <p className="mt-6 text-sm text-indigo-400 font-medium">
+                이미 보유한 보이스팩입니다.
+              </p>
             )}
 
             {showEditDelete && (
