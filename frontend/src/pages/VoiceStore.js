@@ -4,7 +4,7 @@ import { Search } from 'lucide-react';
 import SelectBox from '../components/common/SelectBox';
 import VoicePackCard from '../components/common/VoicePack';
 
-function VoiceStore() {
+const VoiceStore = () => {
   const [voicePacks, setVoicePacks] = useState([]);
   const [filteredPacks, setFilteredPacks] = useState([]);
   const [sortOption, setSortOption] = useState('latest');
