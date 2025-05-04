@@ -11,7 +11,7 @@ import {ScaleLoader} from 'react-spinners';
 import axiosInstance from '../utils/axiosInstance';
 import GradientButton from '../components/common/GradientButton';
 
-function VoiceCreate() {
+const VoiceCreate = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [voicePackName, setVoicePackName] = useState('');
   const [timer, setTimer] = useState(0);
