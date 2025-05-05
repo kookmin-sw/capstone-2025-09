@@ -17,9 +17,9 @@ const BasicVoice = () => {
 
   const POLLING_INTERVAL = 2000;
 
-  const voicepackOptions = voicepacks.map(({voicepackId, voicepackName}) => ({
-    label: voicepackName,
-    value: voicepackId,
+  const voicepackOptions = voicepacks.map(({id, name}) => ({
+    label: name,
+    value: id,
   }));
 
   const pollSynthesisStatus = async (statusUrl) => {
