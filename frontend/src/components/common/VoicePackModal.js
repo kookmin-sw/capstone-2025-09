@@ -1,5 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import LP from '../../assets/lp.svg';
+import {BadgeCent} from 'lucide-react';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
@@ -72,13 +73,21 @@ const VoicePackModal = ({
   };
 
   const handlePurchase = async () => {
+    const confirmed = window.confirm('정말로 구매하시겠습니까?');
+    if (!confirmed) return;
+
     try {
       const result = await buy(pack.id);
       alert(`${result.message || '성공적으로 구매되었습니다.'}`);
       onClose(); // 구매 성공하면 모달 닫기
     } catch (err) {
       console.error('구매 실패:', err);
-      alert('구매에 실패했습니다. 다시 시도해주세요.');
+      // 크래딧 부족 에러 추가
+      if (err.response && err.response.status === 409) {
+        alert('크래딧이 부족합니다. 충전 후 다시 시도해주세요.');
+      } else {
+        alert('구매에 실패했습니다. 다시 시도해주세요.');
+      }
     }
   };
 
@@ -164,13 +173,22 @@ const VoicePackModal = ({
 
             {/* 버튼 조건 처리 */}
             {showBuyButton && (
-              <button
-                className="mt-6 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-70 transition"
-                onClick={handlePurchase}
-              >
-                구매하기
-              </button>
+              <>
+                <div className="flex items-center gap-2 mt-4">
+                  <BadgeCent className="w-5 h-5 text-yellow-400"/>
+                  <p className="text-sm text-slate-600">
+                    {pack.price?.toLocaleString() || '0'} 크레딧
+                  </p>
+                </div>
+                <button
+                  className="mt-2 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-70 transition"
+                  onClick={handlePurchase}
+                >
+                  구매하기
+                </button>
+              </>
             )}
+
             {/* 이미 보유한 경우 메시지 */}
             {!showBuyButton && isVoicestore && (
               <p className="mt-6 text-sm text-indigo-400 font-medium">
