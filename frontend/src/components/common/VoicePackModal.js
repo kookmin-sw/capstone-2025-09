@@ -106,8 +106,20 @@ const VoicePackModal = ({
     }
   };
 
-  const handleDelete = () => {
-    alert('삭제 기능은 추후 구현 예정입니다.');
+  const handleDelete = async () => {
+    try {
+      await axiosInstance.delete(`/voicepack/${pack.id}`, {
+        params: {
+          userId: user.id,
+          voicepackId: pack.id,
+        },
+      });
+      alert('삭제되었습니다.');
+      onClose();
+    } catch (err) {
+      console.error('삭제 실패:', err);
+      alert('삭제에 실패했습니다. 다시 시도해주세요.');
+    }
   };
 
   return (
