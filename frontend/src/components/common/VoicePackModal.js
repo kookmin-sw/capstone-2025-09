@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import LP from '../../assets/lp.svg';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack';
+import useUserStore from '../../utils/userStore';
+import axiosInstance from '../../utils/axiosInstance';
 
 const VoicePackModal = ({
   pack,
@@ -12,11 +14,13 @@ const VoicePackModal = ({
   const audioRef = useRef(null);
   const { getVoicepackAudio } = useVoicepackDetail();
   const { buy } = useBuyVoicepack();
+  const { user } = useUserStore((state) => state);
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isPublic, setIsPublic] = useState(pack.isPublic);
 
   const isMypage = type === 'mypage';
   const showEditDelete = isMypage && filter === 'mine';
@@ -73,13 +77,33 @@ const VoicePackModal = ({
       alert(`${result.message || '성공적으로 구매되었습니다.'}`);
       onClose(); // 구매 성공하면 모달 닫기
     } catch (err) {
-      console.error('구매 실패:', err);
       alert('구매에 실패했습니다. 다시 시도해주세요.');
     }
   };
 
-  const handleEdit = () => {
-    alert('수정 기능은 추후 구현 예정입니다.');
+  const handleTogglePublic = async () => {
+    try {
+      const response = await axiosInstance.patch(
+        `/voicepack/${pack.id}`,
+        {
+          isPublic: !isPublic,
+        },
+        {
+          params: {
+            userId: user.id,
+            voicepackId: pack.id,
+          },
+        }
+      );
+      setIsPublic(response.data.isPublic);
+      alert(
+        response.data.isPublic
+          ? '공개로 변경되었습니다.'
+          : '비공개로 변경되었습니다.'
+      );
+    } catch (err) {
+      alert('공개 여부 변경에 실패했습니다.');
+    }
   };
 
   const handleDelete = () => {
@@ -87,7 +111,7 @@ const VoicePackModal = ({
   };
 
   return (
-    <div className="fixed top-0 left-48 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-[600px] flex flex-col sm:flex-row gap-6 relative">
         <button
           onClick={onClose}
@@ -96,7 +120,6 @@ const VoicePackModal = ({
           &times;
         </button>
 
-        {/* 왼쪽: 이미지 및 플레이어 */}
         <div className="sm:w-1/2 flex flex-col items-center justify-center bg-violet-50 rounded-xl p-4">
           <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4" />
           {audioUrl && (
@@ -139,7 +162,6 @@ const VoicePackModal = ({
           )}
         </div>
 
-        {/* 오른쪽: 텍스트 정보 및 액션 */}
         <div className="sm:w-1/2 flex flex-col justify-start py-2">
           <div className="px-3 gap-2 flex flex-col">
             <h2 className="text-base sm:text-lg md:text-xl font-bold text-left">
@@ -169,20 +191,36 @@ const VoicePackModal = ({
             )}
 
             {showEditDelete && (
-              <div className="mt-6 flex flex-wrap gap-4">
+              <>
                 <button
-                  className="flex-1 bg-yellow-400 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-80 transition"
-                  onClick={handleEdit}
+                  onClick={handleTogglePublic}
+                  className={`relative inline-flex items-center w-20 h-8 rounded-full transition-colors duration-300 ${
+                    isPublic ? 'bg-green-500' : 'bg-gray-300'
+                  }`}
                 >
-                  수정하기
+                  <span
+                    className={`absolute -translate-x-1/2 text-xs font-medium w-full text-white z-10 ${
+                      isPublic ? ' left-1/3 ' : 'left-2/3'
+                    }`}
+                  >
+                    {isPublic ? '공개' : '비공개'}
+                  </span>
+                  <div
+                    className={`absolute top-1 left-1 h-6 w-6 rounded-full bg-white shadow transition-transform duration-300 ${
+                      isPublic ? 'translate-x-12' : 'translate-x-0'
+                    }`}
+                  />
                 </button>
-                <button
-                  className="flex-1 bg-red-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-80 transition"
-                  onClick={handleDelete}
-                >
-                  삭제하기
-                </button>
-              </div>
+
+                <div className="mt-4">
+                  <button
+                    className="w-full bg-red-500 text-white font-semibold text-sm py-2 rounded-full hover:opacity-80 transition"
+                    onClick={handleDelete}
+                  >
+                    삭제하기
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>
