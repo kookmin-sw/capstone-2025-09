@@ -52,18 +52,9 @@ class VoicepackService(
     private val creditService: CreditService,
     private val saleRepository: SaleRepository,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
-    private val rabbitTemplate: RabbitTemplate
+    private val rabbitTemplate: RabbitTemplate,
+    private val httpClient: HttpClient
 ) {
-
-    private val httpClient = HttpClient(Java) {
-        install(ContentNegotiation) { json() }
-
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-            sanitizeHeader { header -> header == HttpHeaders.Authorization }
-        }
-    }
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val objectMapper = jacksonObjectMapper() // JSON 변환기
