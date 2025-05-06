@@ -17,13 +17,13 @@ const CreditTransactionTabs = ({ charges = [], usages = [] }) => {
           onClick={() => setTab('charge')}
           className={`px-3 py-1 rounded ${tab === 'charge' ? 'bg-purple-200' : 'bg-gray-100'}`}
         >
-          충전 내역
+          유입 내역
         </button>
         <button
           onClick={() => setTab('use')}
           className={`px-3 py-1 rounded ${tab === 'use' ? 'bg-purple-200' : 'bg-gray-100'}`}
         >
-          사용 내역
+          지출 내역
         </button>
       </div>
 
