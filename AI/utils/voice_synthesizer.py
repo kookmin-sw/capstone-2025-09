@@ -76,8 +76,7 @@ class VoiceSynthesizer:
                 gap = 'GAP' if ttfb + generated < elapsed else ""
                 generated += int(audio_chunk.shape[1] / 44.1)
                 
-            combined_wav = torch.cat(audio_chunks, dim=1)
-            
+            combined_wav = torch.cat(audio_chunks, dim=-1).cpu()            
             duration = round(combined_wav.shape[1] / 44100, 3)
 
             # 최종 WAV 데이터를 저장할 버퍼 생성
