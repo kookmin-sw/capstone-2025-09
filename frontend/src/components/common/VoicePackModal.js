@@ -29,7 +29,7 @@ const VoicePackModal = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPublic, setIsPublic] = useState(pack.isPublic);
 
-  const isMypage = type === 'mypage';
+  const isMypage = type === 'mypage' || type === 'dashboard';
   const isVoicestore = type === 'voicestore';
   const showEditDelete = isMypage && filter === 'mine';
   const showBuyButton = type === 'voicestore' && !isAvailable;
