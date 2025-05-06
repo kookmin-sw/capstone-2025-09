@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 
-const CreditTransactionTabs = () => {
+const CreditTransactionTabs = ({ charges = [], usages = [] }) => {
   const [tab, setTab] = useState('charge');
 
-  const charges = [
-    { date: '2025-04-10', amount: 5000, credit: 50, method: '카카오페이' },
-    { date: '2025-04-01', amount: 10000, credit: 100, method: '토스' },
-  ];
-
-  const usages = [
-    { date: '2025-04-12', usage: '감성 보이스 구매', credit: 100 },
-    { date: '2025-04-08', usage: '기능 사용 - 발표 AI', credit: 20 },
-  ];
+  const formatDate = (iso) => {
+    const date = new Date(iso);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
+      date.getDate()
+    ).padStart(2, '0')}`;
+  };
 
   return (
     <div className="space-y-4 text-sm">
@@ -35,17 +32,16 @@ const CreditTransactionTabs = () => {
           <li key={idx} className="flex justify-between border-b pb-1">
             {tab === 'charge' ? (
               <>
-                <span>{item.date}</span>
+                <span>{formatDate(item.date)}</span>
                 <span>
-                  {item.amount.toLocaleString()}원 ({item.credit} 크레딧,{' '}
-                  {item.method})
+                  {item.amountCredit} 크레딧 ({item.method})
                 </span>
               </>
             ) : (
               <>
-                <span>{item.date}</span>
+                <span>{formatDate(item.date)}</span>
                 <span>
-                  {item.usage} - {item.credit} 크레딧
+                  {item.usage} - {item.amountCredit} 크레딧
                 </span>
               </>
             )}

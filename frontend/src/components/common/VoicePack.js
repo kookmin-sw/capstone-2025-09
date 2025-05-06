@@ -3,21 +3,11 @@ import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 import useUserStore from '../../utils/userStore';
 
-const VoicePack = ({ pack, type = 'voicestore' }) => {
+const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  //const user = useUserStore((state) => state.user);
-  //테스트용 로그인 유저
-  const user = {
-    name: '박수연',
-    email: 'suwith@kookmin.ac.kr',
-    profileImage: 'https://avatars.githubusercontent.com/u/85792738?v=4',
-    credit: 320,
-    totalEarnings: 120000,
-    createdPacks: 5,
-    soldPacks: 3,
-    boughtPacks: 7,
-  };
+  const user = useUserStore((state) => state.user);
+
   const isMypage = type === 'mypage';
   const isMine = pack.author === user.email;
 
@@ -92,6 +82,7 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
           onClose={closeModal}
           type={type}
           filter={isMine ? 'mine' : 'purchased'}
+          onRefresh={onRefresh}
         />
       )}
     </>
