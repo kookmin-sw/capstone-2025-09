@@ -1,12 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import LP from '../../assets/lp.svg';
-import {BadgeCent} from 'lucide-react';
+import { BadgeCent } from 'lucide-react';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack';
 import useUserStore from '../../utils/userStore';
 import axiosInstance from '../../utils/axiosInstance';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
-
 
 const VoicePackModal = ({
   pack,
@@ -23,7 +22,6 @@ const VoicePackModal = ({
 
   const { voicepacks: availableVoicepacks } = useVoicepackUsage('available');
   const isAvailable = availableVoicepacks.some((v) => v.id === pack.id);
-
 
   const [audioUrl, setAudioUrl] = useState('');
   const [duration, setDuration] = useState(0);
@@ -120,6 +118,9 @@ const VoicePackModal = ({
           ? '공개로 변경되었습니다.'
           : '비공개로 변경되었습니다.'
       );
+      if (onRefresh) {
+        onRefresh();
+      }
     } catch (err) {
       alert('공개 여부 변경에 실패했습니다.');
     }
@@ -219,7 +220,7 @@ const VoicePackModal = ({
             {showBuyButton && (
               <>
                 <div className="flex items-center gap-2 mt-4">
-                  <BadgeCent className="w-5 h-5 text-yellow-400"/>
+                  <BadgeCent className="w-5 h-5 text-yellow-400" />
                   <p className="text-sm text-slate-600">
                     {pack.price?.toLocaleString() || '0'} 크레딧
                   </p>
