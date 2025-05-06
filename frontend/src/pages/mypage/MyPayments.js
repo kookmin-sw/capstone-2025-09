@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import CreditTransactionTabs from '../../components/mypage/CreditTransactionTabs';
-import CreditExchangeList from '../../components/mypage/CreditExchangeList';
 import useUserStore from '../../utils/userStore';
 import axiosInstance from '../../utils/axiosInstance';
 
@@ -53,13 +52,6 @@ const MyPayments = () => {
 
     fetchAll();
   }, [user?.id]);
-
-  const handleExchange = () => {
-    const won = currentCredit * 100;
-    alert(
-      `${currentCredit} 크레딧은 ${won.toLocaleString()}원으로 환전됩니다.`
-    );
-  };
 
   const handlePayment = async () => {
     try {

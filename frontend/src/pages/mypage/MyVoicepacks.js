@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import VoicePack from '../../components/common/VoicePack';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 import useUserStore from '../../utils/userStore';
@@ -13,7 +13,7 @@ const MyVoicepacks = () => {
   const handleRefresh = () => {
     setRefreshKey((prev) => prev + 1); // 값 변경 → useEffect 재실행
   };
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
