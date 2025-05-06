@@ -19,7 +19,6 @@ class VoiceSynthesizer:
     def __init__(self):
         self._initialize_model()
         self.storage_manager = StorageManager()
-        self.sample_rate = MODEL_CONFIG['sample_rate']
 
     def _initialize_model(self):
         """모델 초기화 및 로드"""
@@ -41,55 +40,51 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
+            # 텍스트 전처리
             sentences = convert_text(text)
-            audio_tensors = []
-            total_duration = 0
             
-            # 정적(silence) 설정
-            sample_rate = self.model.autoencoder.sampling_rate
-            silence_duration_seconds = 0.3
-            num_silence_samples = int(silence_duration_seconds * sample_rate)
-            # 정적 텐서 생성
-            silence_tensor = torch.zeros((1, num_silence_samples)) 
-
-            for i, sentence in enumerate(sentences):
-                if i == 0:
-                    seed = torch.randint(0, 2**32 - 1, (1,)).item()
-                    logger.info(f"seed: {seed}")
+            audio_chunks = []
+            t0 = time.time()
+            ttfb = None
+            generated = 0
+            
+            def generator():
+                for text in sentences:
+                    elapsed = int((time.time() - t0) * 1000)
+                    yield {
+                        "text": text,
+                        "speaker": features,
+                        "language": language
+                    }
                     
-                torch.manual_seed(seed)                
-                # 컨디셔닝 생성, 추가 파라미터는 이곳에 추가
-                logger.info(f'{i+1}/{len(sentences)} 번째 문장 합성: {sentence}')
-                cond_dict = make_cond_dict(text=sentence, speaker=features, language=language)
-                conditioning = self.model.prepare_conditioning(cond_dict)
-
-                # 음성 생성
-                codes = self.model.generate(conditioning)
-                wavs = self.model.autoencoder.decode(codes).cpu()
-
-                sentence_tensor = wavs[0]
-                sentence_duration = sentence_tensor.shape[1] / sample_rate
-
-                if i > 0:
-                    audio_tensors.append(silence_tensor)
-                    total_duration += silence_duration_seconds
+            stream_generator = self.model.stream(
+                cond_dicts_generator=generator(),
+                chunk_schedule=[22, 13, *range(12, 100)],
+                chunk_overlap=1,
+                mark_boundaries=True
+            )
+            
+            for i, audio_chunk in enumerate(stream_generator):
+                if isinstance(audio_chunk, str):
+                    print(audio_chunk)
+                    continue
                 
-                audio_tensors.append(sentence_tensor)
-                total_duration += sentence_duration
-
-            # 모든 오디오 텐서 합치기
-            if not audio_tensors:
-                # 생성된 오디오가 없는 경우 빈 바이트와 0초 반환
-                return b"", 0.0
+                audio_chunks.append(audio_chunk)
+                elapsed = int((time.time() - t0) * 1000)
+                if ttfb is None:
+                    ttfb = elapsed
+                gap = 'GAP' if ttfb + generated < elapsed else ""
+                generated += int(audio_chunk.shape[1] / 44.1)
                 
-            combined_wav = torch.cat(audio_tensors, dim=1)
+            combined_wav = torch.cat(audio_chunks, dim=-1).cpu()            
+            duration = round(combined_wav.shape[1] / 44100, 3)
 
             # 최종 WAV 데이터를 저장할 버퍼 생성
             final_buffer = io.BytesIO()
             torchaudio.save(final_buffer, combined_wav, self.model.autoencoder.sampling_rate, format="wav")
             final_buffer.seek(0)
 
-            return final_buffer.getvalue(), total_duration
+            return final_buffer.getvalue(), duration
 
         except Exception as e:
             logger.error(f"Error during synthesis: {e}")

@@ -21,5 +21,5 @@ OPENAI_CONFIG = {
 # 모델 설정
 MODEL_CONFIG = {
     'path': "Zyphra/Zonos-v0.1-transformer",
-    'sample_rate': 22050
+    'sample_rate': 44100
 } 
