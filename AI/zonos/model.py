@@ -353,7 +353,7 @@ class Zonos(nn.Module):
             Audio chunks as torch tensors [and sentence strings as indicators of the sentence end if mark_boundaries is True]
         """
         assert cfg_scale != 1, "TODO: add support for cfg_scale=1"
-        assert len(chunk_overlap) >= 0, "chunk_overlap must be non-negative"
+        assert len(chunk_schedule) > 0, "chunk_schedule must not be empty"
         assert all(chunk_overlap * 2 < size for size in chunk_schedule), "overlap must be less than a half of a chunk"
         
         batch_size = 1  # Streaming generation is single-sample only
