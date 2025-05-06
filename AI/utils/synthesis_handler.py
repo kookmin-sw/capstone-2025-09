@@ -67,7 +67,6 @@ async def process_synthesis_request(
 async def process_assistant_request(
     prompt: str,
     voicepackName: str,
-    userId: int,
     jobId: int,
     category: str,
     writingStyle: str,
@@ -79,7 +78,6 @@ async def process_assistant_request(
     Args:
         prompt (str): 합성 프롬프트
         voicepackName (str): 음성팩 이름
-        userId (int): 사용자 ID
         jobId (int): 작업 ID
         category (str): 카테고리
         writingStyle (str): 글쓰기 스타일
@@ -87,13 +85,8 @@ async def process_assistant_request(
         speed (float): 음성 속도 (1.0 기본, 선택사항)
     """
     try:
-        logger.info(f"starting assistant synthesis: voicepackName={voicepackName}, prompt={prompt}, userId={userId}, jobId={jobId}, category={category}, writingStyle={writingStyle}, nowTime={nowTime}, speed={speed}")
-        
-        # 프롬프트를 개행 문자로 분리하고 첫 번째 문장만 선택
-        sentences = prompt.split('\\n')
-        prompt = sentences[0] if sentences else ""
+        logger.info(f"starting assistant synthesis: voicepackName={voicepackName}, prompt={prompt}, jobId={jobId}, category={category}, writingStyle={writingStyle}, nowTime={nowTime}, speed={speed}")
 
-        # 음성 합성 시작 (첫 문장 사용)
         audio_url, duration = await voice_synthesizer.synthesize_assistant(
             prompt=prompt,
             voicepackName=voicepackName,
@@ -112,7 +105,7 @@ async def process_assistant_request(
             jobId=jobId,
             success=True,
             additional_params={
-                "resultUrl": audio_url
+                "resultS3Key": audio_url
             }
         )
         

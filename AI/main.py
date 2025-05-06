@@ -76,7 +76,6 @@ async def synthesize_endpoint(
 async def assistant_endpoint(
     prompt: str = Form(...),
     voicepackName: str = Form(...),
-    userId: int = Form(...),
     jobId: int = Form(...),
     category: str = Form(...),
     writingStyle: str = Form(...),
@@ -88,7 +87,6 @@ async def assistant_endpoint(
         await process_assistant_request(
             prompt=prompt,
             voicepackName=voicepackName,
-            userId=userId,
             jobId=jobId,
             speed=speed,
             category=category,
