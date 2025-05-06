@@ -87,7 +87,7 @@ const MyDashboard = ({ user, recentBought }) => {
         });
 
         // 최근 판매 수익 5개
-        setRecentSales(sales.slice(0, 5));
+        setRecentSales(sales.slice(0, 3));
 
         // 최근 충전 내역 (최대 3개)
         const historyRes = await axiosInstance.get(
@@ -115,7 +115,7 @@ const MyDashboard = ({ user, recentBought }) => {
     <div className="max-w-full overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
       {/* 좌측: 프로필 + 그래프 */}
       <div className="lg:col-span-1 flex flex-col gap-4">
-        <div className="bg-white p-4 rounded-xl shadow flex flex-col items-center text-center">
+        <div className="bg-white p-4 rounded-xl flex flex-col items-center text-center">
           {user.profileImage ? (
             <img
               src={user.profileImage}
@@ -168,7 +168,7 @@ const MyDashboard = ({ user, recentBought }) => {
               },
               maintainAspectRatio: false,
             }}
-            height={100}
+            height={150}
           />
         </Section>
       </div>

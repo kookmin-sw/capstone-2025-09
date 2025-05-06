@@ -76,18 +76,18 @@ const MyPayments = () => {
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow space-y-6">
+    <div className="bg-white p-6 rounded-xl   space-y-6">
       {/* 크레딧 정보 */}
       <div className="grid grid-cols-3 gap-4 text-sm relative">
-        <div className="bg-purple-100 p-4 rounded shadow text-center relative">
+        <div className="bg-purple-100 p-4 rounded text-center relative">
           <p className="text-gray-500">보유 크레딧</p>
           <p className="font-bold text-base">{currentCredit} 크레딧</p>
         </div>
-        <div className="bg-purple-100 p-4 rounded shadow text-center">
+        <div className="bg-purple-100 p-4 rounded text-center">
           <p className="text-gray-500">총 충전</p>
           <p className="font-bold text-base">{charged} 크레딧</p>
         </div>
-        <div className="bg-purple-100 p-4 rounded shadow text-center">
+        <div className="bg-purple-100 p-4 rounded text-center">
           <p className="text-gray-500">이번 달 사용</p>
           <p className="font-bold text-base">{used} 크레딧</p>
         </div>

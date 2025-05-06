@@ -117,15 +117,15 @@ const MyRevenue = () => {
 
   const RevenueStatCards = ({ total, month, count }) => (
     <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
-      <div className="bg-indigo-100 p-4 rounded shadow text-center">
+      <div className="bg-indigo-100 p-4 rounded text-center">
         <p className="text-gray-500">총 수익</p>
         <p className="font-bold text-base">{total} 크레딧</p>
       </div>
-      <div className="bg-indigo-100 p-4 rounded shadow text-center">
+      <div className="bg-indigo-100 p-4 rounded text-center">
         <p className="text-gray-500">이번 달 수익</p>
         <p className="font-bold text-base">{month} 크레딧</p>
       </div>
-      <div className="bg-indigo-100 p-4 rounded shadow text-center">
+      <div className="bg-indigo-100 p-4 rounded text-center">
         <p className="text-gray-500">판매 수</p>
         <p className="font-bold text-base">{count}건</p>
       </div>
@@ -133,7 +133,7 @@ const MyRevenue = () => {
   );
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow space-y-6">
+    <div className="bg-white p-6 rounded-xl space-y-6">
       <RevenueStatCards
         total={summary?.totalRevenue || 0}
         month={summary?.monthlyRevenue || 0}
