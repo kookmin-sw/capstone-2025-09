@@ -20,10 +20,8 @@ const MyPage = () => {
     }
   }, [user, navigate]);
 
-  const { voicepacks: createdVoicepacks } = useVoicepackUsage('mine');
   const { voicepacks: boughtVoicepacks } = useVoicepackUsage('purchased');
 
-  const recentCreated = createdVoicepacks.slice(0, 5);
   const recentBought = boughtVoicepacks.slice(0, 5);
 
   const recentSales = [
@@ -76,7 +74,6 @@ const MyPage = () => {
         <MyDashboard
           user={user}
           earningsChart={earningsChart}
-          recentCreated={recentCreated}
           recentBought={recentBought}
           recentSales={recentSales}
           recentPayments={recentPayments}

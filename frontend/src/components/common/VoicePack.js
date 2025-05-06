@@ -3,7 +3,7 @@ import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 import useUserStore from '../../utils/userStore';
 
-const VoicePack = ({ pack, type = 'voicestore' }) => {
+const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const user = useUserStore((state) => state.user);
@@ -82,6 +82,7 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
           onClose={closeModal}
           type={type}
           filter={isMine ? 'mine' : 'purchased'}
+          onRefresh={onRefresh}
         />
       )}
     </>

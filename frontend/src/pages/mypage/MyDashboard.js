@@ -1,22 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import Section from '../../components/mypage/Section';
 import VoicePack from '../../components/common/VoicePack';
 import useFetchUserInfo from '../../hooks/useUserInfo';
 import { User } from 'lucide-react';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 const MyDashboard = ({
   user,
   earningsChart,
-  recentCreated,
   recentBought,
   recentSales,
   recentPayments,
 }) => {
   const userId = user?.id;
 
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { voicepacks: createdVoicepacks } = useVoicepackUsage(
+    'mine',
+    refreshKey
+  );
+  const recentCreated = createdVoicepacks.slice(0, 5);
+
+  const handleRefresh = () => setRefreshKey((prev) => prev + 1);
+
   useFetchUserInfo(userId);
-  console.log(user);
 
   if (!user) {
     return (
@@ -95,7 +103,12 @@ const MyDashboard = ({
             <div className="flex flex-nowrap gap-3 pr-2 min-w-fit">
               {recentCreated.length > 0 ? (
                 recentCreated.map((pack) => (
-                  <VoicePack key={pack.id} pack={pack} type="mypage" />
+                  <VoicePack
+                    key={pack.id}
+                    pack={pack}
+                    type="mypage"
+                    onRefresh={handleRefresh}
+                  />
                 ))
               ) : (
                 <p className="text-xs text-gray-400 text-center">

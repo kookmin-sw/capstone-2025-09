@@ -6,7 +6,12 @@ import useUserStore from '../../utils/userStore';
 const MyVoicepacks = () => {
   const { user } = useUserStore((state) => state);
   const [filter, setFilter] = useState('available');
-  const { voicepacks } = useVoicepackUsage(filter);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { voicepacks } = useVoicepackUsage(filter, refreshKey);
+
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1); // 값 변경 → useEffect 재실행
+  };
   const [loading, setLoading] = useState(false);
 
   console.log(voicepacks, filter);
@@ -40,6 +45,7 @@ const MyVoicepacks = () => {
               pack={pack}
               type="mypage"
               filter={pack.author === user?.email ? 'mine' : 'purchased'}
+              onRefresh={handleRefresh}
             />
           ))}
         </div>
