@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 import logging
 from fastapi.responses import JSONResponse
 from utils.voice_registration_handler import process_voice_registration
-from utils.synthesis_handler import process_synthesis_request
+from utils.synthesis_handler import process_synthesis_request, process_assistant_request
 
 logging.basicConfig(level=logging.INFO)
 
@@ -47,7 +47,7 @@ async def synthesize_endpoint(
     voicepackName: str = Form(...),
     userId: int = Form(...),
     jobId: int = Form(...),
-    speed: float = Form(1.0),
+    speed: float = Form(1.0)
 ):
     """음성 합성 API 엔드포인트"""
     try:
@@ -71,6 +71,42 @@ async def synthesize_endpoint(
     except Exception as e:
         logger.error(f"failed to synthesize: {str(e)}")
         raise HTTPException(status_code=500, detail="음성 합성 요청 처리 중 오류가 발생했습니다.")
+
+@app.post("/assistant")
+async def assistant_endpoint(
+    prompt: str = Form(...),
+    voicepackName: str = Form(...),
+    jobId: int = Form(...),
+    category: str = Form(...),
+    writingStyle: str = Form(...),
+    nowTime: str = Form(...),
+    speed: float = Form(1.0)
+):
+    """AI 비서용 음성 합성 API 엔드포인트"""
+    try:
+        await process_assistant_request(
+            prompt=prompt,
+            voicepackName=voicepackName,
+            jobId=jobId,
+            speed=speed,
+            category=category,
+            writingStyle=writingStyle,
+            nowTime=nowTime
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content={
+                "status": "completed",
+                "message": "AI 비서 음성 합성이 완료되었습니다.",
+                "jobId": jobId
+            }
+        )
+
+    except Exception as e:
+        logger.error(f"failed to synthesize: {str(e)}")
+        raise HTTPException(status_code=500, detail="AI 비서 음성 합성 요청 처리 중 오류가 발생했습니다.")
+
 
 @app.get("/health")
 def health_check():
