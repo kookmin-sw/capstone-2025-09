@@ -186,7 +186,7 @@ class AiAssistantService(
                         prompt = promptContent,
                         category = categoryEnum.description,
                         writingStyle = writingStyleEnum.description,
-                        voicePackId = voicepack.id,
+                        voicepackName = voicepack.name,
                         nowTime = currentPromptTimeSlot
                     )
                     val messageJson = objectMapper.writeValueAsString(mqDto)

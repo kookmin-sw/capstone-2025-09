@@ -14,7 +14,7 @@ data class AiAssistantSynthesisMqRequest(
     // 적용된 글쓰기 스타일
     val writingStyle: String,
     // 사용된 보이스팩 이름
-    val voicePackId: Long,
+    val voicepackName: String,
     // 작업 기준 시간 (YYYYMMDDHH)
     val nowTime: String
 ) 
