@@ -10,7 +10,8 @@ AWS_CONFIG = {
     'access_key_id': os.getenv('AWS_ACCESS_KEY_ID'),
     'secret_access_key': os.getenv('AWS_SECRET_ACCESS_KEY'),
     'register_queue_url': os.getenv('AWS_SQS_REGISTER_QUEUE_URL'),
-    'synthesize_queue_url': os.getenv('AWS_SQS_SYNTHESIZE_QUEUE_URL')
+    'synthesize_queue_url': os.getenv('AWS_SQS_SYNTHESIZE_QUEUE_URL'),
+    'assistant_queue_url': os.getenv('AWS_SQS_ASSISTANT_QUEUE_URL')
 }
 
 OPENAI_CONFIG = {

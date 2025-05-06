@@ -19,7 +19,7 @@ class VoiceSynthesizer:
     def __init__(self):
         self._initialize_model()
         self.storage_manager = StorageManager()
-        self.sample_rate = MODEL_CONFIG['sample_rate']  # Zonos 모델의 샘플링 레이트에 맞게 설정
+        self.sample_rate = MODEL_CONFIG['sample_rate']
 
     def _initialize_model(self):
         """모델 초기화 및 로드"""
@@ -158,7 +158,7 @@ class VoiceSynthesizer:
         userId: int,
         speed: float = 1.0,
     ) -> dict:
-        """기능 1: 베이직 기능에 사용되는 음성 합성"""
+        """베이직 보이스에 사용되는 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):
                 raise HTTPException(status_code=404, detail="Speaker not found")
@@ -188,4 +188,45 @@ class VoiceSynthesizer:
 
         except Exception as e:
             logger.error(f"failed to generate speech: {str(e)}")
+            raise
+        
+            
+    async def synthesize_assistant(
+        self,
+        prompt: str,
+        voicepackName: str,
+        category: str,
+        writingStyle: str,
+        nowTime: str,
+        speed: float = 1.0
+        ):
+        """AI 비서용 음성 합성"""
+        try:
+            if not self.storage_manager.speaker_exists(voicepackName):
+                raise HTTPException(status_code=404, detail="Speaker not found")
+                
+            features = self.storage_manager.get_speaker_features(voicepackName)
+            if features is None:
+                raise HTTPException(status_code=500, detail="Failed to load speaker features")
+                
+            audio_data, duration = self._synthesize_speech_internal(
+                text=prompt,
+                features=features,
+                speed=speed
+            )
+                
+            if audio_data is None:
+                raise ValueError("Failed to synthesize assistant speech")
+                
+            # S3에 저장
+            file_path = f"ai-assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
+            audio_url = self.storage_manager.save_audio(audio_data, file_path)
+                
+            if not audio_url:
+                raise HTTPException(status_code=500, detail="Failed to save assistant audio")
+                
+            return audio_url, duration
+            
+        except Exception as e:
+            logger.error(f"failed to synthesize assistant speech: {str(e)}")
             raise
