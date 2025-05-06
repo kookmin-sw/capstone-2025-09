@@ -4,11 +4,10 @@ import Section from '../../components/mypage/Section';
 import VoicePack from '../../components/common/VoicePack';
 import useFetchUserInfo from '../../hooks/useUserInfo';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
-import useUserStore from '../../utils/userStore';
 import axiosInstance from '../../utils/axiosInstance';
 import { User } from 'lucide-react';
 
-const MyDashboard = ({ user, earningsChart, recentBought }) => {
+const MyDashboard = ({ user, recentBought }) => {
   const userId = user?.id;
 
   const [refreshKey, setRefreshKey] = useState(0);
@@ -17,6 +16,18 @@ const MyDashboard = ({ user, earningsChart, recentBought }) => {
     refreshKey
   );
   const recentCreated = createdVoicepacks.slice(0, 5);
+  const [monthlyRevenueData, setMonthlyRevenueData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: '월별 수익 (크레딧)',
+        data: [],
+        borderColor: 'rgba(99, 102, 241, 1)',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        fill: true,
+      },
+    ],
+  });
 
   const [recentSales, setRecentSales] = useState([]);
   const [recentPayments, setRecentPayments] = useState([]);
@@ -27,24 +38,64 @@ const MyDashboard = ({ user, earningsChart, recentBought }) => {
 
   useEffect(() => {
     if (!userId) return;
-
     const fetchData = async () => {
       try {
-        // 최근 판매 수익 (최대 3개)
-        const salesRes = await axiosInstance.get('sales', {
+        // 판매 내역 가져오기
+        const salesRes = await axiosInstance.get('/sales', {
           params: {
             sellerId: user.id,
             page: 0,
-            size: 5,
+            size: 100,
             sort: 'transactionDate',
           },
         });
-        setRecentSales(salesRes.data.content || []);
 
-        console.log(salesRes.data.content);
+        const sales = salesRes.data.content || [];
+
+        // 현재 날짜 기준 최근 4개월 리스트 생성 (월 번호 기준)
+        const now = new Date();
+        const recentMonths = Array.from({ length: 4 }, (_, i) => {
+          const date = new Date(now.getFullYear(), now.getMonth() - (3 - i));
+          return {
+            label: `${date.getMonth() + 1}월`,
+            month: date.getMonth() + 1,
+          };
+        });
+
+        // 월별 수익 집계
+        const monthlyMap = new Map();
+        sales.forEach(({ date, amount }) => {
+          const saleMonth = new Date(date).getMonth() + 1;
+          monthlyMap.set(
+            saleMonth,
+            (monthlyMap.get(saleMonth) || 0) + amount / 100
+          );
+        });
+
+        const labels = recentMonths.map((m) => m.label);
+        const data = recentMonths.map((m) => monthlyMap.get(m.month) || 0);
+
+        // 그래프 데이터 세팅
+        setMonthlyRevenueData({
+          labels,
+          datasets: [
+            {
+              label: '월별 수익 (크레딧)',
+              data,
+              borderColor: 'rgba(99, 102, 241, 1)',
+              backgroundColor: 'rgba(99, 102, 241, 0.1)',
+              fill: true,
+            },
+          ],
+        });
+
+        // 최근 판매 수익 5개
+        setRecentSales(sales.slice(0, 5));
 
         // 최근 충전 내역 (최대 3개)
-        const historyRes = await axiosInstance.get(`credits/history/${userId}`);
+        const historyRes = await axiosInstance.get(
+          `/credits/history/${user.id}`
+        );
         const charges = historyRes.data.charges || [];
         setRecentPayments(charges.slice(0, 3));
       } catch (err) {
@@ -111,7 +162,7 @@ const MyDashboard = ({ user, earningsChart, recentBought }) => {
 
         <Section title="월별 수익 통계" icon="📊">
           <Line
-            data={earningsChart}
+            data={monthlyRevenueData}
             options={{
               responsive: true,
               plugins: {
