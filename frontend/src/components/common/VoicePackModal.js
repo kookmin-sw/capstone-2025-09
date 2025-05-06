@@ -146,7 +146,7 @@ const VoicePackModal = ({
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    <div className="fixed top-0 left-48 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-[600px] flex flex-col sm:flex-row gap-6 relative">
         <button
           onClick={onClose}
