@@ -82,12 +82,6 @@ const MyPayments = () => {
         <div className="bg-purple-100 p-4 rounded shadow text-center relative">
           <p className="text-gray-500">보유 크레딧</p>
           <p className="font-bold text-base">{currentCredit} 크레딧</p>
-          <button
-            onClick={handleExchange}
-            className="absolute right-3 top-7 text-xs bg-indigo-300 px-2 py-1 rounded"
-          >
-            환전 신청
-          </button>
         </div>
         <div className="bg-purple-100 p-4 rounded shadow text-center">
           <p className="text-gray-500">총 충전</p>
@@ -101,9 +95,6 @@ const MyPayments = () => {
 
       {/* 충전/사용 내역 */}
       <CreditTransactionTabs charges={charges} usages={usages} />
-
-      {/* 환전 내역 */}
-      <CreditExchangeList />
 
       {/* 결제 영역 */}
       <div className="mt-6 text-sm">
