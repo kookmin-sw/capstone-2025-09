@@ -9,7 +9,7 @@ data class AiAssistantJobCallbackRequest(
     // 처리된 Job의 ID
     val jobId: Long,
     // Job 처리 결과 상태 (SUCCESS 또는 FAILURE)
-    val status: SynthesisStatus,
+    val success: Boolean,
     // Job 성공 시 결과 파일 S3 키 (실패 시 null)
     val resultS3Key: String? = null
 ) 

@@ -27,7 +27,7 @@ class AiAssistantCallbackService(
     data class AiAssistantCallbackMessage(
         val jobId: Long,
         val success: Boolean,
-        val resultUrl: String?,
+        val resultS3Key: String?,
         val errorMessage: String?
     )
 
@@ -75,14 +75,12 @@ class AiAssistantCallbackService(
         try {
             val callbackMessage: AiAssistantCallbackMessage = objectMapper.readValue(message.body())
             logger.info("[ai-assistant] 메시지 처리 시작: messageId={}, jobId={}, success={}, resultUrl={}, errorMessage={}",
-                messageId, callbackMessage.jobId, callbackMessage.success, callbackMessage.resultUrl, callbackMessage.errorMessage)
-
-            val jobStatus = if (callbackMessage.success) SynthesisStatus.SUCCESS else SynthesisStatus.FAILURE
+                messageId, callbackMessage.jobId, callbackMessage.success, callbackMessage.resultS3Key, callbackMessage.errorMessage)
 
             val callbackDto = AiAssistantJobCallbackRequest(
                 jobId = callbackMessage.jobId,
-                status = jobStatus,
-                resultS3Key = callbackMessage.resultUrl
+                success = callbackMessage.success,
+                resultS3Key = callbackMessage.resultS3Key
             )
             withContext(Dispatchers.IO) {
                 aiAssistantService.handleSynthesisCallback(callbackDto)

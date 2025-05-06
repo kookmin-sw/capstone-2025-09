@@ -253,7 +253,7 @@ class AiAssistantService(
 
     @Transactional
     fun handleSynthesisCallback(callbackDto: AiAssistantJobCallbackRequest) {
-        logger.info("AI 비서 음성 합성 콜백 수신 - Job ID: {}, Status: {}", callbackDto.jobId, callbackDto.status)
+        logger.info("AI 비서 음성 합성 콜백 수신 - Job ID: {}, Success: {}", callbackDto.jobId, callbackDto.success)
         val job = aiAssistantSynthesisJobRepository.findById(callbackDto.jobId)
             .orElseThrow {
                 logger.warn("콜백 처리 실패: Job ID {} 를 찾을 수 없습니다.", callbackDto.jobId)
@@ -261,12 +261,12 @@ class AiAssistantService(
             }
 
         if (job.status == SynthesisStatus.SUCCESS || job.status == SynthesisStatus.FAILURE) {
-            logger.warn("이미 처리된 Job에 대한 콜백 수신됨 - Job ID: {}, 현재 상태: {}, 수신 상태: {}", job.id, job.status, callbackDto.status)
+            logger.warn("이미 처리된 Job에 대한 콜백 수신됨 - Job ID: {}, 현재 상태: {}, 성공 여부: {}", job.id, job.status, callbackDto.success)
             return
         }
 
-        job.status = callbackDto.status
-        if (callbackDto.status == SynthesisStatus.SUCCESS) {
+        if (callbackDto.success) {
+            job.status = SynthesisStatus.SUCCESS
             if (callbackDto.resultS3Key == null) {
                 logger.error("콜백 오류: 성공 상태이지만 resultS3Key가 null 입니다 - Job ID: {}", job.id)
                 job.status = SynthesisStatus.FAILURE
@@ -278,6 +278,6 @@ class AiAssistantService(
         }
 
         aiAssistantSynthesisJobRepository.save(job)
-        logger.debug("Job {} 상태 업데이트 완료: {}", job.id, job.status)
+        logger.debug("Job {} 성공 여부 업데이트 완료: {}", job.id, job.status)
     }
 }
