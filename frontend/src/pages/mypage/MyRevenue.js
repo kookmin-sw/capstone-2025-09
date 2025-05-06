@@ -115,6 +115,26 @@ const MyRevenue = () => {
     });
   }, [sales]);
 
+  const data = monthlyRevenueData.datasets[0].data;
+  const allZero = data.every((v) => v === 0);
+
+  const yScaleOptions = allZero
+    ? {
+        max: 4,
+        ticks: {
+          stepSize: 1,
+          precision: 0,
+          callback: (value) => (Number.isInteger(value) ? value : null),
+        },
+      }
+    : {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => (Number.isInteger(value) ? value : null),
+        },
+      };
+
   const RevenueStatCards = ({ total, month, count }) => (
     <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
       <div className="bg-indigo-100 p-4 rounded text-center">
@@ -177,6 +197,12 @@ const MyRevenue = () => {
               plugins: {
                 legend: { display: false },
                 title: { display: false },
+              },
+              scales: {
+                y: yScaleOptions,
+              },
+              layout: {
+                padding: { top: 10, bottom: 10 },
               },
             }}
             height={100}

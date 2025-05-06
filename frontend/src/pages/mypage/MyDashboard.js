@@ -110,6 +110,25 @@ const MyDashboard = ({ user, recentBought }) => {
       </div>
     );
   }
+  const data = monthlyRevenueData.datasets[0].data;
+  const allZero = data.every((v) => v === 0);
+
+  const yScaleOptions = allZero
+    ? {
+        max: 4,
+        ticks: {
+          stepSize: 1,
+          precision: 0,
+          callback: (value) => (Number.isInteger(value) ? value : null),
+        },
+      }
+    : {
+        beginAtZero: true,
+        ticks: {
+          precision: 0,
+          callback: (value) => (Number.isInteger(value) ? value : null),
+        },
+      };
 
   return (
     <div className="max-w-full overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -166,9 +185,14 @@ const MyDashboard = ({ user, recentBought }) => {
                 legend: { display: false },
                 title: { display: false },
               },
-              maintainAspectRatio: false,
+              scales: {
+                y: yScaleOptions,
+              },
+              layout: {
+                padding: { top: 10, bottom: 10 }, // 여유 확보
+              },
             }}
-            height={150}
+            height={110}
           />
         </Section>
       </div>
@@ -188,7 +212,7 @@ const MyDashboard = ({ user, recentBought }) => {
                   />
                 ))
               ) : (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs pl-4 text-gray-400">
                   생성한 보이스팩이 없습니다.
                 </p>
               )}
@@ -204,7 +228,7 @@ const MyDashboard = ({ user, recentBought }) => {
                   <VoicePack key={pack.id} pack={pack} type="dashboard" />
                 ))
               ) : (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs pl-4 text-gray-400">
                   구매한 보이스팩이 없습니다.
                 </p>
               )}
@@ -221,7 +245,7 @@ const MyDashboard = ({ user, recentBought }) => {
                 </li>
               ))
             ) : (
-              <li className="text-xs text-gray-400">판매 내역이 없습니다.</li>
+              <p className="text-xs text-gray-400">판매 내역이 없습니다.</p>
             )}
           </ul>
         </Section>
@@ -236,7 +260,7 @@ const MyDashboard = ({ user, recentBought }) => {
                 </li>
               ))
             ) : (
-              <li className="text-xs text-gray-400">충전 내역이 없습니다.</li>
+              <p className="text-xs text-gray-400">충전 내역이 없습니다.</p>
             )}
           </ul>
         </Section>

@@ -38,7 +38,7 @@ const MyVoicepacks = () => {
       {loading ? (
         <p className="text-sm text-gray-500">불러오는 중...</p>
       ) : voicepacks.length === 0 ? (
-        <p className="col-span-full text-gray-500 text-md mt-12">
+        <p className="col-span-full text-gray-500 text-center text-sm mt-12">
           보이스팩이 없습니다.
         </p>
       ) : (
