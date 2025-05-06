@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import useUserStore from '../utils/userStore';
 import { getVoicepacksByUserId } from '../api/getVoicepacks';
@@ -17,6 +16,7 @@ const useVoicepackUsage = (filter = 'available', refreshKey = 0) => {
     }
 
     const fetch = async () => {
+      setLoading(true);
       try {
         const data = await getVoicepacksByUserId(user.id, filter);
 

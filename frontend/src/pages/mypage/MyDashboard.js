@@ -183,7 +183,7 @@ const MyDashboard = ({ user, recentBought }) => {
                   <VoicePack
                     key={pack.id}
                     pack={pack}
-                    type="mypage"
+                    type="dashboard"
                     onRefresh={handleRefresh}
                   />
                 ))
@@ -201,7 +201,7 @@ const MyDashboard = ({ user, recentBought }) => {
             <div className="flex flex-nowrap gap-3 pr-2 min-w-fit">
               {recentBought.length > 0 ? (
                 recentBought.map((pack) => (
-                  <VoicePack key={pack.id} pack={pack} type="mypage" />
+                  <VoicePack key={pack.id} pack={pack} type="dashboard" />
                 ))
               ) : (
                 <p className="text-xs text-gray-400 text-center">
