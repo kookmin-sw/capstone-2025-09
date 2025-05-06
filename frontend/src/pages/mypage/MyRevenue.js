@@ -29,6 +29,18 @@ const MyRevenue = () => {
   const { user } = useUserStore((state) => state);
   const [summary, setSummary] = useState(null);
   const [sales, setSales] = useState([]);
+  const [monthlyRevenueData, setMonthlyRevenueData] = useState({
+    labels: [],
+    datasets: [
+      {
+        label: '월별 수익 (크레딧)',
+        data: [],
+        borderColor: 'rgba(99, 102, 241, 1)',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        fill: true,
+      },
+    ],
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,7 +58,7 @@ const MyRevenue = () => {
           params: {
             sellerId: user.id,
             page: 0,
-            size: 10,
+            size: 100,
             sort: 'transactionDate',
           },
         });
@@ -70,18 +82,38 @@ const MyRevenue = () => {
     ],
   };
 
-  const monthlyRevenue = {
-    labels: ['1월', '2월', '3월', '4월', '5월'], // 예시
-    datasets: [
-      {
-        label: '월별 수익 (크레딧)',
-        data: [0, 0, 100, 200, summary?.monthlyRevenue || 0],
-        borderColor: 'rgba(99, 102, 241, 1)',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        fill: true,
-      },
-    ],
-  };
+  useEffect(() => {
+    const now = new Date();
+    const recentMonths = Array.from({ length: 6 }, (_, i) => {
+      const date = new Date(now.getFullYear(), now.getMonth() - (5 - i));
+      return {
+        label: `${date.getMonth() + 1}월`,
+        month: date.getMonth() + 1,
+      };
+    });
+
+    const monthlyMap = new Map();
+    sales.forEach(({ date, amount }) => {
+      const saleMonth = new Date(date).getMonth() + 1;
+      monthlyMap.set(saleMonth, (monthlyMap.get(saleMonth) || 0) + amount);
+    });
+
+    const labels = recentMonths.map((m) => m.label);
+    const data = recentMonths.map((m) => monthlyMap.get(m.month) || 0);
+
+    setMonthlyRevenueData({
+      labels,
+      datasets: [
+        {
+          label: '월별 수익 (크레딧)',
+          data,
+          borderColor: 'rgba(99, 102, 241, 1)',
+          backgroundColor: 'rgba(99, 102, 241, 0.1)',
+          fill: true,
+        },
+      ],
+    });
+  }, [sales]);
 
   const RevenueStatCards = ({ total, month, count }) => (
     <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
@@ -139,7 +171,7 @@ const MyRevenue = () => {
         <div>
           <h3 className="text-sm font-semibold mb-2">월별 수익 추이</h3>
           <Line
-            data={monthlyRevenue}
+            data={monthlyRevenueData}
             options={{
               responsive: true,
               plugins: {
