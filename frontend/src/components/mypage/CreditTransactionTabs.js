@@ -27,7 +27,7 @@ const CreditTransactionTabs = ({ charges = [], usages = [] }) => {
         </button>
       </div>
 
-      <ul className="text-xs space-y-2">
+      <ul className="text-xs space-y-2 overflow-y-auto max-h-[170px] pr-1">
         {(tab === 'charge' ? charges : usages).map((item, idx) => (
           <li key={idx} className="flex justify-between border-b pb-1">
             {tab === 'charge' ? (
