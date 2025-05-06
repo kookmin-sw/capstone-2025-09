@@ -66,10 +66,7 @@ const MyDashboard = ({ user, recentBought }) => {
         const monthlyMap = new Map();
         sales.forEach(({ date, amount }) => {
           const saleMonth = new Date(date).getMonth() + 1;
-          monthlyMap.set(
-            saleMonth,
-            (monthlyMap.get(saleMonth) || 0) + amount / 100
-          );
+          monthlyMap.set(saleMonth, (monthlyMap.get(saleMonth) || 0) + amount);
         });
 
         const labels = recentMonths.map((m) => m.label);
@@ -220,7 +217,7 @@ const MyDashboard = ({ user, recentBought }) => {
             {recentSales.length > 0 ? (
               recentSales.map((sale, idx) => (
                 <li key={idx}>
-                  {sale.voicepackName} - {sale.amount / 100} 크레딧
+                  {sale.voicepackName} - {sale.amount} 크레딧
                 </li>
               ))
             ) : (
