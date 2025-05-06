@@ -30,7 +30,7 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
   return (
     <>
       <div
-        className={`bg-violet-50 p-4 border border-indigo-300 rounded-xl shadow-md hover:shadow-xl cursor-pointer text-center ${
+        className={`bg-violet-50 p-4 border border-indigo-300 rounded-xl hover:shadow-xl cursor-pointer text-center ${
           isMypage ? 'w-36 h-auto' : 'max-w-[240px] w-full'
         }`}
         onClick={handleClick}
