@@ -11,6 +11,8 @@ const MyPayments = () => {
   const [selectedAmount, setSelectedAmount] = useState(5000);
   const [charged, setCharged] = useState(0);
   const [used, setUsed] = useState(0);
+  const [charges, setCharges] = useState([]);
+  const [usages, setUsages] = useState([]);
 
   useEffect(() => {
     if (!user?.id) return;
@@ -27,22 +29,23 @@ const MyPayments = () => {
         const historyRes = await axiosInstance.get(
           `credits/history/${user.id}`
         );
-        const charges = historyRes.data.charges || [];
-        const usages = historyRes.data.usages || [];
+        const chargesData = historyRes.data.charges || [];
+        const usagesData = historyRes.data.usages || [];
 
-        // 총 충전 크레딧 합산
-        const totalCharged = charges.reduce(
+        // 총합 계산
+        const totalCharged = chargesData.reduce(
           (sum, item) => sum + (item.amountCredit || 0),
           0
         );
-        // 총 사용 크레딧 합산
-        const totalUsed = usages.reduce(
+        const totalUsed = usagesData.reduce(
           (sum, item) => sum + (item.amountCredit || 0),
           0
         );
 
         setCharged(totalCharged);
         setUsed(totalUsed);
+        setCharges(chargesData);
+        setUsages(usagesData);
       } catch (err) {
         console.error('크레딧 정보 조회 실패:', err);
       }
@@ -59,14 +62,14 @@ const MyPayments = () => {
   };
 
   const handlePayment = async () => {
-    const credit = selectedAmount / 100;
     try {
       await axiosInstance.post('credits/charge', {
         userId: user.id,
-        amount: credit,
+        amount: selectedAmount,
       });
-      alert(`${credit} 크레딧이 충전되었습니다.`);
-      setCurrentCredit((prev) => prev + credit); // 충전 후 갱신
+      alert(`${selectedAmount} 크레딧이 충전되었습니다.`);
+      setCurrentCredit((prev) => prev + selectedAmount);
+      // 새로 고침 없이 최신 데이터 반영을 원하면 fetchAll 재호출
     } catch (err) {
       alert('결제에 실패했습니다. 다시 시도해주세요.');
     }
@@ -74,7 +77,7 @@ const MyPayments = () => {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow space-y-6">
-      {/* 크레딧 정보 영역 */}
+      {/* 크레딧 정보 */}
       <div className="grid grid-cols-3 gap-4 text-sm relative">
         <div className="bg-purple-100 p-4 rounded shadow text-center relative">
           <p className="text-gray-500">보유 크레딧</p>
@@ -96,8 +99,13 @@ const MyPayments = () => {
         </div>
       </div>
 
-      <CreditTransactionTabs />
+      {/* 충전/사용 내역 */}
+      <CreditTransactionTabs charges={charges} usages={usages} />
+
+      {/* 환전 내역 */}
       <CreditExchangeList />
+
+      {/* 결제 영역 */}
       <div className="mt-6 text-sm">
         <h3 className="font-semibold mb-2">크레딧 충전하기</h3>
         <div className="flex items-center space-x-2">
@@ -106,9 +114,9 @@ const MyPayments = () => {
             value={selectedAmount}
             onChange={(e) => setSelectedAmount(Number(e.target.value))}
           >
-            <option value={5000}>5,000원 (50 크레딧)</option>
-            <option value={10000}>10,000원 (100 크레딧)</option>
-            <option value={20000}>20,000원 (200 크레딧)</option>
+            <option value={1000}>10,000원 (1000 크레딧)</option>
+            <option value={2000}>20,000원 (2000 크레딧)</option>
+            <option value={5000}>50,000원 (5000 크레딧)</option>
           </select>
           <button
             onClick={handlePayment}
