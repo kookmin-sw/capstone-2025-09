@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import useUserStore from '../utils/userStore';
 import { getVoicepacksByUserId } from '../api/getVoicepacks';
@@ -33,7 +34,6 @@ const useVoicepackUsage = (filter = 'available', refreshKey = 0) => {
 
     fetch();
   }, [user?.id, filter, refreshKey]);
-
   return { voicepacks, loading, error };
 };
 
