@@ -14,8 +14,6 @@ const MyVoicepacks = () => {
   };
   const [loading, setLoading] = useState(false);
 
-  console.log(voicepacks, filter);
-
   return (
     <div className="bg-white p-6 rounded-xl shadow">
       <div className="flex justify-between items-center mb-6">
