@@ -1,18 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import Section from '../../components/mypage/Section';
 import VoicePack from '../../components/common/VoicePack';
 import useFetchUserInfo from '../../hooks/useUserInfo';
-import { User } from 'lucide-react';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
+import useUserStore from '../../utils/userStore';
+import axiosInstance from '../../utils/axiosInstance';
+import { User } from 'lucide-react';
 
-const MyDashboard = ({
-  user,
-  earningsChart,
-  recentBought,
-  recentSales,
-  recentPayments,
-}) => {
+const MyDashboard = ({ user, earningsChart, recentBought }) => {
   const userId = user?.id;
 
   const [refreshKey, setRefreshKey] = useState(0);
@@ -22,9 +18,42 @@ const MyDashboard = ({
   );
   const recentCreated = createdVoicepacks.slice(0, 5);
 
+  const [recentSales, setRecentSales] = useState([]);
+  const [recentPayments, setRecentPayments] = useState([]);
+
   const handleRefresh = () => setRefreshKey((prev) => prev + 1);
 
   useFetchUserInfo(userId);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchData = async () => {
+      try {
+        // 최근 판매 수익 (최대 3개)
+        const salesRes = await axiosInstance.get('sales', {
+          params: {
+            sellerId: user.id,
+            page: 0,
+            size: 5,
+            sort: 'transactionDate',
+          },
+        });
+        setRecentSales(salesRes.data.content || []);
+
+        console.log(salesRes.data.content);
+
+        // 최근 충전 내역 (최대 3개)
+        const historyRes = await axiosInstance.get(`credits/history/${userId}`);
+        const charges = historyRes.data.charges || [];
+        setRecentPayments(charges.slice(0, 3));
+      } catch (err) {
+        console.error('대시보드 데이터 로딩 실패:', err);
+      }
+    };
+
+    fetchData();
+  }, [userId]);
 
   if (!user) {
     return (
@@ -33,10 +62,11 @@ const MyDashboard = ({
       </div>
     );
   }
+
   return (
     <div className="max-w-full overflow-hidden grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {/* 좌측: 프로필 + 그래프 */}
       <div className="lg:col-span-1 flex flex-col gap-4">
-        {/* 유저 프로필 정보 */}
         <div className="bg-white p-4 rounded-xl shadow flex flex-col items-center text-center">
           {user.profileImage ? (
             <img
@@ -79,7 +109,6 @@ const MyDashboard = ({
           </div>
         </div>
 
-        {/* 수익 그래프 */}
         <Section title="월별 수익 통계" icon="📊">
           <Line
             data={earningsChart}
@@ -96,7 +125,7 @@ const MyDashboard = ({
         </Section>
       </div>
 
-      {/* 보이스팩/수익 요약 */}
+      {/* 우측: 보이스팩 요약 및 수익/충전 내역 */}
       <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 content-stretch">
         <Section title="최근 생성한 보이스팩" icon="🎤" className="h-full">
           <div className="overflow-x-auto scrollbar-hide">
@@ -137,22 +166,30 @@ const MyDashboard = ({
 
         <Section title="최근 판매 수익" icon="💰" className="h-full">
           <ul className="list-disc pl-4">
-            {recentSales.map((sale, idx) => (
-              <li key={idx}>
-                {sale.name} - {sale.amount / 100} 크레딧
-              </li>
-            ))}
+            {recentSales.length > 0 ? (
+              recentSales.map((sale, idx) => (
+                <li key={idx}>
+                  {sale.voicepackName} - {sale.amount / 100} 크레딧
+                </li>
+              ))
+            ) : (
+              <li className="text-xs text-gray-400">판매 내역이 없습니다.</li>
+            )}
           </ul>
         </Section>
 
         <Section title="최근 충전 내역" icon="💳" className="h-full">
           <ul className="list-disc pl-4">
-            {recentPayments.map((pay, idx) => (
-              <li key={idx}>
-                {pay.date} - {pay.amount.toLocaleString()}원 ({pay.amount / 100}{' '}
-                크레딧)
-              </li>
-            ))}
+            {recentPayments.length > 0 ? (
+              recentPayments.map((pay, idx) => (
+                <li key={idx}>
+                  {new Date(pay.date).toLocaleDateString()} -{' '}
+                  {pay.method || '충전'} ({pay.amountCredit} 크레딧)
+                </li>
+              ))
+            ) : (
+              <li className="text-xs text-gray-400">충전 내역이 없습니다.</li>
+            )}
           </ul>
         </Section>
       </div>
