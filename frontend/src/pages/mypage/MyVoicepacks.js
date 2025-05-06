@@ -36,7 +36,7 @@ const MyVoicepacks = () => {
           보이스팩이 없습니다.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gab-7">
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-7">
           {voicepacks.map((pack) => (
             <VoicePack
               key={pack.id}
