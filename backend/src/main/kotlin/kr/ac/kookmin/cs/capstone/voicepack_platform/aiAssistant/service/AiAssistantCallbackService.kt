@@ -3,7 +3,8 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import kotlinx.coroutines.*
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantCallbackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantJobCallbackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.entity.SynthesisStatus
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
@@ -76,13 +77,16 @@ class AiAssistantCallbackService(
             logger.info("[ai-assistant] 메시지 처리 시작: messageId={}, jobId={}, success={}, resultUrl={}, errorMessage={}",
                 messageId, callbackMessage.jobId, callbackMessage.success, callbackMessage.resultUrl, callbackMessage.errorMessage)
 
-            val callbackRequest = AiAssistantCallbackRequest(
-                id = callbackMessage.jobId,
-                success = callbackMessage.success,
-                resultUrl = callbackMessage.resultUrl,
-                errorMessage = callbackMessage.errorMessage
+            val jobStatus = if (callbackMessage.success) SynthesisStatus.SUCCESS else SynthesisStatus.FAILURE
+
+            val callbackDto = AiAssistantJobCallbackRequest(
+                jobId = callbackMessage.jobId,
+                status = jobStatus,
+                resultS3Key = callbackMessage.resultUrl
             )
-            aiAssistantService.handleAiAssistantCallback(callbackRequest)
+            withContext(Dispatchers.IO) {
+                aiAssistantService.handleSynthesisCallback(callbackDto)
+            }
 
             deleteMessageFromQueue(aiAssistantQueueUrl, message.receiptHandle(), messageId, "ai-assistant")
             logger.info("[ai-assistant] 메시지 처리 완료 및 삭제: messageId={}", messageId)

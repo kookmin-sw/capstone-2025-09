@@ -5,22 +5,23 @@ import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantCallbackRequest
+import io.swagger.v3.oas.annotations.tags.Tag
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.setting.AiAssistantSettingRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantStatusDto
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.synthesis.AiAssistantSynthesisSubmitRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.response.setting.AiAssistantSettingResponse
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.service.AiAssistantService
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisStatusDto
-import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.dto.VoicepackSynthesisSubmitResponse
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import org.springframework.http.HttpStatus
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.response.synthesis.AiAssistantMultiSynthesisResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.response.synthesis.AiAssistantMultiSynthesisStatusResponse
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantJobCallbackRequest
+import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.synthesis.AiAssistantSynthesisSubmitRequest
 
 @RestController
 @RequestMapping("/api/ai-assistant")
+@Tag(name = "AI Assistant", description = "AI 비서 관련 API")
 class AiAssistantController(
     private val aiAssistantService: AiAssistantService
 ) {
@@ -38,7 +39,7 @@ class AiAssistantController(
             ApiResponse(
                 responseCode = "200",
                 description = "세팅 성공",
-                content = [Content(schema = Schema(implementation = VoicepackSynthesisStatusDto::class))]
+                content = [Content(schema = Schema(implementation = AiAssistantSettingResponse::class))]
             ),
             ApiResponse(
                 responseCode = "400",
@@ -89,126 +90,107 @@ class AiAssistantController(
     }
 
     /**
-     * AI 비서 음성 합성
+     * AI 비서 음성 합성 (다중 카테고리 통합)
      */
-
     @Operation(
-        summary = "AI 비서 이용하기 요청 (비동기)",
-        description = "사용자가 보이스팩을 기반으로 AI 비서 스크립트 TTS 생성을 비동기적으로 요청합니다.",
+        summary = "AI 비서 이용하기 요청 (다중 카테고리)",
+        description = "로그인된 사용자의 AI 비서 설정에 따라 선택된 모든 카테고리에 대한 음성 합성을 비동기적으로 요청합니다. 중복 요청은 자동으로 처리됩니다.",
         responses = [
             ApiResponse(
                 responseCode = "202",
-                description = "생성 요청 성공 (처리 시작됨)",
-                content = [Content(schema = Schema(implementation = VoicepackSynthesisSubmitResponse::class))]
+                description = "요청 수락됨. Location 헤더에 상태 확인 URL 포함",
+                content = [Content(schema = Schema(implementation = AiAssistantMultiSynthesisResponse::class))]
             ),
-            ApiResponse(
-                responseCode = "400",
-                description = "잘못된 요청"
-            ),
-            ApiResponse(
-                responseCode = "403",
-                description = "사용 권한 없음"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류 (Lambda 호출 실패 등)"
-            )
+            ApiResponse(responseCode = "400", description = "잘못된 요청 또는 설정 (선택된 카테고리 없음 등 - IllegalArgumentException)"),
+            ApiResponse(responseCode = "401", description = "인증 실패 (세션 등)"),
+            ApiResponse(responseCode = "403", description = "해당 보이스팩 사용 권한 없음 (SecurityException)"),
+            ApiResponse(responseCode = "404", description = "사용자, 보이스팩, 또는 AI 비서 설정을 찾을 수 없음 (IllegalArgumentException/NoSuchElementException 등)"),
+            ApiResponse(responseCode = "500", description = "서버 내부 오류 (날짜 포맷 오류, MQ/S3 오류 등)")
         ]
     )
     @PostMapping("/synthesis")
-    suspend fun submitSynthesisRequest(
+    fun submitSynthesisRequest(
         @SessionAttribute("userId") userId: Long,
         @RequestBody request: AiAssistantSynthesisSubmitRequest
-    ): ResponseEntity<Any> {
+    ): ResponseEntity<AiAssistantMultiSynthesisResponse> {
         try {
-            val response = aiAssistantService.submitSynthesisRequest(userId, request)
+            val responseDto = aiAssistantService.submitSynthesisRequest(userId, request)
 
-            // Location 헤더 생성 (상태 조회 엔드포인트 URL)
             val locationUri = ServletUriComponentsBuilder
                 .fromCurrentContextPath() // 현재 요청의 기본 URL (e.g., http://localhost:8080)
-                .path("/api/ai-assistant/synthesis/status/{id}") // 상태 조회 경로 추가
-                .buildAndExpand(response.id) // 경로 변수({id}) 채우기
+                .path("/api/ai-assistant/synthesis//status/{requestId}")
+                .buildAndExpand(responseDto.requestId) // 경로 변수({requestId}) 채우기
                 .toUri()
 
-            return ResponseEntity.accepted().location(locationUri).body(response)
+            return ResponseEntity.accepted().location(locationUri).body(responseDto)
         } catch (e: SecurityException) {
-            logger.error("AI 비서 음성 합성 권한 오류: {}", e.message)
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
+            logger.warn("AI 비서 음성 합성 권한 오류: User ID {}, Message: {}", userId, e.message)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null)
         } catch (e: IllegalArgumentException) {
-            logger.error("AI 비서 음성 합성 잘못된 요청: {}", e.message)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
-        } catch (e: RuntimeException) {
-            logger.error("AI 비서 음성 합성 요청 제출 오류: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to e.message))
+            logger.warn("AI 비서 음성 합성 잘못된 요청: User ID {}, Message: {}", userId, e.message)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null)
+        } catch (e: IllegalStateException) {
+            logger.error("AI 비서 음성 합성 내부 상태 오류: User ID {}, Message: {}", userId, e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
         } catch (e: Exception) {
-            logger.error("AI 비서 음성 합성 중 예상치 못한 오류: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "음성 합성 요청 중 오류가 발생했습니다."))
+            logger.error("AI 비서 음성 합성 중 예상치 못한 오류: User ID: {}, Message: {}", userId, e.message, e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)
         }
     }
 
-    // AI 비서 음성 합성 시 모델로부터 부를 callback url
+    @GetMapping("/synthesis/status/{requestId}")
     @Operation(
-        summary = "AI 비서 음성 합성 콜백",
-        description = "AI 비서 음성 합성 처리 완료 후 Cloud Run에서 호출하는 내부 콜백 엔드포인트입니다.",
-        deprecated = true
-    )
-    @PostMapping("/synthesis/callback")
-    fun handleSynthesisCallback(
-        @Parameter(description = "요청 ID") @RequestParam id: Long,
-        @Parameter(description = "처리 성공 여부") @RequestParam success: Boolean,
-        @Parameter(description = "성공 시 결과 URL") @RequestParam(required = false) resultUrl: String?,
-        @Parameter(description = "실패 시 오류 메시지") @RequestParam(required = false) errorMessage: String?
-    ): ResponseEntity<Any> {
-        // RequestParam으로 받은 값들을 사용하여 DTO 객체 생성
-        val callbackRequest = AiAssistantCallbackRequest(
-            id = id,
-            success = success,
-            resultUrl = resultUrl,
-            errorMessage = errorMessage
-        )
-
-        try {
-            aiAssistantService.handleAiAssistantCallback(callbackRequest)
-            return ResponseEntity.ok().build() // 성공 시 200 OK만 반환
-        } catch (e: Exception) {
-            // 콜백 처리 중 오류 발생 시 로깅만 하고 500 에러 반환 (Cloud Run 재시도 방지 목적)
-            logger.error("AI 비서 음성 합성 콜백 처리 중 오류 발생: id={}, error={}", callbackRequest.id, e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "콜백 처리 중 오류 발생"))
-        }
-    }
-
-    @Operation(
-        summary = "AI 비서 음성 합성 상태 조회 (Polling)",
-        description = "제출된 AI 비서 음성 합성 요청의 현재 상태와 결과(완료 시)를 조회합니다.",
+        summary = "AI 비서 음성 합성 상태 확인 (다중 카테고리)",
+        description = "지정된 요청 ID의 전체 음성 합성 진행 상태를 확인합니다.",
+        parameters = [
+            Parameter(name = "requestId", description = "확인할 요청의 ID", required = true)
+        ],
         responses = [
-            ApiResponse(
-                responseCode = "200",
-                description = "조회 성공",
-                content = [Content(schema = Schema(implementation = AiAssistantStatusDto::class))]
-            ),
-            ApiResponse(
-                responseCode = "404",
-                description = "해당 Job ID의 요청을 찾을 수 없음"
-            ),
-            ApiResponse(
-                responseCode = "500",
-                description = "서버 오류"
-            )
+            ApiResponse(responseCode = "200", description = "상태 조회 성공. PROCESSING, SUCCESS, FAILURE 중 하나.", content = [Content(schema = Schema(implementation = AiAssistantMultiSynthesisStatusResponse::class))]),
+            ApiResponse(responseCode = "404", description = "요청 ID에 해당하는 요청을 찾을 수 없음 (IllegalArgumentException 발생)")
         ]
     )
-    @GetMapping("/synthesis/status/{id}")
-    fun getAiAssistantStatus(
-        @Parameter(description = "조회할 요청의 ID") @PathVariable id: Long
-    ): ResponseEntity<Any> {
+    fun getSynthesisRequestStatus(
+        @PathVariable requestId: Long
+    ): ResponseEntity<AiAssistantMultiSynthesisStatusResponse> {
         try {
-            val statusDto = aiAssistantService.getAiAssistantStatus(id)
+            val statusDto = aiAssistantService.getSynthesisRequestStatus(requestId)
             return ResponseEntity.ok(statusDto)
         } catch (e: IllegalArgumentException) {
-            logger.warn("AI 비서 음성 합성 상태 조회 실패: {}", e.message)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
+            logger.warn("AI 비서 상태 조회 실패 (찾을 수 없음): Request ID $requestId, Error: ${e.message}")
+            return ResponseEntity.notFound().build()
         } catch (e: Exception) {
-            logger.error("AI 비서 음성 합성 상태 조회 중 오류 발생: id={}, error={}", id, e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "상태 조회 중 오류 발생"))
+            logger.error("AI 비서 상태 조회 중 오류 발생: Request ID $requestId", e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build()
+        }
+    }
+
+    @PostMapping("/callback")
+    @Operation(
+        summary = "AI 비서 음성 합성 콜백 (Job 단위)",
+        description = "Cloud Run 에서 개별 음성 합성 작업(Job) 완료/실패 시 호출하는 엔드포인트",
+        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+            description = "Job 처리 결과 정보",
+            required = true,
+            content = [Content(schema = Schema(implementation = AiAssistantJobCallbackRequest::class))]
+        ),
+        responses = [
+            ApiResponse(responseCode = "200", description = "콜백 처리 성공"),
+            ApiResponse(responseCode = "404", description = "Job ID에 해당하는 작업을 찾을 수 없음 (IllegalArgumentException 발생)")
+        ]
+    )
+    fun handleSynthesisCallback(
+        @RequestBody callbackDto: AiAssistantJobCallbackRequest
+    ): ResponseEntity<String> {
+        try {
+            aiAssistantService.handleSynthesisCallback(callbackDto)
+            return ResponseEntity.ok("Callback processed successfully for Job ID: ${callbackDto.jobId}")
+        } catch (e: IllegalArgumentException) {
+            logger.warn("Callback 처리 실패 (찾을 수 없음): Job ID ${callbackDto.jobId}, Error: ${e.message}")
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.message)
+        } catch (e: Exception) {
+            logger.error("Callback 처리 중 오류 발생: Job ID ${callbackDto.jobId}", e)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Internal server error")
         }
     }
 
