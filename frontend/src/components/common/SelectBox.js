@@ -1,43 +1,48 @@
+import { Listbox } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import React from 'react';
 
 const SelectBox = ({ label, value, onChange, options, placeholder }) => {
+  const selectedOption = options.find((opt) => opt.value === value);
+
   return (
     <div>
       <label className="block text-sm font-medium mb-1">{label}</label>
-      <div className="relative w-full">
-        <select
-          value={value ?? ''}
-          onChange={onChange}
-          className="appearance-none w-full h-[40px] px-4 pr-10 py-2 rounded-md border border-[#D9D9D9] bg-white text-gray-800 font-medium focus:outline-none"
-        >
-          <option value="" disabled hidden>
-            {placeholder}
-          </option>
-          {options.map(({ label, value }, i) => (
-            <option key={i} value={value} className="text-black">
-              {label}
-            </option>
-          ))}
-        </select>
+      <Listbox
+        value={value}
+        onChange={onChange}
+      >
+        <div className="relative min-w-[200px]">
+          <Listbox.Button className=" max-w-full w-full overflow-hidden whitespace-nowrap text-ellipsis px-4 pr-10 py-2 text-left bg-white border border-[#D9D9D9] rounded-md font-medium text-gray-800 focus:outline-none">
+            <span>
+              {selectedOption ? (
+                selectedOption.label
+              ) : (
+                <span className="text-gray-400">{placeholder}</span>
+              )}
+            </span>
+            <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+              <ChevronDownIcon className="w-4 h-4 text-gray-700" />
+            </span>
+          </Listbox.Button>
 
-        {/* 아래 화살표 아이콘 */}
-        <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-          <svg
-            className="w-4 h-4 text-gray-700"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 9l-7 7-7-7"
-            />
-          </svg>
+          <Listbox.Options className="absolute z-10 max-h-60 w-full overflow-y-auto bg-white border border-[#D9D9D9] rounded-md">
+            {options.map(({ label, value }) => (
+              <Listbox.Option
+                key={value}
+                value={value}
+                className={({ active }) =>
+                  `cursor-pointer select-none px-4 py-2 ${
+                    active ? 'bg-violet-400 text-white' : 'text-gray-900'
+                  }`
+                }
+              >
+                {label}
+              </Listbox.Option>
+            ))}
+          </Listbox.Options>
         </div>
-      </div>
+      </Listbox>
     </div>
   );
 };

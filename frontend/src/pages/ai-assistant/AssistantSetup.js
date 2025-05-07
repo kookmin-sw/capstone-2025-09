@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import GradientButton from '../../components/common/GradientButton';
 import SelectBox from '../../components/common/SelectBox';
-import useUserStore from '../../utils/userStore';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 // 상수로 유지될 항목들
 const WRITING_STYLES = ['존댓말', '반말', '밝은 톤', '차분한 톤'];
@@ -14,9 +14,8 @@ const CATEGORIES = [
 ];
 
 const AssistantSetup = ({ setIsConfigured }) => {
-  const user = useUserStore((state) => state.user);
-
-  const voicepacks = user?.voicepacks || [];
+  const voicepacksRaw = useVoicepackUsage('available').voicepacks;
+  const voicepacks = Array.isArray(voicepacksRaw) ? voicepacksRaw : [];
 
   const [selectedVoiceId, setSelectedVoiceId] = useState(null);
   const [selectedWritingStyle, setSelectedWritingStyle] = useState(null);
@@ -27,10 +26,20 @@ const AssistantSetup = ({ setIsConfigured }) => {
     value: index,
   }));
 
-  const voicepackOptions = voicepacks.map(({ voicepackId, voicepackName }) => ({
-    label: voicepackName,
-    value: voicepackId,
-  }));
+  const hasVoicepacks = Array.isArray(voicepacks) && voicepacks.length > 0;
+
+  const voicepackOptions = hasVoicepacks
+    ? voicepacks
+        .filter((v) => v?.id && v?.name)
+        .map(({ id, name }) => ({
+          label: name,
+          value: id,
+        }))
+    : [];
+
+  const placeholderText = hasVoicepacks
+    ? '보이스팩을 선택해주세요.'
+    : '보이스팩이 없습니다.';
 
   const toggleCategory = (index) => {
     const alreadySelected = selectedCategories.includes(index);
@@ -61,18 +70,18 @@ const AssistantSetup = ({ setIsConfigured }) => {
       <h1 className="text-xl font-semibold">AI 비서</h1>
 
       {/* 보이스팩 & 문체 선택 */}
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <SelectBox
           label="보이스팩"
           value={selectedVoiceId}
-          onChange={(e) => setSelectedVoiceId(Number(e.target.value))}
+          onChange={(val) => setSelectedVoiceId(Number(val))}
           options={voicepackOptions}
-          placeholder="보이스팩을 선택해주세요."
+          placeholder={placeholderText}
         />
         <SelectBox
           label="문체"
           value={selectedWritingStyle}
-          onChange={(e) => setSelectedWritingStyle(Number(e.target.value))}
+          onChange={(val) => setSelectedWritingStyle(Number(val))}
           options={writingStyleOptions}
           placeholder="문체를 선택해주세요."
         />
