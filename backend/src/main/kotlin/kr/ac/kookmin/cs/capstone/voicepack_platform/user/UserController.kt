@@ -51,22 +51,6 @@ class UserController(
         }
     }
 
-    @GetMapping("/test")
-    fun test(request: HttpServletRequest) : ResponseEntity<String> {
-        val userId = request.session.getAttribute("userId") as? Long
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요함")
-
-        return ResponseEntity.ok("로그인 완료")
-    }
-
-    @GetMapping("/test2")
-    fun test2(request: HttpServletRequest): ResponseEntity<String> {
-        val sessionCookie = request.cookies?.find { it.name == "JSESSIONID" }?.value
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키 없음")
-
-        return ResponseEntity.ok("현재 쿠키 값: $sessionCookie")
-    }
-
     @Operation(
         summary = "내 정보 조회",
         description = "로그인한 사용자의 정보와 활동 통계를 조회합니다.",
