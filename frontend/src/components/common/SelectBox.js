@@ -10,7 +10,7 @@ const SelectBox = ({ label, value, onChange, options, placeholder }) => {
       <label className="block text-sm font-medium mb-1">{label}</label>
       <Listbox
         value={value}
-        onChange={(val) => onChange({ target: { value: val } })}
+        onChange={onChange}
       >
         <div className="relative min-w-[200px]">
           <Listbox.Button className=" max-w-full w-full overflow-hidden whitespace-nowrap text-ellipsis px-4 pr-10 py-2 text-left bg-white border border-[#D9D9D9] rounded-md font-medium text-gray-800 focus:outline-none">
