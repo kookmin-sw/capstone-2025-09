@@ -37,8 +37,18 @@ class UserController(
 
 
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession) : ResponseEntity<Long> {
-        return ResponseEntity.ok(userService.login(request, session))
+    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession): ResponseEntity<Any> {
+        return try {
+            ResponseEntity.ok(userService.login(request, session))
+        } catch (e: IllegalArgumentException) {
+            // 비밀번호가 틀린 경우와 이메일이 틀린 경우를 구분하여 처리
+            val status = if (e.message == "비밀번호가 틀렸습니다.") {
+                HttpStatus.UNAUTHORIZED // 비밀번호 오류
+            } else {
+                HttpStatus.BAD_REQUEST // 이메일 오류
+            }
+            ResponseEntity.status(status).body(mapOf("error" to e.message)) // 오류 메시지를 응답 본문에 포함
+        }
     }
 
     @GetMapping("/test")

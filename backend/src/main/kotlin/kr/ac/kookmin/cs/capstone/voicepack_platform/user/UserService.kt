@@ -54,10 +54,10 @@ class UserService(
 
     fun login(request: UserLoginRequest, session: HttpSession): Long {
         val user = userRepository.findByEmail(request.email)
-            ?: throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
+            ?: throw IllegalArgumentException("가입된 이메일이 존재하지 않습니다.")
 
         if (user.password != request.password) {
-            throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
+            throw IllegalArgumentException("비밀번호가 틀렸습니다.")
         }
 
         session.removeAttribute("userId")
