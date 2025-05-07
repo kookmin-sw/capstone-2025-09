@@ -129,7 +129,7 @@ class AiAssistantService(
         val writingStyleEnum = settings.writingStyle
         
          // 테스트 Time을 쓰지 않는 시점에 val로 변경
-         var formattedDateTime = try {
+         val formattedDateTime = try {
             OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"))
         } catch (e: Exception) {
             logger.error("날짜 포맷 중 오류 발생: ${e.message}", e)
@@ -137,7 +137,6 @@ class AiAssistantService(
         }
 
         logger.info("현재 시각을 확인했습니다. nowTime : {}", formattedDateTime)
-        formattedDateTime = "2025041211" //테스트용 시간대 설정
         
         val currentPromptTimeSlot = formattedDateTime
 
