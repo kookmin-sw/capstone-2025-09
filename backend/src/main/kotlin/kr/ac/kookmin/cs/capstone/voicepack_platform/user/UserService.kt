@@ -12,6 +12,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.NoSuchElementException
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.core.sync.RequestBody
+import java.util.UUID
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.beans.factory.annotation.Value
 
 @Service
 class UserService(
@@ -19,7 +25,9 @@ class UserService(
     private val creditService: CreditService,
     private val voicepackRepository: VoicepackRepository,
     private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
-    private val saleRepository: SaleRepository
+    private val saleRepository: SaleRepository,
+    private val s3Client: S3Client,
+    @Value("\${aws.s3.bucket-name}") private val bucketName: String 
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -33,7 +41,14 @@ class UserService(
             email = request.email,
             password = request.password // 실제 구현시 암호화 필요
         )
-        
+
+        // 프로필 이미지가 있는 경우 S3에 업로드
+        request.profileImage?.let { file ->
+            val objectKey = "profile-images/${UUID.randomUUID()}_${file.originalFilename}"
+            val s3Url = uploadFileToS3(objectKey, file)
+            user.profileImageUrl = s3Url // S3 URL 저장
+        }
+
         return userRepository.save(user).id
     }
 
@@ -81,5 +96,16 @@ class UserService(
             createdPacks = createdPacks,
             boughtPacks = boughtPacks
         )
+    }
+
+    private fun uploadFileToS3(objectKey: String, file: MultipartFile): String {
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(bucketName) // S3 버킷 이름 사용
+                .key(objectKey)
+                .build(),
+            RequestBody.fromInputStream(file.inputStream, file.size)
+        )
+        return "https://$bucketName.s3.amazonaws.com/$objectKey"
     }
 } 

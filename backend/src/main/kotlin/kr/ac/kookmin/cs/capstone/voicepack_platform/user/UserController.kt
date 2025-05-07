@@ -16,6 +16,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
 import java.util.NoSuchElementException
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,10 +25,16 @@ import java.util.NoSuchElementException
 class UserController(
     private val userService: UserService
 ) {
-    @PostMapping("/signup")
-    fun signup(@Valid @RequestBody request: UserSignupRequest): ResponseEntity<Long> {
+    @PostMapping("/signup", consumes = ["multipart/form-data"])
+    fun signup(
+        @RequestParam("email") email: String,
+        @RequestParam("password") password: String,
+        @RequestPart("profileImage", required = false) profileImage: MultipartFile?
+    ): ResponseEntity<Long> {
+        val request = UserSignupRequest(email, password, profileImage)
         return ResponseEntity.ok(userService.signup(request))
     }
+
 
     @PostMapping("/login")
     fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession) : ResponseEntity<Long> {
