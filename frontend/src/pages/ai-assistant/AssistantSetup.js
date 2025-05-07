@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import GradientButton from '../../components/common/GradientButton';
 import SelectBox from '../../components/common/SelectBox';
-import useUserStore from '../../utils/userStore';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
 
 // 상수로 유지될 항목들
@@ -75,14 +74,14 @@ const AssistantSetup = ({ setIsConfigured }) => {
         <SelectBox
           label="보이스팩"
           value={selectedVoiceId}
-          onChange={(e) => setSelectedVoiceId(Number(e.target.value))}
+          onChange={(val) => setSelectedVoiceId(Number(val))}
           options={voicepackOptions}
           placeholder={placeholderText}
         />
         <SelectBox
           label="문체"
           value={selectedWritingStyle}
-          onChange={(e) => setSelectedWritingStyle(Number(e.target.value))}
+          onChange={(val) => setSelectedWritingStyle(Number(val))}
           options={writingStyleOptions}
           placeholder="문체를 선택해주세요."
         />
