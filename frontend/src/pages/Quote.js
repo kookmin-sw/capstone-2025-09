@@ -6,7 +6,7 @@ import useVoicepackSynthesis from "../hooks/useVoicepackSynthesis";
 import {ScaleLoader} from "react-spinners";
 import AudioPlayer from "../components/common/AudioPlayer";
 
-const BasicVoice = () => {
+const Quote = () => {
   const {voicepacks} = useVoicepackUsage();
   const {synthesize} = useVoicepackSynthesis();
 
@@ -14,6 +14,7 @@ const BasicVoice = () => {
   const [scriptText, setScriptText] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [cultureType, setCultureType] = useState("");
 
   const POLLING_INTERVAL = 2000;
 
@@ -21,6 +22,12 @@ const BasicVoice = () => {
     label: name,
     value: id,
   }));
+
+  const cultureOptions = [
+    {label: "한국", value: "korean"},
+    {label: "동양", value: "asian"},
+    {label: "서양", value: "western"},
+  ];
 
   const pollSynthesisStatus = async (statusUrl) => {
     const poll = async () => {
@@ -63,7 +70,8 @@ const BasicVoice = () => {
       setIsGenerating(true);
       const location = await synthesize({
         voicepackId: parseInt(selectedVoiceId),
-        prompt: scriptText,
+        emotion: scriptText,
+        category: cultureType, //
       });
 
       if (location) {
@@ -93,23 +101,34 @@ const BasicVoice = () => {
         </div>
       )}
 
-      <h1 className="text-xl font-bold">베이직 보이스</h1>
+      <h1 className="text-xl font-bold">명언 생성</h1>
 
       <div>
-        <div className="w-1/4 mb-2">
-          <SelectBox
-            label="보이스팩"
-            value={selectedVoiceId}
-            onChange={(value) => setSelectedVoiceId(value)}
-            options={voicepackOptions}
-            placeholder="보이스팩을 선택해주세요."
-          />
-        </div>
+        <div className="flex gap-8 mb-4">
+          <div className="w-1/4">
+            <SelectBox
+              label="보이스팩"
+              value={selectedVoiceId}
+              onChange={(value) => setSelectedVoiceId(value)}
+              options={voicepackOptions}
+              placeholder="보이스팩을 선택해주세요."
+            />
+          </div>
 
+          <div className="w-1/4">
+            <SelectBox
+              label="카테고리"
+              value={cultureType}
+              onChange={(value) => setCultureType(value)}
+              options={cultureOptions}
+              placeholder="카테고리를 선택해주세요."
+            />
+          </div>
+        </div>
         <textarea
           value={scriptText}
           onChange={(e) => setScriptText(e.target.value)}
-          placeholder="변환할 텍스트를 입력해주세요."
+          placeholder="오늘의 감정을 표현해보세요. 당신을 위한 한 줄 명언을 전해드립니다."
           className="w-full h-40 p-4 bg-white text-gray-600 placeholder-gray-400 rounded-md resize-none focus:outline-none focus:ring-1 focus:ring-indigo-400"
         />
 
@@ -152,4 +171,4 @@ const BasicVoice = () => {
   );
 };
 
-export default BasicVoice;
+export default Quote;
