@@ -3,21 +3,12 @@ import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 import useUserStore from '../../utils/userStore';
 
-const VoicePack = ({ pack, type = 'voicestore' }) => {
+const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  //const user = useUserStore((state) => state.user);
-  //테스트용 로그인 유저
-  const user = {
-    name: '박수연',
-    email: 'suwith@kookmin.ac.kr',
-    profileImage: 'https://avatars.githubusercontent.com/u/85792738?v=4',
-    credit: 320,
-    totalEarnings: 120000,
-    createdPacks: 5,
-    soldPacks: 3,
-    boughtPacks: 7,
-  };
+  const user = useUserStore((state) => state.user);
+
+  const isDashboard = type === 'dashboard';
   const isMypage = type === 'mypage';
   const isMine = pack.author === user.email;
 
@@ -31,34 +22,48 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
     <>
       <div
         className={`bg-violet-50 p-4 border border-indigo-300 rounded-xl hover:shadow-xl cursor-pointer text-center ${
-          isMypage ? 'w-36 h-auto' : 'max-w-[240px] w-full'
+          isDashboard
+            ? 'w-36 h-auto'
+            : isMypage
+              ? 'w-full max-w-[150px] min-w-0'
+              : 'max-w-[240px] w-full'
         }`}
         onClick={handleClick}
       >
         <div
           className={`${
-            isMypage ? 'w-[100px] h-[100px]' : 'max-w-[180px] max-h-[180px]'
+            isMypage
+              ? 'w-full max-w-[100px] h-auto'
+              : 'max-w-[180px] max-h-[180px]'
           } mx-auto mb-2`}
         >
           <img src={LP} alt="LP" className="w-full h-full object-contain" />
         </div>
         <h2
           className={`${
-            isMypage ? 'text-sm' : 'text-sm sm:text-md md:text-lg'
+            isDashboard
+              ? 'text-[10px] sm:text-xs md:text-sm'
+              : isMypage
+                ? 'text-xs sm:text-sm md:text-base'
+                : 'text-sm sm:text-md md:text-lg'
           } font-semibold mb-1`}
         >
           {pack.name}
         </h2>
         <p
           className={`${
-            isMypage ? 'text-[10px]' : 'text-xs sm:text-xs'
+            isDashboard
+              ? 'text-[10px] sm:text-xs md:text-sm'
+              : isMypage
+                ? 'text-xs sm:text-sm md:text-md'
+                : 'text-sm sm:text-md'
           } text-slate-600 break-all`}
         >
           {pack.author}
         </p>
         <p
           className={`${
-            isMypage ? 'text-[10px]' : 'text-xs sm:text-xs'
+            isDashboard ? 'text-[10px]' : 'text-xs sm:text-xs'
           } text-slate-600`}
         >
           {formatDate(pack.createdAt)}
@@ -67,18 +72,22 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
         <div className="flex justify-center gap-2 mt-2 flex-wrap">
           <span
             className={`${
-              isMypage
-                ? 'text-[8px] px-2 py-0.5'
-                : 'text-xs sm:text-xs px-3 py-1'
+              isDashboard
+                ? 'text-[9px] px-1.5 py-0.5'
+                : isMypage
+                  ? 'text-[10px] px-1 py-0.5'
+                  : 'text-xs sm:text-xs px-3 py-1'
             } bg-indigo-100 text-indigo-700 rounded-lg`}
           >
             #카테고리
           </span>
           <span
             className={`${
-              isMypage
-                ? 'text-[8px] px-2 py-0.5'
-                : 'text-xs sm:text-xs px-3 py-1'
+              isDashboard
+                ? 'text-[9px] px-1.5 py-0.5'
+                : isMypage
+                  ? 'text-[10px] px-1 py-0.5'
+                  : 'text-xs sm:text-xs px-3 py-1'
             } bg-indigo-100 text-indigo-700 rounded-lg`}
           >
             #카테고리
@@ -92,6 +101,7 @@ const VoicePack = ({ pack, type = 'voicestore' }) => {
           onClose={closeModal}
           type={type}
           filter={isMine ? 'mine' : 'purchased'}
+          onRefresh={onRefresh}
         />
       )}
     </>

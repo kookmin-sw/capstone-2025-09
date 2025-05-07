@@ -1,64 +1,27 @@
 import React, { useState } from 'react';
 import VoicePack from '../../components/common/VoicePack';
+import useVoicepackUsage from '../../hooks/useVoicepackUsage';
+import useUserStore from '../../utils/userStore';
 
-const MyVoicepacks = ({ userId = 1 }) => {
-  const [filter, setFilter] = useState('all');
-
-  const voicepacks = [
-    {
-      id: 1,
-      name: '감성 보이스',
-      credit: 100,
-      authorId: 1,
-      author: '박수연',
-      createdAt: '2025-04-01',
-    },
-    {
-      id: 2,
-      name: '낭독용 보이스',
-      credit: 100,
-      authorId: 1,
-      author: '박수연',
-      createdAt: '2025-04-02',
-    },
-    {
-      id: 3,
-      name: '아나운서 보이스',
-      credit: 100,
-      authorId: 2,
-      author: '김지우',
-      createdAt: '2025-04-03',
-    },
-    {
-      id: 4,
-      name: '밝은 감정 보이스',
-      credit: 100,
-      authorId: 2,
-      author: '이서준',
-      createdAt: '2025-04-05',
-    },
-  ];
-
-  const filteredVoicepacks = voicepacks.filter((vp) => {
-    if (filter === 'mine') return vp.authorId === userId;
-    if (filter === 'purchased') return vp.authorId !== userId;
-    return true;
-  });
-
-  const handleClick = (pack) => {
-    console.log('보이스팩 클릭:', pack);
-    // 추후 상세보기, 수정 등 연결
+const MyVoicepacks = () => {
+  const { user } = useUserStore((state) => state);
+  const [filter, setFilter] = useState('available');
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { voicepacks } = useVoicepackUsage(filter, refreshKey);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
+  const handleRefresh = () => {
+    setRefreshKey((prev) => prev + 1); // 값 변경 → useEffect 재실행
   };
+  const [loading] = useState(false);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(
-      date.getDate()
-    ).padStart(2, '0')}`;
-  };
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = voicepacks.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(voicepacks.length / itemsPerPage);
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow">
+    <div className="bg-white p-6 rounded-xl ">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-lg font-bold">보이스팩 관리</h2>
         <select
@@ -66,24 +29,52 @@ const MyVoicepacks = ({ userId = 1 }) => {
           onChange={(e) => setFilter(e.target.value)}
           className="border px-3 py-1 rounded text-sm"
         >
-          <option value="all">전체 보이스팩</option>
+          <option value="available">전체 보이스팩</option>
           <option value="mine">내가 생성한 보이스팩</option>
           <option value="purchased">구매한 보이스팩</option>
         </select>
       </div>
 
-      {filteredVoicepacks.length === 0 ? (
-        <p className="text-sm text-gray-500">보여줄 보이스팩이 없습니다.</p>
+      {loading ? (
+        <p className="text-sm text-gray-500">불러오는 중...</p>
+      ) : voicepacks.length === 0 ? (
+        <p className="col-span-full text-gray-500 text-center text-sm mt-12">
+          보이스팩이 없습니다.
+        </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {filteredVoicepacks.map((vp) => (
-            <VoicePack
-              key={vp.id}
-              pack={vp}
-              onClick={handleClick}
-              formatDate={formatDate}
-            />
-          ))}
+        <div className="container mx-auto min-h-screen-1/2">
+          <div className="mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-7 justify-center">
+            {currentItems.map((pack) => (
+              <VoicePack
+                key={pack.id}
+                pack={pack}
+                type="mypage"
+                filter={pack.author === user?.email ? 'mine' : 'purchased'}
+                onRefresh={handleRefresh}
+              />
+            ))}
+          </div>
+          {/* 페이지네이션 UI */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6 space-x-2">
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setCurrentPage(index + 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className={`px-3 py-1 rounded-md ${
+                    currentPage === index + 1
+                      ? 'bg-indigo-400 text-white'
+                      : 'bg-gray-200 hover:bg-gray-300'
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
