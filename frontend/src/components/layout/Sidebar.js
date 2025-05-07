@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   LogOut,
   AudioLines,
+  Quote
 } from 'lucide-react';
 import logo from '../../assets/logo-new.svg';
 import useUserStore from '../../utils/userStore';
@@ -63,6 +64,13 @@ const Sidebar = () => {
         >
           <BotMessageSquare size={20} />
           <span>AI 비서</span>
+        </Link>
+        <Link
+          to="/quote"
+          className={`flex items-center space-x-2 p-2 rounded ${isActive('/quote')}`}
+        >
+          <Quote size={20} />
+          <span>명언 생성</span>
         </Link>
       </div>
 
