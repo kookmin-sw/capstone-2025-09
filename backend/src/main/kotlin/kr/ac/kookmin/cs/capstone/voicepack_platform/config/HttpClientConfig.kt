@@ -14,20 +14,25 @@ import org.springframework.context.annotation.Configuration
 class HttpClientConfig {
 
     @Bean
-    fun httpClient(): HttpClient {
+    fun ktorJson(): Json {
+        return Json { 
+            prettyPrint = true
+            isLenient = true
+            ignoreUnknownKeys = true
+        }
+    }
+
+    @Bean
+    fun httpClient(json: Json): HttpClient {
         return HttpClient(Java) {
             install(ContentNegotiation) { 
-                json(Json { 
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true // 알 수 없는 키 무시
-                })
+                json(json)
             }
             
             install(Logging) {
                 logger = Logger.DEFAULT
-                level = LogLevel.ALL // 필요에 따라 로그 레벨 조절 (INFO, HEADERS, BODY 등)
-                sanitizeHeader { header -> header == HttpHeaders.Authorization } // 민감한 헤더 로깅 제외
+                level = LogLevel.ALL
+                sanitizeHeader { header -> header == HttpHeaders.Authorization }
             }
             
             // 필요하다면 추가적인 엔진 설정 (타임아웃 등) 가능
