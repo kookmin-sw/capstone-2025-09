@@ -15,7 +15,7 @@ class QuoteController(
     private val quoteService: QuoteService
 ) {
 
-    @PostMapping("/today")
+    @PostMapping("")
     suspend fun generateTodayQuote(
         @Parameter(description = "사용자 ID") userId: Long,
         @RequestBody request: TodayQuoteRequest
