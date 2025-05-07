@@ -100,7 +100,7 @@ const BasicVoice = () => {
           <SelectBox
             label="보이스팩"
             value={selectedVoiceId}
-            onChange={(e) => setSelectedVoiceId(e.target.value)}
+            onChange={(value) => setSelectedVoiceId(value)}
             options={voicepackOptions}
             placeholder="보이스팩을 선택해주세요."
           />
