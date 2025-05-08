@@ -22,7 +22,7 @@ class VoicepackCallbackService(
     private val voicepackService: VoicepackService,
     private val sqsClient: SqsClient,
     private val objectMapper: ObjectMapper,
-    @Qualifier("applicationScope") private val scope: CoroutineScope
+    private val scope: CoroutineScope
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
