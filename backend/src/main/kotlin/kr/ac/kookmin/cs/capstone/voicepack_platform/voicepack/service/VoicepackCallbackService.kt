@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.sqs.SqsClient
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest
 import software.amazon.awssdk.services.sqs.model.Message
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest
+import org.springframework.beans.factory.annotation.Qualifier
 
 @Service
 class VoicepackCallbackService(
@@ -21,7 +22,7 @@ class VoicepackCallbackService(
     private val voicepackService: VoicepackService,
     private val sqsClient: SqsClient,
     private val objectMapper: ObjectMapper,
-    private val scope: CoroutineScope
+    @Qualifier("applicationScope") private val scope: CoroutineScope
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
