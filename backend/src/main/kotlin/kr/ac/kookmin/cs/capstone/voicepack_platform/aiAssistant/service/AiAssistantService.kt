@@ -135,7 +135,9 @@ class AiAssistantService(
         }
 
         logger.info("현재 시각을 확인했습니다. nowTime : {}", formattedDateTime)
-        
+
+        formattedDateTime = "2025041211"
+
         val currentPromptTimeSlot = formattedDateTime
 
         settings.categories.forEach<Categories> { categoryEnum ->
