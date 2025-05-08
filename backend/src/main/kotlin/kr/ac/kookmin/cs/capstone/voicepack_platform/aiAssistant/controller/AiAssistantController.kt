@@ -17,7 +17,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.response.synthesis.AiAssistantMultiSynthesisResponse
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.response.synthesis.AiAssistantMultiSynthesisStatusResponse
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.callback.AiAssistantJobCallbackRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.synthesis.AiAssistantSynthesisSubmitRequest
 
 @RestController
 @RequestMapping("/api/ai-assistant")
@@ -110,11 +109,10 @@ class AiAssistantController(
     )
     @PostMapping("/synthesis")
     fun submitSynthesisRequest(
-        @SessionAttribute("userId") userId: Long,
-        @RequestBody request: AiAssistantSynthesisSubmitRequest
+        @SessionAttribute("userId") userId: Long
     ): ResponseEntity<AiAssistantMultiSynthesisResponse> {
         try {
-            val responseDto = aiAssistantService.submitSynthesisRequest(userId, request)
+            val responseDto = aiAssistantService.submitSynthesisRequest(userId)
 
             val locationUri = ServletUriComponentsBuilder
                 .fromCurrentContextPath() // 현재 요청의 기본 URL (e.g., http://localhost:8080)
