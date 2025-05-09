@@ -3,7 +3,6 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.transaction.annotation.Transactional
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.setting.AiAssistantSettingRequest
-import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.synthesis.AiAssistantSynthesisSubmitRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.entity.AiAssistantSetting
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.entity.AiAssistantSynthesisRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.enums.Categories
@@ -96,30 +95,29 @@ class AiAssistantService(
      * AI 비서 음성 합성 요청 처리 (다중 카테고리)
      */
     @Transactional
-    fun submitSynthesisRequest(userId: Long, request: AiAssistantSynthesisSubmitRequest): AiAssistantMultiSynthesisResponse {
-        logger.info("AI 비서 음성 합성 요청 시작 - User ID: {}, Request: {}", userId, request)
+    fun submitSynthesisRequest(userId: Long): AiAssistantMultiSynthesisResponse {
+        logger.info("AI 비서 음성 합성 요청 시작 - User ID: {}", userId)
 
         val user = userRepository.findById(userId).orElseThrow{
             IllegalArgumentException("User not found with ID: $userId")
         }
 
-        val voicepack =  voicepackRepository.findById(request.voicepackId).orElseThrow {
-            IllegalArgumentException("Voicepack not found with ID: ${request.voicepackId}")
+        val settings = aiAssistantSettingRepository.findByUserId(userId)
+            .orElseThrow { IllegalArgumentException("AI Assistant settings not found for user ID: $userId") }
+
+        val voicepack =  voicepackRepository.findById(settings.voicepackId).orElseThrow {
+            IllegalArgumentException("Voicepack not found with ID: ${settings.voicepackId}")
         }
 
         logger.info("요청 정보 확인 완료: userId={}, voicepackId={}, voicepackName={}", userId, voicepack.id, voicepack.name)
 
-        // TODO: 사용권 확인 로직 강화 (사용자가 이 보이스팩에 대한 사용권을 가지고 있는지 확인)
-        if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, request.voicepackId)) {
-            logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, request.voicepackId)
+        if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, settings.voicepackId)) {
+            logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, settings.voicepackId)
             throw SecurityException("해당 보이스팩에 대한 사용 권한이 없습니다.")
         }
 
-        val settings = aiAssistantSettingRepository.findByUserId(userId)
-            .orElseThrow { IllegalArgumentException("AI Assistant settings not found for user ID: $userId") }
-
         if (settings.categories.isEmpty()) {
-            throw IllegalArgumentException("No categories selected in AI Assistant settings.")
+            throw IllegalArgumentException("No categories selected in AI Assistant settings for user ID: $userId")
         }
 
         val synthesisRequest = AiAssistantSynthesisRequest(user = user)
@@ -137,8 +135,9 @@ class AiAssistantService(
         }
 
         logger.info("현재 시각을 확인했습니다. nowTime : {}", formattedDateTime)
-        formattedDateTime = "2025041211" //테스트용 시간대 설정
-        
+
+        formattedDateTime = "2025041211"
+
         val currentPromptTimeSlot = formattedDateTime
 
         settings.categories.forEach<Categories> { categoryEnum ->
