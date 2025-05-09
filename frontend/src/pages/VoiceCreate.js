@@ -181,6 +181,11 @@ const VoiceCreate = () => {
       return;
     }
 
+    const regex = /[^a-zA-Z0-9가-힣\s]/;
+    if (regex.test(voicePackName)) {
+      alert('보이스팩 이름에 특수기호는 사용할 수 없습니다.');
+      return; // 특수기호가 있으면 생성하지 않음
+    }
     try {
       setIsPolling(true);
       const res = await convertVoice(voicePackName, audioBlob);
