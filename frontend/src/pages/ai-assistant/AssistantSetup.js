@@ -3,16 +3,11 @@ import GradientButton from '../../components/common/GradientButton';
 import SelectBox from '../../components/common/SelectBox';
 import useUserStore from '../../utils/userStore';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
+import useAssistantSetup from '../../hooks/useAssistantSetup';
 
 // 상수로 유지될 항목들
 const WRITING_STYLES = ['존댓말', '반말', '밝은 톤', '차분한 톤'];
-const CATEGORIES = [
-  '오늘의 명언',
-  '오늘의 날씨',
-  '오늘의 뉴스',
-  'IT 소식',
-  '유머',
-];
+const CATEGORIES = ['BBC 뉴스', 'Google 뉴스', 'IT 뉴스'];
 
 const AssistantSetup = ({ setIsConfigured }) => {
   const voicepacksRaw = useVoicepackUsage('available').voicepacks;
@@ -21,6 +16,8 @@ const AssistantSetup = ({ setIsConfigured }) => {
   const [selectedVoiceId, setSelectedVoiceId] = useState(null);
   const [selectedWritingStyle, setSelectedWritingStyle] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const postSettings = useAssistantSetup();
 
   const writingStyleOptions = WRITING_STYLES.map((style, index) => ({
     label: style,
@@ -52,7 +49,7 @@ const AssistantSetup = ({ setIsConfigured }) => {
     }
   };
 
-  const handleSetting = () => {
+  const handleSetting = async () => {
     const sortedCategories = [...selectedCategories].sort((a, b) => a - b);
 
     const config = {
@@ -61,7 +58,8 @@ const AssistantSetup = ({ setIsConfigured }) => {
       categories: sortedCategories,
     };
 
-    console.log('🧠 API 요청용 설정 데이터:', config);
+    await postSettings(config);
+
     localStorage.setItem('ai-assistant-config', JSON.stringify(config));
     setIsConfigured(true);
   };
