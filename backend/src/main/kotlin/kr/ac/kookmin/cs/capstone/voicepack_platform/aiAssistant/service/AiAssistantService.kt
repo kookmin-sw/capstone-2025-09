@@ -32,6 +32,7 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.dto.request.mess
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.entity.AiAssistantSynthesisJob
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.repository.AiAssistantSynthesisJobRepository
 import kr.ac.kookmin.cs.capstone.voicepack_platform.aiAssistant.entity.SynthesisStatus
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import java.time.LocalDateTime
 
 @Service
@@ -46,6 +47,7 @@ class AiAssistantService(
     private val objectMapper: ObjectMapper,
     private val rabbitTemplate: RabbitTemplate,
     private val s3Client: S3Client,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -239,8 +241,9 @@ class AiAssistantService(
         var results: Map<String, String>? = null
 
         if (overallStatus == SynthesisStatus.SUCCESS) {
-            results = request.jobs.associate { job ->
-                job.category.description to job.resultS3Key
+            results = request.jobs.filter { it.status == SynthesisStatus.SUCCESS && it.resultS3Key != null } // 성공하고 resultS3Key가 있는 경우만
+                .associate { job ->
+                    job.category.description to s3PresignedUrlGenerator.generatePresignedUrl(job.resultS3Key)
             }
             logger.debug("상태 조회 결과: SUCCESS, 결과 개수: {}", results.size ?: 0)
         } else {
