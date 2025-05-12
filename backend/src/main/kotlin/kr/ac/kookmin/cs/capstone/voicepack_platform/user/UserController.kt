@@ -29,9 +29,10 @@ class UserController(
     fun signup(
         @RequestParam("email") email: String,
         @RequestParam("password") password: String,
+        @RequestParam("name") name: String,
         @RequestPart("profileImage", required = false) profileImage: MultipartFile?
     ): ResponseEntity<Long> {
-        val request = UserSignupRequest(email, password, profileImage)
+        val request = UserSignupRequest(email, password, name, profileImage)
         return ResponseEntity.ok(userService.signup(request))
     }
 

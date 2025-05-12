@@ -13,5 +13,8 @@ data class UserSignupRequest(
     @field:NotBlank(message = "비밀번호는 필수입니다")
     val password: String,
 
+    @field:NotBlank(message = "이름은 필수입니다")
+    val name: String,
+
     val profileImage: MultipartFile? = null
 ) 

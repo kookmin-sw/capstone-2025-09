@@ -41,7 +41,8 @@ class UserService(
 
         val user = User(
             email = request.email,
-            password = request.password // 실제 구현시 암호화 필요
+            password = request.password, // 실제 구현시 암호화 필요
+            name = request.name
         )
 
         // 프로필 이미지가 있는 경우 S3에 업로드
