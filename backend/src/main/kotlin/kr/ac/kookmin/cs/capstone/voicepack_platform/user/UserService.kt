@@ -1,6 +1,7 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
 import jakarta.servlet.http.HttpSession
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
@@ -27,7 +28,8 @@ class UserService(
     private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
     private val saleRepository: SaleRepository,
     private val s3Client: S3Client,
-    @Value("\${aws.s3.bucket-name}") private val bucketName: String 
+    @Value("\${aws.s3.bucket-name}") private val bucketName: String,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -90,7 +92,7 @@ class UserService(
             id = user.id,
             name = user.name,
             email = user.email,
-            profileImageUrl = user.profileImageUrl,
+            profileImageUrl = user.profileImageUrl?.let { s3PresignedUrlGenerator.generatePresignedUrl(it) },
             credit = creditBalance,
             totalEarnings = totalEarnings,
             createdPacks = createdPacks,
