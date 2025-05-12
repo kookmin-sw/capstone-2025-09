@@ -1,6 +1,5 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
 import org.springframework.http.ResponseEntity
@@ -16,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
 import java.util.NoSuchElementException
-import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.multipart.MultipartFile
 
 @RestController

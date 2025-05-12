@@ -66,7 +66,7 @@ class UserService(
         session.removeAttribute("userId")
         session.setAttribute("userId", user.id)
 
-        return user.id;
+        return user.id
     }
 
     @Transactional // Credit 초기화 과정이 실행되므로 readOnly 사용 불가 (추후 변경 해야될 듯)
