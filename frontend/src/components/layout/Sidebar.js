@@ -62,7 +62,7 @@ const Sidebar = () => {
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/ai-assistant')}`}
         >
           <BotMessageSquare size={20} />
-          <span>AI 비서</span>
+          <span>AI 리포터</span>
         </Link>
       </div>
 
