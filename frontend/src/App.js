@@ -10,6 +10,8 @@ import Index from './pages/ai-assistant';
 import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/mypage/index';
+import Quote from './pages/Quote';
+
 
 function App() {
   return (
@@ -24,6 +26,7 @@ function App() {
           <Route path="/voice-create" element={<VoiceCreate />} />
           <Route path="/voice-store" element={<VoiceStore />} />
           <Route path="/mypage" element={<MyPage />} />
+          <Route path="/quote" element={<Quote />} />
         </Routes>
       </Layout>
     </Router>
