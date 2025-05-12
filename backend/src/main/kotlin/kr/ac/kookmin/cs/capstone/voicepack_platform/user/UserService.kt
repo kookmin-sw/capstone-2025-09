@@ -1,6 +1,7 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
 import jakarta.servlet.http.HttpSession
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
@@ -12,6 +13,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.NoSuchElementException
+import software.amazon.awssdk.services.s3.S3Client
+import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.core.sync.RequestBody
+import java.util.UUID
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.beans.factory.annotation.Value
 
 @Service
 class UserService(
@@ -19,7 +26,10 @@ class UserService(
     private val creditService: CreditService,
     private val voicepackRepository: VoicepackRepository,
     private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
-    private val saleRepository: SaleRepository
+    private val saleRepository: SaleRepository,
+    private val s3Client: S3Client,
+    @Value("\${aws.s3.bucket-name}") private val bucketName: String,
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -31,27 +41,35 @@ class UserService(
 
         val user = User(
             email = request.email,
-            password = request.password // 실제 구현시 암호화 필요
+            password = request.password, // 실제 구현시 암호화 필요
+            name = request.name
         )
-        
+
+        // 프로필 이미지가 있는 경우 S3에 업로드
+        request.profileImage?.let { file ->
+            val objectKey = "profile-images/${UUID.randomUUID()}_${file.originalFilename}"
+            val s3Url = uploadFileToS3(objectKey, file)
+            user.profileImageUrl = s3Url // S3 URL 저장
+        }
+
         return userRepository.save(user).id
     }
 
     fun login(request: UserLoginRequest, session: HttpSession): Long {
         val user = userRepository.findByEmail(request.email)
-            ?: throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
+            ?: throw IllegalArgumentException("가입된 이메일이 존재하지 않습니다.")
 
         if (user.password != request.password) {
-            throw IllegalArgumentException("이메일 또는 비밀번호가 틀렸습니다.")
+            throw IllegalArgumentException("비밀번호가 틀렸습니다.")
         }
 
         session.removeAttribute("userId")
         session.setAttribute("userId", user.id)
 
-        return user.id;
+        return user.id
     }
 
-    @Transactional(readOnly = true)
+    @Transactional // Credit 초기화 과정이 실행되므로 readOnly 사용 불가 (추후 변경 해야될 듯)
     fun getUserProfile(userId: Long): UserProfileDto {
         logger.info("사용자 프로필 조회 요청: userId={}", userId)
         
@@ -75,11 +93,22 @@ class UserService(
             id = user.id,
             name = user.name,
             email = user.email,
-            profileImageUrl = user.profileImageUrl,
+            profileImageUrl = user.profileImageUrl?.let { s3PresignedUrlGenerator.generatePresignedUrl(it) },
             credit = creditBalance,
             totalEarnings = totalEarnings,
             createdPacks = createdPacks,
             boughtPacks = boughtPacks
         )
+    }
+
+    private fun uploadFileToS3(objectKey: String, file: MultipartFile): String {
+        s3Client.putObject(
+            PutObjectRequest.builder()
+                .bucket(bucketName) // S3 버킷 이름 사용
+                .key(objectKey)
+                .build(),
+            RequestBody.fromInputStream(file.inputStream, file.size)
+        )
+        return "https://$bucketName.s3.amazonaws.com/$objectKey"
     }
 } 

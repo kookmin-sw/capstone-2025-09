@@ -1,6 +1,5 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
-import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpSession
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
 import org.springframework.http.ResponseEntity
@@ -16,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserProfileDto
 import java.util.NoSuchElementException
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/users")
@@ -23,30 +23,31 @@ import java.util.NoSuchElementException
 class UserController(
     private val userService: UserService
 ) {
-    @PostMapping("/signup")
-    fun signup(@Valid @RequestBody request: UserSignupRequest): ResponseEntity<Long> {
+    @PostMapping("/signup", consumes = ["multipart/form-data"])
+    fun signup(
+        @RequestParam("email") email: String,
+        @RequestParam("password") password: String,
+        @RequestParam("name") name: String,
+        @RequestPart("profileImage", required = false) profileImage: MultipartFile?
+    ): ResponseEntity<Long> {
+        val request = UserSignupRequest(email, password, name, profileImage)
         return ResponseEntity.ok(userService.signup(request))
     }
 
+
     @PostMapping("/login")
-    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession) : ResponseEntity<Long> {
-        return ResponseEntity.ok(userService.login(request, session))
-    }
-
-    @GetMapping("/test")
-    fun test(request: HttpServletRequest) : ResponseEntity<String> {
-        val userId = request.session.getAttribute("userId") as? Long
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요함")
-
-        return ResponseEntity.ok("로그인 완료")
-    }
-
-    @GetMapping("/test2")
-    fun test2(request: HttpServletRequest): ResponseEntity<String> {
-        val sessionCookie = request.cookies?.find { it.name == "JSESSIONID" }?.value
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("쿠키 없음")
-
-        return ResponseEntity.ok("현재 쿠키 값: $sessionCookie")
+    fun login(@Valid @RequestBody request: UserLoginRequest, session: HttpSession): ResponseEntity<Any> {
+        return try {
+            ResponseEntity.ok(userService.login(request, session))
+        } catch (e: IllegalArgumentException) {
+            // 비밀번호가 틀린 경우와 이메일이 틀린 경우를 구분하여 처리
+            val status = if (e.message == "비밀번호가 틀렸습니다.") {
+                HttpStatus.UNAUTHORIZED // 비밀번호 오류
+            } else {
+                HttpStatus.BAD_REQUEST // 이메일 오류
+            }
+            ResponseEntity.status(status).body(mapOf("error" to e.message)) // 오류 메시지를 응답 본문에 포함
+        }
     }
 
     @Operation(
