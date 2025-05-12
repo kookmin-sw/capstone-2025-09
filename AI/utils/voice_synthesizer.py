@@ -42,6 +42,7 @@ class VoiceSynthesizer:
         try:
             # 텍스트 전처리
             sentences = convert_text(text)
+            total_sentences = len(sentences)
             
             audio_chunks = []
             t0 = time.time()
@@ -64,9 +65,11 @@ class VoiceSynthesizer:
                 mark_boundaries=True
             )
             
+            current_sentence = 0
             for i, audio_chunk in enumerate(stream_generator):
                 if isinstance(audio_chunk, str):
-                    print(audio_chunk)
+                    logger.info(f"{current_sentence} / {total_sentences} 문장 생성: {audio_chunk}")
+                    current_sentence += 1
                     continue
                 
                 audio_chunks.append(audio_chunk)
