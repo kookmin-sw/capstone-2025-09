@@ -68,7 +68,7 @@ class UserService(
         return user.id;
     }
 
-    @Transactional(readOnly = true)
+    @Transactional // Credit 초기화 과정이 실행되므로 readOnly 사용 불가 (추후 변경 해야될 듯)
     fun getUserProfile(userId: Long): UserProfileDto {
         logger.info("사용자 프로필 조회 요청: userId={}", userId)
         
