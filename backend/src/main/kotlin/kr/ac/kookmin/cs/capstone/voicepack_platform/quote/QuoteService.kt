@@ -48,12 +48,12 @@ class QuoteService(
         type = "function",
         function = FunctionTool(
             name = "web_search_for_quote",
-            description = "Searches the web for a famous quote based on emotion and category, and verifies its authenticity and speaker.",
+            description = "웹에서 감정과 카테고리에 따른 유명한 명언을 검색하고, 그 명언의 진실성과 말한 사람을 확인합니다.",
             parameters = FunctionParameters(
                 type = "object",
                 properties = mapOf(
-                    "emotion" to PropertyDetail(type = "string", description = "The current emotional state, e.g., happy, sad"),
-                    "category" to PropertyDetail(type = "string", description = "The category of the quote, e.g., KOREAN, EASTERN, WESTERN, or a general query term")
+                    "emotion" to PropertyDetail(type = "string", description = "현재 감정 상태, 예: 행복, 슬픔"),
+                    "category" to PropertyDetail(type = "string", description = "명언의 지역 분류, 예: 한국, 동양, 서양")
                 ),
                 required = listOf("emotion", "category")
             )
@@ -166,7 +166,7 @@ class QuoteService(
             QuoteCategory.EASTERN -> "동양"
             QuoteCategory.WESTERN -> "서양"
         }
-        return "현재 감정 상태는 '${emotion}'입니다. 이 감정에 어울리는 '${categoryDescription}'의 유명한 명언 한 구절과 그 명언을 말한 사람을 웹 검색을 통해 찾아보고, 검증된 정보를 바탕으로 알려주세요. 응답 형식은 '명언 구절 - 말한 사람' 형태로 한글로 답해주세요. 특수문자는 제외합니다. 적절한 결과가 없다면 일반적인 명언을 생성하고, 작자 미상으로 표시합니다. 출력은 별도의 설명 없이 반드시 '명언 구절 - 말한 사람' 형태로만 출력해주세요."
+        return "현재 감정 상태는 '${emotion}'입니다. 이 감정에 어울리는 '${categoryDescription}'의 유명한 명언 한 구절과 그 명언을 말한 사람을 웹 검색을 통해 찾아보고, 검증된 정보를 바탕으로 알려주세요. 응답 형식은 '{말한 사람}은 이렇게 말했습니다. {명언 내용}' 형태로 한글로 답해주세요. 특수문자는 제외합니다. 생성 결과 끝에 말한 사람을 다시 붙이지 마세요. 적절한 결과가 없다면 일반적인 명언을 생성하고, '누군가 이렇게 말했습니다. {명언 내용}' 형식으로 출력합니다." 
     }
 
     private suspend fun performWebSearch(query: String): String {
