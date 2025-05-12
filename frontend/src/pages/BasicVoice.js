@@ -27,7 +27,6 @@ const BasicVoice = () => {
       try {
         const res = await fetch(statusUrl, {method: "GET", credentials: "include"});
         const result = await res.json();
-        console.log("📡 폴링 결과:", result);
 
         if (result.status === "COMPLETED" && result.resultUrl) {
           const audioRes = await fetch(result.resultUrl);

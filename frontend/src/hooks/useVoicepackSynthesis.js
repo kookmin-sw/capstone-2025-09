@@ -8,8 +8,6 @@ const useVoicepackSynthesis = () => {
     if (!user || !user.id) {
       throw new Error("유저 정보가 없습니다.");
     }
-
-    console.log(user.id)
     const res = await axiosInstance.post(`voicepack/synthesis?userId=${user.id}`, {
       voicepackId,
       prompt,
