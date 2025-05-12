@@ -66,7 +66,10 @@ const AssistantSetup = ({ setIsConfigured }) => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-semibold">AI 비서</h1>
+      <h1 className="text-xl font-semibold">AI 리포터</h1>
+      <p className="text-sm text-slate-500">
+        음성 뉴스 요약 리포트를 위한 기본 정보를 설정해주세요.
+      </p>
 
       {/* 보이스팩 & 문체 선택 */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
