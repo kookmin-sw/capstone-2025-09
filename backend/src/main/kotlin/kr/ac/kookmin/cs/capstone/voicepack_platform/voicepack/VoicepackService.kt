@@ -633,6 +633,12 @@ class VoicepackService(
             throw SecurityException("해당 보이스팩을 수정할 권한이 없습니다.")
         }
 
+        // 영상기반 보이스팩인 경우 공개 불가
+        if (voicepack.isVideoBased) {
+            logger.warn("영상기반 보이스팩은 공개 불가: voicepackId={}", voicepackId)
+            throw IllegalStateException("영상기반 보이스팩은 공개 불가입니다.")
+        }
+
         // 상태 업데이트
         voicepack.isPublic = isPublic
         val updatedVoicepack = voicepackRepository.save(voicepack)
