@@ -16,12 +16,12 @@ const JoinAgreement = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="mb-4">
+    <div className="max-w-3xl mx-auto p-8">
+      <div className="flex flex-col items-center mb-4">
         <h1 className="text-2xl font-bold mb-4">회원가입</h1>
         <p>회원가입 전, Covos 약관을 확인해주세요.</p>
       </div>
-      <section className="text-sm space-y-4 max-h-[500px] overflow-y-auto border p-4 rounded-lg bg-white">
+      <section className="text-sm space-y-4 max-h-[430px] overflow-y-auto border p-4 rounded-lg bg-slate-100">
         <p>
           본 약관은 「보이스팩 플랫폼」(이하 “Covos”)이 제공하는 모든 서비스에 적용됩니다.
           이용자는 회원가입 또는 서비스 이용 시 본 약관에 동의한 것으로 간주되며,
