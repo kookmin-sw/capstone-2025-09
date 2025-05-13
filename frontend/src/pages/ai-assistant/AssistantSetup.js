@@ -63,6 +63,12 @@ const AssistantSetup = ({ setIsConfigured }) => {
     setIsConfigured(true);
   };
 
+  const isValid =
+    selectedVoiceId !== null &&
+    selectedWritingStyle !== null &&
+    Array.isArray(selectedCategories) &&
+    selectedCategories.length > 0;
+
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-semibold">AI 리포터</h1>
@@ -87,6 +93,7 @@ const AssistantSetup = ({ setIsConfigured }) => {
           placeholder="문체를 선택해주세요."
         />
       </div>
+
       {/* 카테고리 */}
       <div>
         <p className="text-sm font-medium mb-2">카테고리 (최대 3개)</p>
@@ -115,11 +122,7 @@ const AssistantSetup = ({ setIsConfigured }) => {
         <GradientButton
           className="px-6 py-3"
           onClick={handleSetting}
-          disabled={
-            !selectedVoiceId ||
-            !selectedWritingStyle ||
-            selectedCategories.length === 0
-          }
+          disabled={!isValid}
         >
           세팅하기
         </GradientButton>
