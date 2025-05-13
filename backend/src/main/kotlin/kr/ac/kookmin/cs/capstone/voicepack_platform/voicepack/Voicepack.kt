@@ -6,9 +6,6 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.Voicepa
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
 import java.time.OffsetDateTime
 import io.swagger.v3.oas.annotations.media.Schema
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.ObjectMapper
-import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 
 @Entity
 @Table(name = "voicepack")

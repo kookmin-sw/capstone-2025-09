@@ -51,7 +51,6 @@ class VoicepackService(
     private val saleRepository: SaleRepository,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate,
-    @Value("\${aws.s3.bucket-name}") private val bucketName: String,
     private val s3ObjectDeleter: S3ObjectDeleter,
     private val s3ObjectUploader: S3ObjectUploader
 ) {
