@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
-import java.util.NoSuchElementException
 
 @RestController
 @RequestMapping("/api/voicepack")
@@ -215,9 +214,6 @@ class VoicepackController(
         } catch (e: IllegalArgumentException) {
             logger.warn("보이스팩 삭제 실패 (찾을 수 없음): voicepackId={}, error={}", voicepackId, e.message)
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))
-        } catch (e: NoSuchElementException) {
-            logger.warn("보이스팩 삭제 실패 (찾을 수 없음): voicepackId={}, error={}", voicepackId, e.message)
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to (e.message ?: "보이스팩을 찾을 수 없습니다.")))
         } catch (e: SecurityException) {
             logger.warn("보이스팩 삭제 권한 없음: userId={}, voicepackId={}, error={}", userId, voicepackId, e.message)
             ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
