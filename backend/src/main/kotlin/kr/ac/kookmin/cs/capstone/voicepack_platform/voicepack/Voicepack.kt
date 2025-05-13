@@ -33,6 +33,9 @@ data class Voicepack(
     @Column(name = "is_public", nullable = false)
     var isPublic: Boolean = false,
 
+    @Column(name = "is_video_based", nullable = false)
+    var isVideoBased: Boolean = false,
+
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
 
@@ -51,7 +54,8 @@ data class VoicepackDto(
     val author: String,
     val createdAt: OffsetDateTime,
     val price: Int?,
-    val isPublic: Boolean
+    val isPublic: Boolean,
+    val isVideoBased: Boolean
 ) {
     companion object {
         fun fromEntity(voicepack: Voicepack): VoicepackDto {
@@ -61,7 +65,8 @@ data class VoicepackDto(
                 author = voicepack.author.email,
                 createdAt = voicepack.createdAt,
                 price = voicepack.price,
-                isPublic = voicepack.isPublic
+                isPublic = voicepack.isPublic,
+                isVideoBased = voicepack.isVideoBased
             )
         }
     }

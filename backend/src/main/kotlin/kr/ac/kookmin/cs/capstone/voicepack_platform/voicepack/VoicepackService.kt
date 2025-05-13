@@ -77,7 +77,7 @@ class VoicepackService(
         //checkOngoingRequests(userId)
 
         // 보이스팩 요청 엔티티 생성
-        val voicepackRequest = createVoicepackRequest(user, request.name)
+        val voicepackRequest = createVoicepackRequest(user, request.name, request.isVideoBased, request.tempFilePath)
 
         try {
             // ActiveMQ로 메시지 전송
@@ -92,11 +92,13 @@ class VoicepackService(
     
 
     // 보이스팩 요청 엔티티 생성
-    private fun createVoicepackRequest(user: User, name: String): VoicepackRequest {
+    private fun createVoicepackRequest(user: User, name: String, isVideoBased: Boolean = false, tempFilePath: String? = null): VoicepackRequest {
         val voicepackRequest = VoicepackRequest(
             name = name,
             author = user,
-            status = VoicepackRequestStatus.PROCESSING
+            status = VoicepackRequestStatus.PROCESSING,
+            isVideoBased = isVideoBased,
+            tempFilePath = tempFilePath
         )
         return voicepackConvertRequestRepository.save(voicepackRequest)
     }
@@ -153,7 +155,9 @@ class VoicepackService(
             name = voicepackRequest.name,
             author = voicepackRequest.author,
             s3Path = outputPath,
-            createdAt = finishedTime
+            createdAt = finishedTime,
+            // isPublic = if (voicepackRequest.isVideoBased) false else true, (기본값이 false라 굳이 필요 없어 주석처리)
+            isVideoBased = voicepackRequest.isVideoBased
         )
         voicepackRepository.save(voicepack)
         voicepackRequest.voicepackId = voicepack.id
@@ -164,6 +168,17 @@ class VoicepackService(
 
         // 알림 전송
         notificationService.notifyVoicepackComplete(voicepackRequest)
+
+        // 임시파일 삭제 (영상기반 보이스팩 등)
+        if (voicepackRequest.tempFilePath != null) {
+            try {
+                val file = java.io.File(voicepackRequest.tempFilePath)
+                if (file.exists()) file.delete()
+                logger.info("임시파일 삭제 완료: ${voicepackRequest.tempFilePath}")
+            } catch (e: Exception) {
+                logger.warn("임시파일 삭제 실패: ${voicepackRequest.tempFilePath}")
+            }
+        }
     }
 
     // 변환 실패 시 처리
@@ -178,6 +193,17 @@ class VoicepackService(
         
         // 알림 전송
         notificationService.notifyVoicepackFailed(voicepackRequest)
+
+        // 임시파일 삭제 (영상기반 보이스팩 등)
+        if (voicepackRequest.tempFilePath != null) {
+            try {
+                val file = java.io.File(voicepackRequest.tempFilePath)
+                if (file.exists()) file.delete()
+                logger.info("임시파일 삭제 완료: ${voicepackRequest.tempFilePath}")
+            } catch (e: Exception) {
+                logger.warn("임시파일 삭제 실패: ${voicepackRequest.tempFilePath}")
+            }
+        }
     }
 
     private fun findUser(userId: Long) =

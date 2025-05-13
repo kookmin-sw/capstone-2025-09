@@ -33,7 +33,13 @@ data class VoicepackRequest(
     var completedAt: OffsetDateTime? = null,
 
     @Column(name = "voicepack_id", nullable = true)
-    var voicepackId: Long? = null
+    var voicepackId: Long? = null,
+
+    @Column(name = "is_video_based", nullable = false)
+    var isVideoBased: Boolean = false,
+
+    @Column(name = "temp_file_path", nullable = true)
+    var tempFilePath: String? = null
 )
 
 enum class VoicepackRequestStatus {
