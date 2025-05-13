@@ -72,7 +72,7 @@ const SignIn = () => {
       <p className="text-center text-sm text-gray-600">
         계정이 없으신가요?{' '}
         <button
-          onClick={() => navigate('/join-agreement')}
+          onClick={() => navigate('/sign-up')}
           className="text-indigo-400 underline font-semibold"
         >
           회원가입

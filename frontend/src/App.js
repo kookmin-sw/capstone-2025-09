@@ -11,7 +11,7 @@ import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/mypage/index';
 import Quote from './pages/Quote';
-import JoinAgreement from "./pages/JoinAgreement";
+
 
 function App() {
   return (
@@ -27,7 +27,6 @@ function App() {
           <Route path="/voice-store" element={<VoiceStore />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/quote" element={<Quote />} />
-          <Route path="/join-agreement" element={<JoinAgreement />} />
         </Routes>
       </Layout>
     </Router>
