@@ -61,7 +61,10 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
           console.log(`[Polling] 상태 응답: ${status}`);
 
           if (status === 'SUCCESS') {
-            const audioUrls = Object.values(results);
+            const audioUrls = Object.entries(results)
+              .sort(([a], [b]) => a.localeCompare(b)) // 카테고리명 기준 정렬
+              .map(([, url]) => url);
+
             localStorage.setItem(
               'assistant-result-audios',
               JSON.stringify(audioUrls)
