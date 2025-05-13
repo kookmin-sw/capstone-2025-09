@@ -16,7 +16,7 @@ const JoinAgreement = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-8">
+    <div className="max-w-3xl mx-auto p-4">
       <div className="flex flex-col items-center mb-4">
         <h1 className="text-2xl font-bold mb-4">회원가입</h1>
         <p>회원가입 전, Covos 약관을 확인해주세요.</p>
