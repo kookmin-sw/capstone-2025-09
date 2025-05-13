@@ -13,6 +13,7 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
+  // 뒤로 가기 시 강제 /sign-in 이동
   useEffect(() => {
     const handlePopState = () => {
       navigate('/sign-in', { replace: true });
@@ -21,6 +22,15 @@ const SignUp = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
+  }, [navigate]);
+
+  // 약관 동의하지 않은 경우 진입 차단
+  useEffect(() => {
+    const agreed = sessionStorage.getItem('agreedToTerms');
+    if (agreed !== 'true') {
+      alert('약관에 동의하셔야 회원가입이 가능합니다.');
+      navigate('/join-agreement');
+    }
   }, [navigate]);
 
   const handleSignUp = async () => {
@@ -38,6 +48,10 @@ const SignUp = () => {
       const data = response.data;
 
       alert(data.message || '회원가입이 완료되었습니다. 로그인해주세요.');
+
+      // 약관 동의 상태 초기화
+      sessionStorage.removeItem('agreedToTerms');
+
       navigate('/sign-in');
     } catch (error) {
       console.error('회원가입 오류:', error);
