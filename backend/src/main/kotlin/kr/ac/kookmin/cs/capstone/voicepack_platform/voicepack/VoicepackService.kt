@@ -280,6 +280,21 @@ class VoicepackService(
             logger.warn("보이스팩 삭제 권한 없음: userId={}, voicepackId={}, authorId={}", userId, voicepackId, voicepack.author.id)
             throw SecurityException("해당 보이스팩을 삭제할 권한이 없습니다.")
         }
+
+        // 리팩토링 시 S3 음성 파일 삭제 로직 추가하면 좋을 듯
+
+        // S3에서 보이스팩 이미지 삭제
+        voicepack.imageS3Key?.let {
+            if (it.isNotBlank()) { // 혹시 모를 공백 체크
+                try {
+                    s3ObjectDeleter.deleteObject(it)
+                    logger.info("S3 대표 이미지 삭제 완료: s3Key={}", it)
+                } catch (e: Exception) {
+                    logger.error("S3 대표 이미지 삭제 실패: s3Key={}, error={}", it, e.message, e)
+                    // S3 파일 삭제 실패 시 처리 정책 결정 필요
+                }
+            }
+        }
         
         voicepackRepository.deleteById(voicepackId)
         logger.info("보이스팩 삭제 완료: voicepackId={}", voicepackId)
