@@ -57,15 +57,10 @@ const AssistantSetup = ({ setIsConfigured }) => {
       categories: sortedCategories,
     };
 
-    try {
-      await postSettings(config);
-      localStorage.setItem('ai-assistant-config', JSON.stringify(config));
-      setIsConfigured(true);
-      setErrorMessage(null); // Clear any previous error messages
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      setErrorMessage('설정을 저장하는 데 실패했습니다. 다시 시도해주세요.');
-    }
+    await postSettings(config);
+
+    localStorage.setItem('ai-assistant-config', JSON.stringify(config));
+    setIsConfigured(true);
   };
 
   return (
