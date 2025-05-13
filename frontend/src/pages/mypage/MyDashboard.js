@@ -135,9 +135,9 @@ const MyDashboard = ({ user, recentBought }) => {
       {/* 좌측: 프로필 + 그래프 */}
       <div className="lg:col-span-1 flex flex-col gap-4">
         <div className="bg-white p-4 rounded-xl flex flex-col items-center text-center">
-          {user.profileImage ? (
+          {user.profileImageUrl ? (
             <img
-              src={user.profileImage}
+              src={user.profileImageUrl}
               alt="유저 프로필"
               className="w-20 h-20 rounded-full object-cover border mb-3"
             />
