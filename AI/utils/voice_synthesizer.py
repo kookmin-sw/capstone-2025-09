@@ -12,6 +12,8 @@ import tempfile
 import os
 from config.settings import MODEL_CONFIG
 from .text_converter import convert_text
+import json
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +67,7 @@ class VoiceSynthesizer:
                 mark_boundaries=True
             )
             
-            current_sentence = 0
+            current_sentence = 1
             for i, audio_chunk in enumerate(stream_generator):
                 if isinstance(audio_chunk, str):
                     logger.info(f"{current_sentence} / {total_sentences} 문장 생성: {audio_chunk}")
@@ -121,8 +123,23 @@ class VoiceSynthesizer:
 
             logger.info(f"speaker features saved: {voicepackId}")
 
-            # 테스트 음성 생성
-            test_text = "어제의 실패는 내일의 성공을 위한 발판입니다. 포기하지 않고 꾸준히 노력한다면 결국 원하는 목표에 도달할 수 있습니다."
+            try:
+                # 테스트 문장 로드 및 랜덤 선택
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                json_file_path = os.path.join(current_dir, '..', 'config', 'sample_texts.json')
+                with open(json_file_path, 'r', encoding='utf-8') as f:
+                    test_texts = json.load(f)
+                test_text = random.choice(test_texts)
+                
+            except FileNotFoundError:
+                logger.error(f"sample_texts.json not found. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
+            except json.JSONDecodeError:
+                logger.error(f"Error decoding sample_texts.json. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
+            except Exception as e:
+                logger.error(f"Error loading sample texts. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
 
             audio_data, duration = self._synthesize_speech_internal(
                 text=test_text,
