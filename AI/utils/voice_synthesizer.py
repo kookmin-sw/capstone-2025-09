@@ -132,13 +132,13 @@ class VoiceSynthesizer:
                 test_text = random.choice(test_texts)
                 
             except FileNotFoundError:
-                logger.error(f"sample_texts.json not found at {json_file_path}. Using default text.")
+                logger.error(f"sample_texts.json not found. Using default text.")
                 test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
             except json.JSONDecodeError:
-                logger.error(f"Error decoding sample_texts.json from {json_file_path}. Using default text.")
+                logger.error(f"Error decoding sample_texts.json. Using default text.")
                 test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
             except Exception as e:
-                logger.error(f"Error loading sample texts from {json_file_path}: {e}. Using default text.")
+                logger.error(f"Error loading sample texts. Using default text.")
                 test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
 
             audio_data, duration = self._synthesize_speech_internal(
