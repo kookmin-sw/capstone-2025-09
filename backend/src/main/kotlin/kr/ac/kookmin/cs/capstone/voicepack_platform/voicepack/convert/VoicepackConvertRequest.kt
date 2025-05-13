@@ -39,7 +39,7 @@ data class VoicepackRequest(
     var imageS3Key: String? = null,
 
     @Column(name = "categories_json", length = 1024, nullable = false)
-    var categoriesJson: String? = null
+    var categoriesJson: String
 )
 
 enum class VoicepackRequestStatus {
