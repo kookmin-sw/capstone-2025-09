@@ -13,16 +13,18 @@ async def process_synthesis_request(
     voicepackName: str,
     userId: int,
     jobId: int,
-    speed: float
+    speed: float,
+    emotionIndex: int
 ):
-    """비동기로 음성 합성 및 SQS 메시지 전송
+    """음성 합성 및 SQS 메시지 전송
     
     Args:
         prompt (str): 합성 프롬프트
         voicepackName (str): 음성팩 이름
         userId (int): 사용자 ID
         jobId (int): 작업 ID
-        speed (float): 음성 속도 (1.0 기본, 선택사항)
+        speed (float): 음성 속도 (1.0 기본, 선택사항),
+        emotionIndex (int): 감정 인덱스 (0 기본, 선택사항)
     """
     try:
         logger.info(f"starting speech synthesis: voicepackName={voicepackName}, prompt={prompt}, userId={userId}, jobId={jobId}, speed={speed}")
@@ -32,7 +34,8 @@ async def process_synthesis_request(
             prompt=prompt,
             voicepackName=voicepackName,
             userId=userId,
-            speed=speed
+            speed=speed,
+            emotionIndex=emotionIndex
         )
         
         if audio_url is None:

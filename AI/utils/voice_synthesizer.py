@@ -12,8 +12,19 @@ import tempfile
 import os
 from config.settings import MODEL_CONFIG
 from .text_converter import convert_text
+import json
+import random
 
 logger = logging.getLogger(__name__)
+
+# 감정 프로필 순서: default, Happiness, Sadness, Surprise, Anger
+EMOTION_PROFILE = [
+    [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077], # default
+    [0.950, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050], # Happiness
+    [0.050, 0.950, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050], # Sadness
+    [0.050, 0.050, 0.050, 0.950, 0.050, 0.050, 0.050, 0.050], # Surprise
+    [0.050, 0.050, 0.050, 0.050, 0.050, 0.950, 0.050, 0.050], # Anger
+]
 
 class VoiceSynthesizer:
     def __init__(self):
@@ -36,7 +47,8 @@ class VoiceSynthesizer:
         text: str,
         features: torch.Tensor,
         speed: float = 1.0,
-        language: str = "ko"
+        language: str = "ko",
+        emotionIndex: int = 0
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
@@ -49,13 +61,16 @@ class VoiceSynthesizer:
             ttfb = None
             generated = 0
             
+            current_emotion_profile = EMOTION_PROFILE[emotionIndex]
+            
             def generator():
                 for text in sentences:
                     elapsed = int((time.time() - t0) * 1000)
                     yield {
                         "text": text,
                         "speaker": features,
-                        "language": language
+                        "language": language,
+                        "emotion": current_emotion_profile
                     }
                     
             stream_generator = self.model.stream(
@@ -65,7 +80,7 @@ class VoiceSynthesizer:
                 mark_boundaries=True
             )
             
-            current_sentence = 0
+            current_sentence = 1
             for i, audio_chunk in enumerate(stream_generator):
                 if isinstance(audio_chunk, str):
                     logger.info(f"{current_sentence} / {total_sentences} 문장 생성: {audio_chunk}")
@@ -121,8 +136,23 @@ class VoiceSynthesizer:
 
             logger.info(f"speaker features saved: {voicepackId}")
 
-            # 테스트 음성 생성
-            test_text = "어제의 실패는 내일의 성공을 위한 발판입니다. 포기하지 않고 꾸준히 노력한다면 결국 원하는 목표에 도달할 수 있습니다."
+            try:
+                # 테스트 문장 로드 및 랜덤 선택
+                current_dir = os.path.dirname(os.path.abspath(__file__))
+                json_file_path = os.path.join(current_dir, '..', 'config', 'sample_texts.json')
+                with open(json_file_path, 'r', encoding='utf-8') as f:
+                    test_texts = json.load(f)
+                test_text = random.choice(test_texts)
+                
+            except FileNotFoundError:
+                logger.error(f"sample_texts.json not found. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
+            except json.JSONDecodeError:
+                logger.error(f"Error decoding sample_texts.json. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
+            except Exception as e:
+                logger.error(f"Error loading sample texts. Using default text.")
+                test_text = "AI 보이스팩 거래 플랫폼, 코보스입니다! 코보스를 통해 목소리의 가치를 재정의해보세요."
 
             audio_data, duration = self._synthesize_speech_internal(
                 text=test_text,
@@ -155,6 +185,7 @@ class VoiceSynthesizer:
         voicepackName: str,
         userId: int,
         speed: float = 1.0,
+        emotionIndex: int = 0,
     ) -> dict:
         """베이직 보이스에 사용되는 음성 합성"""
         try:
@@ -165,11 +196,11 @@ class VoiceSynthesizer:
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
-            # 텍스트 전처리 후 음성 합성
             audio_data, duration = self._synthesize_speech_internal(
                 text=prompt,
                 features=features,
-                speed=speed
+                speed=speed,
+                emotionIndex=emotionIndex
             )
 
             # S3에 저장
@@ -197,7 +228,7 @@ class VoiceSynthesizer:
         writingStyle: str,
         nowTime: str,
         speed: float = 1.0
-        ):
+    ):
         """AI 비서용 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):
