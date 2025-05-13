@@ -67,7 +67,7 @@ class VoiceSynthesizer:
                 mark_boundaries=True
             )
             
-            current_sentence = 0
+            current_sentence = 1
             for i, audio_chunk in enumerate(stream_generator):
                 if isinstance(audio_chunk, str):
                     logger.info(f"{current_sentence} / {total_sentences} 문장 생성: {audio_chunk}")
