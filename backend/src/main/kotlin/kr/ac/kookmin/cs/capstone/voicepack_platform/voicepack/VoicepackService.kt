@@ -433,7 +433,18 @@ class VoicepackService(
             }
         }
         
-        return voicepacks.map { VoicepackDto.fromEntity(it) }
+        return voicepacks.map { entity ->
+            val presignedImageUrl = entity.imageS3Key?.let { key -> s3PresignedUrlGenerator.generatePresignedUrl(key) }
+            val parsedCategories = entity.categoriesJson?.let {
+                try {
+                    objectMapper.readValue(it, object : TypeReference<List<String>>() {}) 
+                } catch (e: Exception) {
+                    logger.error("카테고리 JSON 파싱 실패: voicepackId={}, json='{}', error={}", entity.id, it, e.message)
+                    null
+                }
+            }
+            VoicepackDto.fromEntity(entity, presignedImageUrl, parsedCategories)
+        }
     }
 
     // 보이스팩 1개만 조회
