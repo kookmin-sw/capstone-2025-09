@@ -39,9 +39,14 @@ export const useSignin = () => {
       }
     } catch (error) {
       console.error('로그인 오류:', error);
-      alert(
-        `로그인 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`
-      );
+
+      if (error.response?.status === 401) {
+        alert('비밀번호가 일치하지 않습니다.');
+      } else {
+        alert(
+          `로그인 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`
+        );
+      }
     } finally {
       setLoading(false);
     }

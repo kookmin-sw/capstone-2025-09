@@ -26,7 +26,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-8 space-y-6">
+    <div className="max-w-md mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold text-center">로그인</h1>
 
       <div className="space-y-4">
