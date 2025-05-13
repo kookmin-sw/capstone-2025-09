@@ -7,7 +7,7 @@ import PageContainer from '../common/PageContainer';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const noLayoutPaths = ['/', '/sign-in', '/sign-up'];
+  const noLayoutPaths = ['/', '/sign-in', '/sign-up','/join-agreement'];
   const isNoLayout = noLayoutPaths.includes(location.pathname);
 
   return (
