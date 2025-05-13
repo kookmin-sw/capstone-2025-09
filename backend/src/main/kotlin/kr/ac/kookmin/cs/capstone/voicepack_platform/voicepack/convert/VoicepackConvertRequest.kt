@@ -33,7 +33,13 @@ data class VoicepackRequest(
     var completedAt: OffsetDateTime? = null,
 
     @Column(name = "voicepack_id", nullable = true)
-    var voicepackId: Long? = null
+    var voicepackId: Long? = null,
+
+    @Column(name = "image_s3_key", nullable = true)
+    var imageS3Key: String? = null,
+
+    @Column(name = "categories_json", length = 1024, nullable = false)
+    var categoriesJson: String? = null
 )
 
 enum class VoicepackRequestStatus {
