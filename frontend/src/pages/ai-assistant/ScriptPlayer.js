@@ -11,7 +11,7 @@ const ScriptPlayer = ({ onEdit }) => {
   useEffect(() => {
     const audioList = localStorage.getItem('assistant-result-audios');
     const config = localStorage.getItem('ai-assistant-config');
-    console.log(audioList);
+    console.log(config);
     if (audioList) {
       const parsed = JSON.parse(audioList);
       setAudios(parsed);
@@ -21,7 +21,7 @@ const ScriptPlayer = ({ onEdit }) => {
       const m = String(now.getMonth() + 1).padStart(2, '0');
       const d = String(now.getDate()).padStart(2, '0');
       const h = String(now.getHours()).padStart(2, '0');
-      setReportTime(`${y}년 ${m}월 ${d}일 ${h}시 리포트`);
+      setReportTime(`${y}년 ${m}월 ${d}일 ${h}시 기준`);
     }
 
     if (config) {
@@ -74,7 +74,7 @@ const ScriptPlayer = ({ onEdit }) => {
           onClick={onEdit}
           className="text-sm underline text-slate-500 hover:text-slate-700"
         >
-          세팅 다시 하기
+          설정 다시 하기
         </button>
       </div>
     </div>
