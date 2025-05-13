@@ -146,16 +146,16 @@ class VoicepackController(
     fun getVoicepacks(
         @Parameter(description = "사용자 ID ('mine', 'purchased', 'available' 필터 사용 시 필요)") @RequestParam(required = false) userId: Long?,
         @Parameter(description = "필터 (all | mine | purchased | available), 기본값: all(공개된 보이스팩)") @RequestParam(required = false, defaultValue = "all") filter: String?
-    ): ResponseEntity<List<VoicepackDto>> {
+    ): ResponseEntity<Any> {
         try {
             val voicepacks = voicepackService.getVoicepacks(userId, filter)
             return ResponseEntity.ok(voicepacks)
         } catch (e: IllegalArgumentException) {
-            // userId 누락 등 서비스 레벨에서 발생한 오류 처리
-            return ResponseEntity.badRequest().body(listOf()) // 혹은 에러 메시지 반환
+            logger.warn("보이스팩 목록 조회 실패 (잘못된 요청 또는 데이터 문제): userId={}, filter={}, error={}", userId, filter, e.message)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
         } catch (e: Exception) {
             logger.error("보이스팩 목록 조회 중 오류 발생: {}", e.message, e)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(listOf())
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to "서버 내부 오류가 발생했습니다."))
         }
     }
   

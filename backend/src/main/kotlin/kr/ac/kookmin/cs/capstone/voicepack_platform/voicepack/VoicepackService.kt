@@ -60,6 +60,24 @@ class VoicepackService(
     private val objectMapper = jacksonObjectMapper() // JSON 변환기
 
     /**
+     * Voicepack 엔티티를 VoicepackDto로 변환하는 private 헬퍼 메소드.
+     * 카테고리 JSON 파싱 실패 시 IllegalArgumentException을 발생시킵니다.
+     */
+    private fun convertToDto(voicepack: Voicepack): VoicepackDto {
+        val presignedImageUrl = voicepack.imageS3Key?.let {
+            this.s3PresignedUrlGenerator.generatePresignedUrl(it)
+        }
+        
+        val parsedCategories: List<String> = try {
+            this.objectMapper.readValue(voicepack.categoriesJson, object : TypeReference<List<String>>() {})
+        } catch (e: Exception) {
+            logger.error("카테고리 JSON 파싱 실패: voicepackId={}, json='{}', error={}", voicepack.id, voicepack.categoriesJson, e.message)
+            throw IllegalArgumentException("카테고리 JSON 파싱에 실패했습니다. Voicepack ID: ${voicepack.id}", e)
+        }
+        return VoicepackDto.fromEntity(voicepack, presignedImageUrl, parsedCategories)
+    }
+
+    /**
      * 보이스팩 변환 요청 및 처리
      * =========== START ===========
      */
@@ -80,7 +98,7 @@ class VoicepackService(
 
         // 이미지 처리 및 카테고리 JSON 변환
         val imageS3Key = request.imageFile?.let { s3ObjectUploader.uploadImageToS3(it, request.name) }
-        val categoriesJson = request.categories?.let { objectMapper.writeValueAsString(it) }
+        val categoriesJson = objectMapper.writeValueAsString(request.categories) 
 
         // 보이스팩 요청 엔티티 생성
         val voicepackRequest = createVoicepackRequest(user, request.name, imageS3Key, categoriesJson)
@@ -108,7 +126,7 @@ class VoicepackService(
     
 
     // 보이스팩 요청 엔티티 생성
-    private fun createVoicepackRequest(user: User, name: String, imageS3Key: String?, categoriesJson: String?): VoicepackRequest {
+    private fun createVoicepackRequest(user: User, name: String, imageS3Key: String?, categoriesJson: String): VoicepackRequest {
         val voicepackRequestEntity = VoicepackRequest(
             name = name,
             author = user,
@@ -434,32 +452,14 @@ class VoicepackService(
         }
         
         return voicepacks.map { entity ->
-            val presignedImageUrl = entity.imageS3Key?.let { key -> s3PresignedUrlGenerator.generatePresignedUrl(key) }
-            val parsedCategories = entity.categoriesJson?.let {
-                try {
-                    objectMapper.readValue(it, object : TypeReference<List<String>>() {}) 
-                } catch (e: Exception) {
-                    logger.error("카테고리 JSON 파싱 실패: voicepackId={}, json='{}', error={}", entity.id, it, e.message)
-                    null
-                }
-            }
-            VoicepackDto.fromEntity(entity, presignedImageUrl, parsedCategories)
+            convertToDto(entity)
         }
     }
 
     // 보이스팩 1개만 조회
     fun getVoicepack(voicepackId: Long): VoicepackDto {
         val entity: Voicepack = findVoicepack(voicepackId) 
-        val presignedImageUrl = entity.imageS3Key?.let { key -> s3PresignedUrlGenerator.generatePresignedUrl(key) } 
-        val parsedCategories = entity.categoriesJson?.let {
-            try {
-                objectMapper.readValue(it, object : TypeReference<List<String>>() {}) 
-            } catch (e: Exception) {
-                logger.error("카테고리 JSON 파싱 실패: voicepackId={}, json='{}', error={}", entity.id, it, e.message)
-                null
-            }
-        }
-        return VoicepackDto.fromEntity(entity, presignedImageUrl, parsedCategories)
+        return convertToDto(entity)
     }
 
     // 보이스팩 예시 음성 파일 조회
@@ -626,7 +626,8 @@ class VoicepackService(
                 name = "test",
                 author = user as User,
                 s3Path = "test",
-                createdAt = OffsetDateTime.now()
+                createdAt = OffsetDateTime.now(),
+                categoriesJson = "[]" // categoriesJson 파라미터 추가 (기본값으로 빈 배열)
             )
             voicepackRepository.save(newVoicepack)
             newVoicepack
@@ -659,7 +660,7 @@ class VoicepackService(
         val updatedVoicepack = voicepackRepository.save(voicepack)
         logger.info("보이스팩 공개 여부 변경 완료: voicepackId={}, isPublic={}", voicepackId, isPublic)
 
-        return VoicepackDto.fromEntity(updatedVoicepack)
+        return convertToDto(updatedVoicepack)
     }
 
 }

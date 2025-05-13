@@ -6,6 +6,9 @@ import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.Voicepa
 import kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.synthesis.VoiceSynthesisRequest
 import java.time.OffsetDateTime
 import io.swagger.v3.oas.annotations.media.Schema
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 
 @Entity
 @Table(name = "voicepack")
@@ -37,8 +40,8 @@ data class Voicepack(
     @Column(name = "image_s3_key", nullable = true)
     var imageS3Key: String? = null,
 
-    @Column(name = "categories_json", length = 1024, nullable = true)
-    var categoriesJson: String? = null,
+    @Column(name = "categories_json", length = 1024, nullable = false)
+    var categoriesJson: String,
 
     @OneToMany(mappedBy = "voicepack", cascade = [CascadeType.REMOVE], orphanRemoval = true)
     val usageRights: MutableList<VoicepackUsageRight> = mutableListOf(),
@@ -66,14 +69,14 @@ data class VoicepackDto(
     val isPublic: Boolean,
     @Schema(description = "대표 이미지 URL (Presigned URL)", nullable = true)
     val imageUrl: String?,
-    @Schema(description = "카테고리 목록", nullable = true)
-    val categories: List<String>?
+    @Schema(description = "카테고리 목록", nullable = false)
+    val categories: List<String>
 ) {
     companion object {
         fun fromEntity(
-            voicepack: Voicepack, 
-            presignedImageUrl: String? = null,
-            parsedCategories: List<String>? = null
+            voicepack: Voicepack,
+            presignedImageUrl: String?,
+            parsedCategories: List<String>
         ): VoicepackDto {
             return VoicepackDto(
                 id = voicepack.id,
