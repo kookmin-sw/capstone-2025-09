@@ -90,7 +90,7 @@ const VoiceStore = () => {
         <div className="min-h-screen">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-center">
             {currentItems.length === 0 ? (
-              <p className="col-span-full text-gray-500 text-md mt-12">검색 결과가 없습니다.</p>
+              <p className="flex justify-center col-span-full text-gray-500 text-md mt-12">검색 결과가 없습니다.</p>
             ) : (
               currentItems.map((pack) => (
                 <VoicePackCard key={pack.id} pack={pack} type="voicestore" />

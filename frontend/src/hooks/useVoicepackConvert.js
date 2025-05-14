@@ -1,27 +1,11 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import axiosInstance from '../utils/axiosInstance';
-import useUserStore from '../utils/userStore';
 
 const useVoiceConvert = () => {
-  const user = useUserStore((state) => state.user);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const convertVoice = async (voicePackName, audioBlob) => {
-    if (!voicePackName || !audioBlob) {
-      alert('보이스팩 이름과 녹음 파일이 필요합니다.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('userId', user.id);
-    formData.append('name', voicePackName);
-    formData.append(
-      'voiceFile',
-      new File([audioBlob], 'voice.wav', { type: 'audio/wav' })
-    );
-
+  const convertVoice = async (formData) => {
     const url = 'voicepack/convert';
     try {
       setLoading(true);
@@ -29,7 +13,7 @@ const useVoiceConvert = () => {
 
       const response = await axiosInstance.post(url, formData, {
         headers: {
-          'Content-Type': undefined, // axios가 자동으로 설정하게 함
+          'Content-Type': 'multipart/form-data', // 명시적으로 지정
         },
       });
       return response.data;
@@ -42,7 +26,7 @@ const useVoiceConvert = () => {
     }
   };
 
-  return { convertVoice, loading, error };
+  return {convertVoice, loading, error};
 };
 
 export default useVoiceConvert;

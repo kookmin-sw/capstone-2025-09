@@ -157,7 +157,15 @@ const VoicePackModal = ({
         </button>
 
         <div className="sm:w-1/2 flex flex-col items-center justify-center bg-violet-50 rounded-xl p-4">
-          <img src={LP} alt="LP" className="w-[140px] h-[140px] mb-4" />
+          <img
+            src={pack.imageUrl || LP}
+            alt="VoicePack Cover"
+            className="w-[140px] h-[140px] mb-4 object-contain rounded-2xl"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = LP;
+            }}
+          />
           {audioUrl && (
             <>
               <audio
@@ -207,13 +215,15 @@ const VoicePackModal = ({
               {pack.author}
             </p>
 
-            <div className="flex gap-2 mt-2 flex-wrap">
-              <span className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
-                #카테고리
-              </span>
-              <span className="text-[10px] sm:text-xs md:text-sm bg-indigo-100 text-indigo-700 px-2 sm:px-3 py-0.5 sm:py-1 rounded-lg">
-                #카테고리
-              </span>
+            <div className="flex justify-start gap-2 mt-2 flex-wrap">
+              {Array.isArray(pack.categories) &&
+                pack.categories.slice(0, 2).map((category, index) => (
+                  <span
+                    key={index}
+                    className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg">
+                    # {category}
+                  </span>
+                ))}
             </div>
 
             {/* 버튼 조건 처리 */}
