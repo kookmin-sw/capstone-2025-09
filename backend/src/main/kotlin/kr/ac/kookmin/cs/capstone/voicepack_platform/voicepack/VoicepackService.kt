@@ -100,7 +100,7 @@ class VoicepackService(
         val categoriesJson = objectMapper.writeValueAsString(request.categories) 
 
         // 보이스팩 요청 엔티티 생성
-        val voicepackRequest = createVoicepackRequest(user, request.name, imageS3Key, categoriesJson)
+        val voicepackRequest = createVoicepackRequest(user, request.name, imageS3Key, categoriesJson, request.isVideoBased, request.tempFilePath)
 
         try {
             // ActiveMQ로 메시지 전송
@@ -125,15 +125,17 @@ class VoicepackService(
     
 
     // 보이스팩 요청 엔티티 생성
-    private fun createVoicepackRequest(user: User, name: String, imageS3Key: String?, categoriesJson: String): VoicepackRequest {
-        val voicepackRequestEntity = VoicepackRequest(
+    private fun createVoicepackRequest(user: User, name: String, imageS3Key: String?, categoriesJson: String, isVideoBased: Boolean, tempFilePath: String?): VoicepackRequest {
+        val voicepackRequest = VoicepackRequest(
             name = name,
             author = user,
             status = VoicepackRequestStatus.PROCESSING,
             imageS3Key = imageS3Key,
-            categoriesJson = categoriesJson
+            categoriesJson = categoriesJson,
+            isVideoBased = isVideoBased,
+            tempFilePath = tempFilePath
         )
-        return voicepackConvertRequestRepository.save(voicepackRequestEntity)
+        return voicepackConvertRequestRepository.save(voicepackRequest)
     }
 
     // AI 모델 서비스 호출
@@ -190,7 +192,8 @@ class VoicepackService(
             s3Path = outputPath,
             createdAt = finishedTime,
             imageS3Key = voicepackRequest.imageS3Key,
-            categoriesJson = voicepackRequest.categoriesJson
+            categoriesJson = voicepackRequest.categoriesJson,
+            isVideoBased = voicepackRequest.isVideoBased
         )
         val savedVoicepack = voicepackRepository.save(voicepack)
         voicepackRequest.voicepackId = savedVoicepack.id
@@ -201,6 +204,17 @@ class VoicepackService(
 
         // 알림 전송
         notificationService.notifyVoicepackComplete(voicepackRequest)
+
+        // 임시파일 삭제 (영상기반 보이스팩 등)
+        if (voicepackRequest.tempFilePath != null) {
+            try {
+                val file = java.io.File(voicepackRequest.tempFilePath)
+                if (file.exists()) file.delete()
+                logger.info("임시파일 삭제 완료: ${voicepackRequest.tempFilePath}")
+            } catch (e: Exception) {
+                logger.warn("임시파일 삭제 실패: ${voicepackRequest.tempFilePath}")
+            }
+        }
         
         logger.info("보이스팩 변환 성공 및 저장 완료: voicepackId={}, imageS3Key={}, categoriesJson={}", 
             savedVoicepack.id, savedVoicepack.imageS3Key, savedVoicepack.categoriesJson)
@@ -225,6 +239,17 @@ class VoicepackService(
         
         // 알림 전송
         notificationService.notifyVoicepackFailed(voicepackRequest)
+
+        // 임시파일 삭제 (영상기반 보이스팩 등)
+        if (voicepackRequest.tempFilePath != null) {
+            try {
+                val file = java.io.File(voicepackRequest.tempFilePath)
+                if (file.exists()) file.delete()
+                logger.info("임시파일 삭제 완료: ${voicepackRequest.tempFilePath}")
+            } catch (e: Exception) {
+                logger.warn("임시파일 삭제 실패: ${voicepackRequest.tempFilePath}")
+            }
+        }
     }
 
     private fun findUser(userId: Long) =
@@ -669,6 +694,12 @@ class VoicepackService(
         if (voicepack.author.id != userId) {
             logger.warn("보이스팩 공개 여부 변경 권한 없음: userId={}, voicepackId={}, authorId={}", userId, voicepackId, voicepack.author.id)
             throw SecurityException("해당 보이스팩을 수정할 권한이 없습니다.")
+        }
+
+        // 영상기반 보이스팩인 경우 공개 불가
+        if (voicepack.isVideoBased) {
+            logger.warn("영상기반 보이스팩은 공개 불가: voicepackId={}", voicepackId)
+            throw IllegalStateException("영상기반 보이스팩은 공개 불가입니다.")
         }
 
         // 상태 업데이트

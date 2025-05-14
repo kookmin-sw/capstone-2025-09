@@ -58,7 +58,7 @@ class VoicepackController(
         @Parameter(description = "카테고리 목록 (필수 항목)") @RequestParam("categories") categories: List<String>
     ): ResponseEntity<Any> {
         return try {
-            val request = VoicepackConvertRequest(name, voiceFile, imageFile, categories)
+            val request = VoicepackConvertRequest(name, voiceFile, isVideoBased = false, tempFilePath = null, imageFile = imageFile, categories = categories)
             val response = voicepackService.convertVoicepack(userId, request)
             ResponseEntity.status(HttpStatus.ACCEPTED).body(response)
         } catch (e: IllegalArgumentException) {

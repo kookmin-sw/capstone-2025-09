@@ -34,6 +34,9 @@ data class Voicepack(
     @Column(name = "is_public", nullable = false)
     var isPublic: Boolean = false,
 
+    @Column(name = "is_video_based", nullable = false)
+    var isVideoBased: Boolean = false,
+    
     @Column(name = "image_s3_key", nullable = true)
     var imageS3Key: String? = null,
 
@@ -62,6 +65,8 @@ data class VoicepackDto(
     val createdAt: OffsetDateTime,
     @Schema(description = "가격 (크레딧)")
     val price: Int?,
+    @Schema(description = "영상 기반 여부")
+    val isVideoBased: Boolean,
     @Schema(description = "공개 여부")
     val isPublic: Boolean,
     @Schema(description = "대표 이미지 URL (Presigned URL)", nullable = true)
@@ -82,6 +87,7 @@ data class VoicepackDto(
                 createdAt = voicepack.createdAt,
                 price = voicepack.price,
                 isPublic = voicepack.isPublic,
+                isVideoBased = voicepack.isVideoBased,
                 imageUrl = presignedImageUrl,
                 categories = parsedCategories
             )
