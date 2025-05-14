@@ -160,7 +160,7 @@ const VoicePackModal = ({
           <img
             src={pack.imageUrl || LP}
             alt="VoicePack Cover"
-            className="w-[140px] h-[140px] aspect-square object-cove rounded-2xl mb-4"
+            className="w-[140px] h-[140px] aspect-square object-cover rounded-2xl mb-4"
             onError={(e) => {
               e.currentTarget.onerror = null;
               e.currentTarget.src = LP;
