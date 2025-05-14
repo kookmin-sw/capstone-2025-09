@@ -11,7 +11,8 @@ import VoiceCreate from './pages/VoiceCreate';
 import VoiceStore from './pages/VoiceStore';
 import MyPage from './pages/mypage/index';
 import Quote from './pages/Quote';
-import JoinAgreement from "./pages/JoinAgreement";
+import JoinAgreement from './pages/JoinAgreement';
+import RememberVoice from './pages/RememberVoice';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/quote" element={<Quote />} />
           <Route path="/join-agreement" element={<JoinAgreement />} />
+          <Route path="/remember-voice" element={<RememberVoice />} />
         </Routes>
       </Layout>
     </Router>
