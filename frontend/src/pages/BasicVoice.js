@@ -14,6 +14,7 @@ const BasicVoice = () => {
   const [scriptText, setScriptText] = useState("");
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [emotionType, setEmotionType] = useState(0); // 기본값: 기본(0)
 
   const POLLING_INTERVAL = 2000;
 
@@ -21,6 +22,14 @@ const BasicVoice = () => {
     label: name,
     value: id,
   }));
+
+  const emotionOptions = [
+    {label: "기본", value: 0},
+    {label: "기쁨", value: 1},
+    {label: "슬픔", value: 2},
+    {label: "놀람", value: 3},
+    {label: "화남", value: 4},
+  ];
 
   const pollSynthesisStatus = async (statusUrl) => {
     const poll = async () => {
@@ -63,6 +72,7 @@ const BasicVoice = () => {
       const location = await synthesize({
         voicepackId: parseInt(selectedVoiceId),
         prompt: scriptText,
+        emotionIndex: emotionType,
       });
 
       if (location) {
@@ -95,16 +105,29 @@ const BasicVoice = () => {
       <h1 className="text-xl font-bold">베이직 보이스</h1>
 
       <div>
-        <div className="w-1/4 mb-2">
-          <SelectBox
-            label="보이스팩"
-            value={selectedVoiceId}
-            onChange={(value) => setSelectedVoiceId(value)}
-            options={voicepackOptions}
-            placeholder="보이스팩을 선택해주세요."
-          />
+        {/* 보이스팩 선택 */}
+        <div className="flex gap-8 mb-4">
+          <div className="w-1/4">
+            <SelectBox
+              label="보이스팩"
+              value={selectedVoiceId}
+              onChange={(value) => setSelectedVoiceId(value)}
+              options={voicepackOptions}
+              placeholder="보이스팩을 선택해주세요."
+            />
+          </div>
+          <div className="w-1/4">
+            <SelectBox
+              label="감정"
+              value={emotionType}
+              onChange={(value) => setEmotionType(Number(value))}
+              options={emotionOptions}
+              placeholder="감정을 선택해주세요."
+            />
+          </div>
         </div>
 
+        {/* 텍스트 입력 */}
         <textarea
           value={scriptText}
           onChange={(e) => setScriptText(e.target.value)}
@@ -125,7 +148,6 @@ const BasicVoice = () => {
 
       {audioUrl && (
         <div className="mt-12 px-2 py-2 bg-white backdrop-blur-sm rounded-xl">
-          {/* 한 줄로 재생바 + 다운로드 버튼 정렬 */}
           <div className="flex items-center space-x-4 px-6 py-5">
             <div className="flex-1">
               <AudioPlayer audioUrl={audioUrl}/>

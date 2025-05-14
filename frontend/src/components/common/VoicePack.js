@@ -35,10 +35,19 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
             isMypage
               ? 'w-full max-w-[100px] h-auto'
               : 'max-w-[180px] max-h-[180px]'
-          } mx-auto mb-2`}
+          } mx-auto mb-2 flex justify-center items-center`}
         >
-          <img src={LP} alt="LP" className="w-full h-full object-contain" />
+          <img
+            src={pack.imageUrl || LP}
+            alt="VoicePack Cover"
+            className="aspect-square w-full object-cover rounded-2xl"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = LP;
+            }}
+          />
         </div>
+
         <h2
           className={`${
             isDashboard
@@ -70,28 +79,20 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
         </p>
 
         <div className="flex justify-center gap-2 mt-2 flex-wrap">
-          <span
-            className={`${
-              isDashboard
-                ? 'text-[9px] px-1.5 py-0.5'
-                : isMypage
-                  ? 'text-[10px] px-1 py-0.5'
-                  : 'text-xs sm:text-xs px-3 py-1'
-            } bg-indigo-100 text-indigo-700 rounded-lg`}
-          >
-            #카테고리
-          </span>
-          <span
-            className={`${
-              isDashboard
-                ? 'text-[9px] px-1.5 py-0.5'
-                : isMypage
-                  ? 'text-[10px] px-1 py-0.5'
-                  : 'text-xs sm:text-xs px-3 py-1'
-            } bg-indigo-100 text-indigo-700 rounded-lg`}
-          >
-            #카테고리
-          </span>
+          {Array.isArray(pack.categories) &&
+            pack.categories.slice(0, 2).map((category, index) => (
+              <span
+                key={index}
+                className={`${
+                  isDashboard
+                    ? 'text-[10px] px-1.5 py-0.5'
+                    : isMypage
+                      ? 'text-[10px] px-1 py-0.5'
+                      : 'text-sm px-3 py-1'
+                } bg-indigo-100 text-indigo-700 rounded-lg`}
+              ># {category}
+              </span>
+            ))}
         </div>
       </div>
 
