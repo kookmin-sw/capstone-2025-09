@@ -5,6 +5,7 @@ import { ScaleLoader } from 'react-spinners';
 import AudioPlayer from '../components/common/AudioPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Maximize2 } from 'lucide-react';
+import { extractAudioFromVideo } from '../utils/extractAudioFromVideo';
 
 const steps = ['영상 업로드', '텍스트 입력', '결과 확인'];
 
@@ -20,25 +21,40 @@ const RememberVoice = () => {
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleVideoUpload = (e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setVideoFile(file);
-      setVideoUrl(URL.createObjectURL(file));
+      const tempUrl = URL.createObjectURL(file);
+      setVideoUrl(tempUrl);
+
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.src = tempUrl;
+
+      video.onloadedmetadata = async () => {
+        if (video.duration > 15) {
+          alert('15초 이하의 영상만 업로드할 수 있습니다.');
+          setVideoFile(null);
+          setVideoUrl(null);
+          return;
+        }
+
+        setVideoRatio(
+          video.videoHeight > video.videoWidth ? 'portrait' : 'landscape'
+        );
+
+        try {
+          const wavUrl = await extractAudioFromVideo(file);
+          setAudioUrl(wavUrl); // 추출된 오디오 저장
+        } catch (err) {
+          console.error(err);
+          alert('오디오 추출에 실패했습니다.');
+          setVideoFile(null);
+          setVideoUrl(null);
+        }
+      };
     }
-  };
-
-  const handleLoadedMetadata = (e) => {
-    const { videoWidth, videoHeight, duration } = e.target;
-
-    if (duration > 15) {
-      setVideoFile(null);
-      setVideoUrl(null);
-      alert('15초 이하의 영상만 업로드할 수 있습니다.');
-      return;
-    }
-
-    setVideoRatio(videoHeight > videoWidth ? 'portrait' : 'landscape');
   };
 
   const handleFullscreen = () => {
@@ -118,7 +134,6 @@ const RememberVoice = () => {
                       <video
                         id="preview-video"
                         src={videoUrl}
-                        onLoadedMetadata={handleLoadedMetadata}
                         controls
                         className="w-full h-full object-cover"
                       />
@@ -202,14 +217,21 @@ const RememberVoice = () => {
                   disabled={!scriptText}
                   onClick={async () => {
                     setIsGenerating(true);
-                    // const resultUrl = await synthesize(videoFile, scriptText);
-                    //테스트용 샘플 url
-                    const resultUrl =
-                      'https://capstone-voicepack.s3.ap-northeast-2.amazonaws.com/ai-assistant/5/6/2025041211/itnews/%EB%B0%9D%EC%9D%80%20%ED%86%A4.wav?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20250513T162944Z&X-Amz-SignedHeaders=host&X-Amz-Credential=AKIAUPMYNGJXXN257F7O%2F20250513%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Expires=600&X-Amz-Signature=7f0e9d6a44a4d5244e1f7219a5d5cd404407bb11a779b3fb804e509969f13b32';
-                    setAudioUrl(resultUrl);
+
+                    try {
+                      // const resultUrl = await synthesize(videoFile, scriptText);
+                      const resultUrl = audioUrl; // 이제 추출된 오디오 URL을 그대로 사용
+
+                      console.log(audioUrl, scriptText);
+                      setAudioUrl(resultUrl);
+                      setDirection(1);
+                      setStep(3);
+                    } catch (err) {
+                      console.error(err);
+                      alert('복원 실패');
+                    }
+
                     setIsGenerating(false);
-                    setDirection(1);
-                    setStep(3);
                   }}
                 >
                   복원하기
