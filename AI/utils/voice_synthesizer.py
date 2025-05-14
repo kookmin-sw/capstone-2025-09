@@ -17,6 +17,15 @@ import random
 
 logger = logging.getLogger(__name__)
 
+# 감정 프로필 순서: default, Happiness, Sadness, Surprise, Anger
+EMOTION_PROFILE = [
+    [0.3077, 0.0256, 0.0256, 0.0256, 0.0256, 0.0256, 0.2564, 0.3077], # default
+    [0.950, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050], # Happiness
+    [0.050, 0.950, 0.050, 0.050, 0.050, 0.050, 0.050, 0.050], # Sadness
+    [0.050, 0.050, 0.050, 0.950, 0.050, 0.050, 0.050, 0.050], # Surprise
+    [0.050, 0.050, 0.050, 0.050, 0.050, 0.950, 0.050, 0.050], # Anger
+]
+
 class VoiceSynthesizer:
     def __init__(self):
         self._initialize_model()
@@ -38,7 +47,8 @@ class VoiceSynthesizer:
         text: str,
         features: torch.Tensor,
         speed: float = 1.0,
-        language: str = "ko"
+        language: str = "ko",
+        emotionIndex: int = 0
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
@@ -51,13 +61,16 @@ class VoiceSynthesizer:
             ttfb = None
             generated = 0
             
+            current_emotion_profile = EMOTION_PROFILE[emotionIndex]
+            
             def generator():
                 for text in sentences:
                     elapsed = int((time.time() - t0) * 1000)
                     yield {
                         "text": text,
                         "speaker": features,
-                        "language": language
+                        "language": language,
+                        "emotion": current_emotion_profile
                     }
                     
             stream_generator = self.model.stream(
@@ -172,6 +185,7 @@ class VoiceSynthesizer:
         voicepackName: str,
         userId: int,
         speed: float = 1.0,
+        emotionIndex: int = 0,
     ) -> dict:
         """베이직 보이스에 사용되는 음성 합성"""
         try:
@@ -182,11 +196,11 @@ class VoiceSynthesizer:
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
 
-            # 텍스트 전처리 후 음성 합성
             audio_data, duration = self._synthesize_speech_internal(
                 text=prompt,
                 features=features,
-                speed=speed
+                speed=speed,
+                emotionIndex=emotionIndex
             )
 
             # S3에 저장
@@ -214,7 +228,7 @@ class VoiceSynthesizer:
         writingStyle: str,
         nowTime: str,
         speed: float = 1.0
-        ):
+    ):
         """AI 비서용 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):

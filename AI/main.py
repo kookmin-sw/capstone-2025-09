@@ -47,7 +47,8 @@ async def synthesize_endpoint(
     voicepackName: str = Form(...),
     userId: int = Form(...),
     jobId: int = Form(...),
-    speed: float = Form(1.0)
+    speed: float = Form(1.0),
+    emotionIndex: int = Form(0)
 ):
     """음성 합성 API 엔드포인트"""
     try:
@@ -56,7 +57,8 @@ async def synthesize_endpoint(
             voicepackName=voicepackName,
             userId=userId,
             jobId=jobId,
-            speed=speed
+            speed=speed,
+            emotionIndex=emotionIndex
         )
 
         return JSONResponse(
