@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.Optional
 
 @Service
 class PresignedUrlService(
@@ -40,7 +41,17 @@ class PresignedUrlService(
     
     @Transactional(readOnly = true)
     fun getPresignedUrlDetailByPutUrl(putUrl: String): PresignedUrlDetailDto {
-        val presignedUrlEntity = presignedUrlRepository.findById(putUrl)
+        // 먼저 해시로 빠르게 검색
+        val hash = PresignedUrlEntity.calculateHash(putUrl)
+        var entityOptional = presignedUrlRepository.findByPutUrlHash(hash)
+        
+        // 해시 검색이 실패하면 풀 URL로 검색 (해시 충돌 가능성 대비)
+        if (entityOptional.isEmpty) {
+            logger.debug("Hash lookup failed, falling back to full URL lookup")
+            entityOptional = presignedUrlRepository.findByPutUrl(putUrl)
+        }
+        
+        val presignedUrlEntity = entityOptional
             .orElseThrow { IllegalArgumentException("해당하는 PUT URL로 저장된 Presigned URL이 없습니다: $putUrl") }
             
         // 만료 시간 확인
