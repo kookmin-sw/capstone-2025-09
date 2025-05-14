@@ -1,11 +1,6 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack
+
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.ktor.client.*
-import io.ktor.client.engine.java.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
-import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kr.ac.kookmin.cs.capstone.voicepack_platform.notification.NotificationService
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.User
@@ -39,6 +34,10 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import java.util.*
+import org.springframework.beans.factory.annotation.Value
+import com.fasterxml.jackson.core.type.TypeReference
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3ObjectDeleter
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3ObjectUploader
 
 @Service
 class VoicepackService(
@@ -52,11 +51,30 @@ class VoicepackService(
     private val saleRepository: SaleRepository,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val rabbitTemplate: RabbitTemplate,
-    private val httpClient: HttpClient
+    private val s3ObjectDeleter: S3ObjectDeleter,
+    private val s3ObjectUploader: S3ObjectUploader
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
     private val objectMapper = jacksonObjectMapper() // JSON 변환기
+
+    /**
+     * Voicepack 엔티티를 VoicepackDto로 변환하는 private 헬퍼 메소드.
+     * 카테고리 JSON 파싱 실패 시 IllegalArgumentException을 발생시킵니다.
+     */
+    private fun convertToDto(voicepack: Voicepack): VoicepackDto {
+        val presignedImageUrl = voicepack.imageS3Key?.let {
+            this.s3PresignedUrlGenerator.generatePresignedUrl(it)
+        }
+        
+        val parsedCategories: List<String> = try {
+            this.objectMapper.readValue(voicepack.categoriesJson, object : TypeReference<List<String>>() {})
+        } catch (e: Exception) {
+            logger.error("카테고리 JSON 파싱 실패: voicepackId={}, json='{}', error={}", voicepack.id, voicepack.categoriesJson, e.message)
+            throw IllegalArgumentException("카테고리 JSON 파싱에 실패했습니다. Voicepack ID: ${voicepack.id}", e)
+        }
+        return VoicepackDto.fromEntity(voicepack, presignedImageUrl, parsedCategories)
+    }
 
     /**
      * 보이스팩 변환 요청 및 처리
@@ -67,17 +85,22 @@ class VoicepackService(
             userId: Long,
             request: VoicepackConvertRequest
     ): VoicepackConvertResponse {
-        logger.info("보이스팩 변환 요청: userId={}, request={}", userId, request)
+        logger.info("보이스팩 변환 요청: userId={}, requestName={}, hasImage={}, categories={}", 
+            userId, request.name, request.imageFile?.originalFilename, request.categories)
         val user = findUser(userId)
 
         // 패키지 이름 유효성 검사
         validatePackName(request.name)
         
         // 진행 중인 요청이 있는지 확인
-        //checkOngoingRequests(userId)
+        checkOngoingRequests(userId)
+
+        // 이미지 처리 및 카테고리 JSON 변환
+        val imageS3Key = request.imageFile?.let { s3ObjectUploader.uploadImageToS3(it, request.name) }
+        val categoriesJson = objectMapper.writeValueAsString(request.categories) 
 
         // 보이스팩 요청 엔티티 생성
-        val voicepackRequest = createVoicepackRequest(user, request.name, request.isVideoBased, request.tempFilePath)
+        val voicepackRequest = createVoicepackRequest(user, request.name, imageS3Key, categoriesJson, request.isVideoBased, request.tempFilePath)
 
         try {
             // ActiveMQ로 메시지 전송
@@ -85,22 +108,34 @@ class VoicepackService(
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.PROCESSING.name)
             
         } catch (e: Exception) {
-
+            // 변환 요청 실패 시 VoicepackRequest 엔티티 상태 업데이트 등 추가 처리 가능
+            voicepackRequest.status = VoicepackRequestStatus.FAILED
+            voicepackConvertRequestRepository.save(voicepackRequest)
+            
+            // 실패 시 S3에 업로드된 이미지 삭제 (imageS3Key가 있다면)
+            voicepackRequest.imageS3Key?.let {
+                s3ObjectDeleter.deleteObject(it)
+                voicepackRequest.imageS3Key = null
+                voicepackConvertRequestRepository.save(voicepackRequest)
+            }
+            logger.error("AI 모델 서비스 호출 실패 또는 기타 변환 오류: requestId={}, error={}", voicepackRequest.id, e.message)
             return VoicepackConvertResponse(voicepackRequest.id, VoicepackRequestStatus.FAILED.name)
         }
     }
     
 
     // 보이스팩 요청 엔티티 생성
-    private fun createVoicepackRequest(user: User, name: String, isVideoBased: Boolean = false, tempFilePath: String? = null): VoicepackRequest {
+    private fun createVoicepackRequest(user: User, name: String, imageS3Key: String?, categoriesJson: String, isVideoBased: Boolean, tempFilePath: String?): VoicepackRequest {
         val voicepackRequest = VoicepackRequest(
             name = name,
             author = user,
             status = VoicepackRequestStatus.PROCESSING,
+            imageS3Key = imageS3Key,
+            categoriesJson = categoriesJson,
             isVideoBased = isVideoBased,
             tempFilePath = tempFilePath
         )
-        return voicepackConvertRequestRepository.save(voicepackRequest)
+        return voicepackConvertRequestRepository.save(voicepackRequestEntity)
     }
 
     // AI 모델 서비스 호출
@@ -156,15 +191,16 @@ class VoicepackService(
             author = voicepackRequest.author,
             s3Path = outputPath,
             createdAt = finishedTime,
-            // isPublic = if (voicepackRequest.isVideoBased) false else true, (기본값이 false라 굳이 필요 없어 주석처리)
+            imageS3Key = voicepackRequest.imageS3Key,
+            categoriesJson = voicepackRequest.categoriesJson,
             isVideoBased = voicepackRequest.isVideoBased
         )
-        voicepackRepository.save(voicepack)
-        voicepackRequest.voicepackId = voicepack.id
+        val savedVoicepack = voicepackRepository.save(voicepack)
+        voicepackRequest.voicepackId = savedVoicepack.id
         voicepackConvertRequestRepository.save(voicepackRequest)
 
         // 사용권 부여
-        grantUsageRight(voicepackRequest.author.id, voicepack.id)
+        grantUsageRight(voicepackRequest.author.id, savedVoicepack.id)
 
         // 알림 전송
         notificationService.notifyVoicepackComplete(voicepackRequest)
@@ -179,6 +215,9 @@ class VoicepackService(
                 logger.warn("임시파일 삭제 실패: ${voicepackRequest.tempFilePath}")
             }
         }
+        
+        logger.info("보이스팩 변환 성공 및 저장 완료: voicepackId={}, imageS3Key={}, categoriesJson={}", 
+            savedVoicepack.id, savedVoicepack.imageS3Key, savedVoicepack.categoriesJson)
     }
 
     // 변환 실패 시 처리
@@ -189,6 +228,13 @@ class VoicepackService(
         // 실패 상태로 업데이트
         voicepackRequest.status = VoicepackRequestStatus.FAILED
         voicepackRequest.completedAt = OffsetDateTime.now()
+
+        // S3에 업로드된 이미지가 있다면 삭제
+        voicepackRequest.imageS3Key?.let {
+            s3ObjectDeleter.deleteObject(it)
+            voicepackRequest.imageS3Key = null
+        }
+        
         voicepackConvertRequestRepository.save(voicepackRequest)
         
         // 알림 전송
@@ -258,6 +304,21 @@ class VoicepackService(
             logger.warn("보이스팩 삭제 권한 없음: userId={}, voicepackId={}, authorId={}", userId, voicepackId, voicepack.author.id)
             throw SecurityException("해당 보이스팩을 삭제할 권한이 없습니다.")
         }
+
+        // 리팩토링 시 S3 음성 파일 삭제 로직 추가하면 좋을 듯
+
+        // S3에서 보이스팩 이미지 삭제
+        voicepack.imageS3Key?.let {
+            if (it.isNotBlank()) { // 혹시 모를 공백 체크
+                try {
+                    s3ObjectDeleter.deleteObject(it)
+                    logger.info("S3 대표 이미지 삭제 완료: s3Key={}", it)
+                } catch (e: Exception) {
+                    logger.error("S3 대표 이미지 삭제 실패: s3Key={}, error={}", it, e.message, e)
+                    // S3 파일 삭제 실패 시 처리 정책 결정 필요
+                }
+            }
+        }
         
         voicepackRepository.deleteById(voicepackId)
         logger.info("보이스팩 삭제 완료: voicepackId={}", voicepackId)
@@ -287,7 +348,8 @@ class VoicepackService(
         val synthesisRequest = VoiceSynthesisRequest(
             user = user,
             voicepack = voicepack,
-            prompt = request.prompt
+            prompt = request.prompt,
+            emotionIndex = request.emotionIndex
         )
         val savedRequest = voiceSynthesisRequestRepository.save(synthesisRequest) // 저장된 엔티티를 받음
         logger.info("음성 합성 요청 엔티티 생성 및 저장 완료: id={}, userId={}, voicepackId={}, status={}", 
@@ -342,7 +404,8 @@ class VoicepackService(
                     "userId" to synthesisRequest.user.id,
                     "voicepackName" to voicepack.name,
                     "prompt" to prompt,
-                    "callbackUrl" to "/api/voicepack/synthesis/callback"
+                    "callbackUrl" to "/api/voicepack/synthesis/callback",
+                    "emotionIndex" to synthesisRequest.emotionIndex
                 )
             )
 
@@ -411,7 +474,7 @@ class VoicepackService(
     fun getVoicepacks(userId: Long?, filter: String?): List<VoicepackDto> {
         logger.info("보이스팩 목록 조회: userId={}, filter={}", userId, filter ?: "all")
 
-        val voicepacks = when (filter?.lowercase()) {
+        val voicepacks: List<Voicepack> = when (filter?.lowercase()) {
             "mine" -> {
                 if (userId == null) throw IllegalArgumentException("'mine' 필터 사용 시 userId는 필수입니다.")
                 voicepackRepository.findByAuthorId(userId)
@@ -420,7 +483,7 @@ class VoicepackService(
                 if (userId == null) throw IllegalArgumentException("'purchased' 필터 사용 시 userId는 필수입니다.")
                 voicepackUsageRightRepository.findDistinctPurchasedVoicepacksByUserId(userId)
             }
-            "available" -> {
+            "available" -> { 
                 if (userId == null) throw IllegalArgumentException("'available' 필터 사용 시 userId는 필수입니다.")
                 voicepackUsageRightRepository.findByUserId(userId)
             }
@@ -428,17 +491,16 @@ class VoicepackService(
                 voicepackRepository.findByIsPublicTrue() // 공개된 것만 조회
             }
         }
-
-        return voicepacks.map { VoicepackDto.fromEntity(it) }
+        
+        return voicepacks.map { entity ->
+            convertToDto(entity)
+        }
     }
 
     // 보이스팩 1개만 조회
     fun getVoicepack(voicepackId: Long): VoicepackDto {
-        val voicepack = findVoicepack(voicepackId)
-        if (voicepack == null) {
-            throw IllegalArgumentException("Voicepack not found")
-        }
-        return VoicepackDto.fromEntity(voicepack)
+        val entity: Voicepack = findVoicepack(voicepackId) 
+        return convertToDto(entity)
     }
 
     // 보이스팩 예시 음성 파일 조회
@@ -605,7 +667,8 @@ class VoicepackService(
                 name = "test",
                 author = user as User,
                 s3Path = "test",
-                createdAt = OffsetDateTime.now()
+                createdAt = OffsetDateTime.now(),
+                categoriesJson = "[]" // categoriesJson 파라미터 추가 (기본값으로 빈 배열)
             )
             voicepackRepository.save(newVoicepack)
             newVoicepack
@@ -644,7 +707,7 @@ class VoicepackService(
         val updatedVoicepack = voicepackRepository.save(voicepack)
         logger.info("보이스팩 공개 여부 변경 완료: voicepackId={}, isPublic={}", voicepackId, isPublic)
 
-        return VoicepackDto.fromEntity(updatedVoicepack)
+        return convertToDto(updatedVoicepack)
     }
 
 }

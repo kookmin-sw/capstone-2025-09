@@ -145,7 +145,8 @@ class QuoteService(
 
             val synthesisRequest = VoicepackSynthesisRequest(
                 voicepackId = request.voicepackId,
-                prompt = quoteText
+                prompt = quoteText,
+                emotionIndex = 0
             )
 
             logger.info("음성 합성 요청 전달: userId={}, voicepackId={}, prompt='{}'", userId, request.voicepackId, quoteText)
