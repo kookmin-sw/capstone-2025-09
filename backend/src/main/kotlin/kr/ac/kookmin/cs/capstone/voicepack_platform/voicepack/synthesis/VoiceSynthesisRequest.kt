@@ -37,7 +37,10 @@ data class VoiceSynthesisRequest(
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column(name = "updated_at", nullable = false)
-    var updatedAt: OffsetDateTime = OffsetDateTime.now()
+    var updatedAt: OffsetDateTime = OffsetDateTime.now(),
+
+    @Column(name = "emotion_index", nullable = false)
+    val emotionIndex: Int
 )
 
 enum class SynthesisStatus {

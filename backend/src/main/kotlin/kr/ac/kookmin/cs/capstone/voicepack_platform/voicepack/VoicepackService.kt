@@ -323,7 +323,8 @@ class VoicepackService(
         val synthesisRequest = VoiceSynthesisRequest(
             user = user,
             voicepack = voicepack,
-            prompt = request.prompt
+            prompt = request.prompt,
+            emotionIndex = request.emotionIndex
         )
         val savedRequest = voiceSynthesisRequestRepository.save(synthesisRequest) // 저장된 엔티티를 받음
         logger.info("음성 합성 요청 엔티티 생성 및 저장 완료: id={}, userId={}, voicepackId={}, status={}", 
@@ -378,7 +379,8 @@ class VoicepackService(
                     "userId" to synthesisRequest.user.id,
                     "voicepackName" to voicepack.name,
                     "prompt" to prompt,
-                    "callbackUrl" to "/api/voicepack/synthesis/callback"
+                    "callbackUrl" to "/api/voicepack/synthesis/callback",
+                    "emotionIndex" to synthesisRequest.emotionIndex
                 )
             )
 
