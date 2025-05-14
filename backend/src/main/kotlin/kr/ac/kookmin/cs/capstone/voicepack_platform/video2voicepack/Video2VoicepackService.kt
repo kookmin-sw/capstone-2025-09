@@ -32,7 +32,7 @@ class Video2VoicepackService(
                 fileBytes
             )
             // 3. 기존 보이스팩 생성 로직 호출
-            val request = VoicepackConvertRequest(name, multipartFile, isVideoBased = true, tempFilePath = tempFile.absolutePath)
+            val request = VoicepackConvertRequest(name, multipartFile, isVideoBased = true, tempFilePath = tempFile.absolutePath, imageFile = null, categories = listOf(""))
             val response = voicepackService.convertVoicepack(userId, request)
             // 4. 생성된 보이스팩의 isVideoBased=true, isPublic=false로 강제 (DB 반영)
             // (VoicepackService에서 생성 후 후처리 필요)

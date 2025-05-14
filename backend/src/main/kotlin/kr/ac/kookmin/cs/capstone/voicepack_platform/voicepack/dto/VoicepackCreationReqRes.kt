@@ -10,14 +10,14 @@ data class VoicepackConvertRequest(
     @Schema(description = "보이스팩 이름", example = "내 첫 보이스팩")
     val name: String,
     
+    @Schema(description = "변환할 원본 음성 파일")
+    val voiceFile: MultipartFile,
+    
     @Schema(description = "영상 기반 여부", example = "false")
     val isVideoBased: Boolean = false,
 
     @Schema(description = "임시 파일 경로", example = "/tmp/voicepack_request_1234567890.wav")
-    val tempFilePath: String? = null,  // video2voicepack에서만 사용
-
-    @Schema(description = "변환할 원본 음성 파일")
-    val voiceFile: MultipartFile,
+    val tempFilePath: String? = null,  // video2voicepack에서만 사용    
 
     @Schema(description = "보이스팩 대표 이미지 파일 (선택 사항)")
     val imageFile: MultipartFile? = null,

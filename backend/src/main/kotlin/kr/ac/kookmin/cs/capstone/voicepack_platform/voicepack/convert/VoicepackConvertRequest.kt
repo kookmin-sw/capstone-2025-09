@@ -39,8 +39,8 @@ data class VoicepackRequest(
     var isVideoBased: Boolean = false,
 
     @Column(name = "temp_file_path", nullable = true)
-    var tempFilePath: String? = null
-    
+    var tempFilePath: String? = null,
+
     @Column(name = "image_s3_key", nullable = true)
     var imageS3Key: String? = null,
 

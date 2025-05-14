@@ -135,7 +135,7 @@ class VoicepackService(
             isVideoBased = isVideoBased,
             tempFilePath = tempFilePath
         )
-        return voicepackConvertRequestRepository.save(voicepackRequestEntity)
+        return voicepackConvertRequestRepository.save(voicepackRequest)
     }
 
     // AI 모델 서비스 호출
