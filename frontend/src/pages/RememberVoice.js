@@ -29,7 +29,15 @@ const RememberVoice = () => {
   };
 
   const handleLoadedMetadata = (e) => {
-    const { videoWidth, videoHeight } = e.target;
+    const { videoWidth, videoHeight, duration } = e.target;
+
+    if (duration > 15) {
+      setVideoFile(null);
+      setVideoUrl(null);
+      alert('15초 이하의 영상만 업로드할 수 있습니다.');
+      return;
+    }
+
     setVideoRatio(videoHeight > videoWidth ? 'portrait' : 'landscape');
   };
 
