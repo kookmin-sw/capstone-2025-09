@@ -1,6 +1,5 @@
 theme: jekyll-theme-minimal
-title: "COVOS"
 description: "AI 보이스팩 거래 및 활용 플랫폼"
 author: "VocaLab"
-logo: "/assets/logo.svg"
+logo: "assets/logo.svg"
 baseurl: "/capstone-2025-09"
