@@ -19,11 +19,11 @@ const useVoicepackUsage = (filter = 'available', refreshKey = 0) => {
       setLoading(true);
       try {
         const data = await getVoicepacksByUserId(user.id, filter);
+        const filtered = data.filter((v) => v.isVideoBased === false);
 
-        const sorted = [...data].sort(
+        const sorted = [...filtered].sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
         );
-
         setVoicepacks(sorted);
       } catch (err) {
         setError(err);
