@@ -31,6 +31,10 @@ permalink: /
 ## 🚀 프로젝트 소개
 {: #project-intro }
 
+<p align="center">
+  <img src="assets/intro.png" width="100%" alt="COVOS intro">
+</p>
+
 이제 목소리는 **표현**을 넘어 **자산**이 됩니다.
 
 - COVOS는 개인이 자신의 목소리를 AI로 학습시켜 보이스팩을 만들고 이를 사고팔 수 있는 플랫폼입니다.  
