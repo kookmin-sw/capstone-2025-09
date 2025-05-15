@@ -31,6 +31,8 @@ permalink: /
 ## 🚀 프로젝트 소개
 {: #project-intro }
 
+<br>
+
 <p align="center">
   <img src="assets/intro.png" width="100%" alt="COVOS intro">
 </p>
