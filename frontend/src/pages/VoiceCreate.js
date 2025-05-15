@@ -10,6 +10,8 @@ import useVoicepackDelete from '../hooks/useVoicepackDelete';
 import {ScaleLoader} from 'react-spinners';
 import axiosInstance from '../utils/axiosInstance';
 import GradientButton from '../components/common/GradientButton';
+import SelectBox from "../components/common/SelectBox";
+import useUserStore from '../utils/userStore';
 
 const VoiceCreate = () => {
   const [isRecording, setIsRecording] = useState(false);
@@ -21,13 +23,17 @@ const VoiceCreate = () => {
   const [duration, setDuration] = useState('00:00');
   const [currentTime, setCurrentTime] = useState(0);
   const {convertVoice, loading} = useVoiceConvert();
-  const {getVoicepackAudio,makePublic} = useVoicepackDetail();
+  const {getVoicepackAudio, makePublic} = useVoicepackDetail();
   const {deleteVoicepack} = useVoicepackDelete();
   const [isPolling, setIsPolling] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [convertedAudioUrl, setConvertedAudioUrl] = useState('');
   const [voicepackId, setVoicepackId] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [genderCategory, setGenderCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
   const navigate = useNavigate();
+  const user = useUserStore((state) => state.user);
 
   const ffmpegRef = useRef(null);
   const mediaRecorderRef = useRef(null);
@@ -37,6 +43,31 @@ const VoiceCreate = () => {
   const waveformRef = useRef(null);
   const wavesurferRef = useRef(null);
   const audioStreamRef = useRef(null);
+
+  const categoryOptions = [
+    { label: '차분한', value: '차분한' },
+    { label: '귀여운', value: '귀여운' },
+    { label: '카리스마', value: '카리스마' },
+    { label: '가녀린', value: '가녀린' },
+    { label: '중성적인', value: '중성적인' },
+    { label: '도도한', value: '도도한' },
+    { label: '따뜻한', value: '따뜻한' },
+    { label: '지적인', value: '지적인' },
+    { label: '상냥한', value: '상냥한' },
+    { label: '명랑한', value: '명랑한' },
+    { label: '낙천적인', value: '낙천적인' },
+    { label: '단호한', value: '단호한' },
+    { label: '시크한', value: '시크한' },
+    { label: '감미로운', value: '감미로운' },
+    { label: '활기찬', value: '활기찬' },
+    { label: '열정적인', value: '열정적인' },
+    { label: '묵직한', value: '묵직한' },
+    { label: '신뢰가는', value: '신뢰가는' },
+    { label: '유쾌한', value: '유쾌한' },
+    { label: '세련된', value: '세련된' },
+    { label: '포근한', value: '포근한' },
+
+  ];
 
   useEffect(() => {
     const loadFFmpeg = async () => {
@@ -145,6 +176,11 @@ const VoiceCreate = () => {
     setIsPlaying(false);
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) setImageFile(file); // ✅ 추가된 부분
+  };
+
   const togglePlay = () => {
     if (!wavesurferRef.current) return;
     wavesurferRef.current.playPause();
@@ -181,6 +217,11 @@ const VoiceCreate = () => {
       return;
     }
 
+    if (!genderCategory) {
+      alert('성별을 선택해주세요..');
+      return;
+    }
+
     const regex = /[^a-zA-Z0-9가-힣\s]/;
     if (regex.test(voicePackName)) {
       alert('보이스팩 이름에 특수기호는 사용할 수 없습니다.');
@@ -188,7 +229,15 @@ const VoiceCreate = () => {
     }
     try {
       setIsPolling(true);
-      const res = await convertVoice(voicePackName, audioBlob);
+      const formData = new FormData();
+      formData.append('userId', user.id);
+      formData.append('name', voicePackName);
+      formData.append('voiceFile', audioBlob);
+      if (imageFile) {
+        formData.append('imageFile', imageFile);
+      }
+      formData.append('categories', [genderCategory, customCategory].filter(Boolean).join(','));
+      const res = await convertVoice(formData);
 
       if (res?.id) {
         const result = await pollStatus(res.id);
@@ -286,15 +335,78 @@ const VoiceCreate = () => {
 
       <h1 className="text-xl font-bold mb-6">보이스팩 생성</h1>
 
-      <h1 className="text-l font-bold text-gray-900 mb-2">
-        보이스팩 이름 <span className="text-red-500">*</span>
-      </h1>
-      <input
-        value={voicePackName}
-        onChange={(e) => setVoicePackName(e.target.value)}
-        className="w-full px-4 py-2 border-none rounded-md mb-6 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
-        placeholder="보이스팩 이름을 입력해주세요."
-      />
+      <label className="text-l font-bold text-gray-900 mb-2 block">보이스팩 이름 <span className="text-red-500">*</span><span
+        className="text-gray-600 text-sm font-normal"></span></label>
+      <input value={voicePackName} onChange={(e) => setVoicePackName(e.target.value)}
+             className="w-96 px-4 py-2 border-none rounded-md mb-6 bg-white focus:outline-none focus:ring-1 focus:ring-indigo-400"
+             placeholder="보이스팩 이름을 입력해주세요."/>
+
+      {/* 성별 카테고리 선택 */}
+      <label className="text-l font-bold text-gray-900 mb-2 block">
+        보이스팩 성별 <span className="text-red-500">*</span>
+      </label>
+      <div className="flex space-x-2 mb-6">
+        {['남자', '여자', '기타'].map((gender) => (
+          <button
+            key={gender}
+            type="button"
+            onClick={() => setGenderCategory(gender)}
+            className={`px-4 py-2 rounded-lg text-sm border transition ${
+              genderCategory === gender
+                ? 'bg-indigo-500 text-white border-indigo-500'
+                : 'bg-white text-gray-700 border-gray-300 hover:bg-indigo-100'
+            }`}
+          >
+            {gender}
+          </button>
+        ))}
+      </div>
+
+      {/* 사용자 지정 카테고리 입력 */}
+      <label className="text-l font-bold text-gray-900 mb-2 block">
+        카테고리 태그 <span className="text-gray-600 text-sm font-normal">(1개 선택)</span>
+      </label>
+      <div className="w-96 mb-6">
+        <SelectBox
+          value={customCategory}
+          onChange={(value) => setCustomCategory(value)}
+          options={categoryOptions}
+          placeholder="카테고리를 선택해주세요."
+        />
+      </div>
+
+
+      <label className="block text-l font-bold text-gray-900 mb-2">
+        보이스팩 커버 이미지{' '}
+        {!imageFile && (
+          <span className="text-gray-600 text-sm font-normal">(이미지를 선택하지 않으면 기본 커버 이미지가 사용됩니다. (1MB 미만의 이미지만 업로드 가능합니다.))</span>
+        )}
+      </label>
+
+      <div className="mb-4">
+        <label
+          htmlFor="imageUpload"
+          className="inline-block px-4 py-2 bg-gradient-to-r from-violet-400 to-indigo-500 text-white rounded-md cursor-pointer hover:opacity-70 transition"
+        >
+          파일 선택
+        </label>
+        <input
+          id="imageUpload"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+        />
+      </div>
+
+      {imageFile && (
+        <img
+          src={URL.createObjectURL(imageFile)}
+          alt="미리보기"
+          className="w-40 h-40 object-cover mb-6 rounded-lg shadow"
+        />
+      )}
+
       <div className="flex flex-col mb-2">
         <h2 className="text-l font-bold text-gray-900">
           보이스팩 샘플 녹음 <span className="text-red-500">*</span>
@@ -364,3 +476,5 @@ const VoiceCreate = () => {
 }
 
 export default VoiceCreate;
+
+
