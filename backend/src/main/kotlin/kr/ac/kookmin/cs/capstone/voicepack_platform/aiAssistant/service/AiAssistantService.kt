@@ -172,7 +172,7 @@ class AiAssistantService(
                 jobToAssociate = newJob
                 logger.debug("[Request ID: {}] 새 Job 생성됨 - ID: {}", synthesisRequest.id, jobToAssociate.id)
 
-                var promptContent: String? = null
+                var promptContent: String?
                 var mqSendSuccess = false
                 try {
                     promptContent = readPromptFromS3(promptS3Key)

@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
 import java.time.OffsetDateTime
 import java.util.*
-import org.springframework.beans.factory.annotation.Value
 import com.fasterxml.jackson.core.type.TypeReference
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3ObjectDeleter
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3ObjectUploader

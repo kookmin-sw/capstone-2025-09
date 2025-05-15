@@ -15,10 +15,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.NoSuchElementException
 import software.amazon.awssdk.services.s3.S3Client
-import software.amazon.awssdk.services.s3.model.PutObjectRequest
-import software.amazon.awssdk.core.sync.RequestBody
-import java.util.UUID
-import org.springframework.web.multipart.MultipartFile
 import org.springframework.beans.factory.annotation.Value
 
 @Service
@@ -28,8 +24,6 @@ class UserService(
     private val voicepackRepository: VoicepackRepository,
     private val voicepackUsageRightRepository: VoicepackUsageRightRepository,
     private val saleRepository: SaleRepository,
-    private val s3Client: S3Client,
-    @Value("\${aws.s3.bucket-name}") private val bucketName: String,
     private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
     private val s3ObjectUploader: S3ObjectUploader
 ) {
