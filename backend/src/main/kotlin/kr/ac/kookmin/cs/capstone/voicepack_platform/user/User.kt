@@ -10,7 +10,7 @@ data class User(
     val id: Long = 0,
 
     @Column(nullable = true)
-    val name: String? = null,
+    val name: String,
 
     @Column(nullable = false, unique = true)
     val email: String,

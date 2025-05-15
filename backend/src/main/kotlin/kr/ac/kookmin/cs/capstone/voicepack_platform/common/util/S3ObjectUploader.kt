@@ -23,11 +23,11 @@ class S3ObjectUploader(
      * @return 생성된 S3 객체 키
      * @throws RuntimeException S3 업로드 실패 시
      */
-    fun uploadImageToS3(file: MultipartFile, baseName: String): String {
+    fun uploadImageToS3(file: MultipartFile, baseName: String, urlType: String): String {
         val fileExtension = file.originalFilename?.substringAfterLast('.', "") ?: ""
         val uniqueFileName = "${baseName}_${UUID.randomUUID()}.$fileExtension"
         // S3에 저장될 경로. 예: images/voicepack_name_uuid.jpg
-        val objectKey = "images/$uniqueFileName" 
+        val objectKey = "$urlType/$uniqueFileName" 
 
         logger.info("S3 이미지 업로드 시도: objectKey={}, bucketName={}", objectKey, bucketName)
 

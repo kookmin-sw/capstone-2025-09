@@ -59,8 +59,10 @@ data class VoicepackDto(
     val id: Long,
     @Schema(description = "보이스팩 이름")
     val name: String,
-    @Schema(description = "제작자")
+    @Schema(description = "제작자 이메일")
     val author: String,
+    @Schema(description = "제작자 이름")
+    val authorName: String,
     @Schema(description = "생성 일시")
     val createdAt: OffsetDateTime,
     @Schema(description = "가격 (크레딧)")
@@ -84,6 +86,7 @@ data class VoicepackDto(
                 id = voicepack.id,
                 name = voicepack.name,
                 author = voicepack.author.email,
+                authorName = voicepack.author.name,
                 createdAt = voicepack.createdAt,
                 price = voicepack.price,
                 isPublic = voicepack.isPublic,

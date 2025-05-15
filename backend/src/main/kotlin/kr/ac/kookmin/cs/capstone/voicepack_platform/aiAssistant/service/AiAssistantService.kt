@@ -127,20 +127,16 @@ class AiAssistantService(
         logger.debug("AiAssistantSynthesisRequest 생성됨 - ID: {}", synthesisRequest.id)
 
         val writingStyleEnum = settings.writingStyle
-        
-         // 테스트 Time을 쓰지 않는 시점에 val로 변경
-         var formattedDateTime = try {
+
+
+        val currentPromptTimeSlot = try {
             OffsetDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHH"))
         } catch (e: Exception) {
             logger.error("날짜 포맷 중 오류 발생: ${e.message}", e)
             throw IllegalStateException("날짜 포맷 에러", e)
         }
 
-        logger.info("현재 시각을 확인했습니다. nowTime : {}", formattedDateTime)
-
-        formattedDateTime = "2025041211"
-
-        val currentPromptTimeSlot = formattedDateTime
+        logger.info("현재 시각을 확인했습니다. nowTime : {}", currentPromptTimeSlot)
 
         settings.categories.forEach<Categories> { categoryEnum ->
             logger.debug("[Request ID: {}] Category {} 처리 시작...", synthesisRequest.id, categoryEnum.description)
@@ -176,7 +172,7 @@ class AiAssistantService(
                 jobToAssociate = newJob
                 logger.debug("[Request ID: {}] 새 Job 생성됨 - ID: {}", synthesisRequest.id, jobToAssociate.id)
 
-                var promptContent: String? = null
+                var promptContent: String?
                 var mqSendSuccess = false
                 try {
                     promptContent = readPromptFromS3(promptS3Key)
