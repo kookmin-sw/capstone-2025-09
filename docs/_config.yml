@@ -36,6 +36,6 @@ footer_content: "Copyright &copy; 2025 Kookmin Univ. All rights reserved."
 just_the_docs:
   collections:
     pages:
-      name: Pages
+      name: 매뉴얼
       nav_fold: true
       nav_order: 2
