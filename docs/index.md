@@ -1,6 +1,6 @@
 ---
 layout: default
-title: "메인"
+title: "COVOS"
 nav_order: 1
 description: "캡스톤디자인 2025"
 permalink: /
@@ -13,8 +13,8 @@ permalink: /
 
 ## 🔗 목차
 
-1. [🚀 프로젝트 소개](#프로젝트-소개)
-2. [💡 핵심 기능](#핵심-기능)
+1. [🚀 프로젝트 소개](#project-intro)
+2. [💡 핵심 기능](#핵심-기능)  
    a. [🗣️ AI 보이스팩 생성](#ai-보이스팩-생성)  
    b. [🛍️ 보이스 마켓플레이스](#보이스-마켓플레이스)  
    c. [🎮 보이스팩 플레이그라운드](#보이스팩-플레이그라운드)
@@ -23,6 +23,7 @@ permalink: /
 
 
 ## 🚀 프로젝트 소개
+{: #project-intro }
 
 •	팀명: VocaLadddb  
 •	플랫폼명: 코보스 (CozyVoice Studio)  
