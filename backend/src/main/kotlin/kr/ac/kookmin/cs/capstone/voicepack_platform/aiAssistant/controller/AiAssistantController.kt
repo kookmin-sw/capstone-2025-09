@@ -45,6 +45,10 @@ class AiAssistantController(
                 description = "요청 데이터가 유효하지 않음 (잘못된 문체 혹은 카테고리 없음)"
             ),
             ApiResponse(
+                responseCode = "403",
+                description = "해당 보이스팩 사용 권한 없음"
+            ),
+            ApiResponse(
                 responseCode = "404",
                 description = "사용자를 찾을 수 없거나 관련 데이터 없음"
             ),
@@ -73,6 +77,9 @@ class AiAssistantController(
             logger.info("Successfully updated settings for user ID: $userId")
             ResponseEntity.ok(response)
 
+        } catch (e: SecurityException) {
+            logger.warn("Failed to update settings due to security reasons: ${e.message}")
+            ResponseEntity.status(HttpStatus.FORBIDDEN).body(mapOf("error" to e.message))
         } catch (e: NoSuchElementException) {
             logger.warn("Failed to update settings: ${e.message}")
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(mapOf("error" to e.message))

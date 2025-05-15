@@ -60,6 +60,11 @@ class AiAssistantService(
         val user = userRepository.findById(userId)
             .orElseThrow { NoSuchElementException("User not found with ID: $userId") }
 
+        if (!voicepackUsageRightRepository.existsByUserIdAndVoicepackId(userId, request.voicepackId)) {
+            logger.warn("사용 권한 없는 보이스팩 합성 시도: userId={}, voicepackId={}", userId, request.voicepackId)
+            throw SecurityException("해당 보이스팩에 대한 사용 권한이 없습니다.")
+        }
+
         val writingStyle = WritingStyle.fromIndex(request.writingStyle)
             ?: throw IllegalArgumentException("Invalid writing style provided: ${request.writingStyle}")
 
