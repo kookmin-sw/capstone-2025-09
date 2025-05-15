@@ -1,18 +1,16 @@
-// utils/extractAudioFromVideo.js
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 
 const ffmpeg = new FFmpeg();
-
 let isLoaded = false;
 
 export const extractAudioFromVideo = async (videoFile) => {
   if (!isLoaded) {
-    await ffmpeg.load(); // ✅ coreURL 생략
+    await ffmpeg.load();
     isLoaded = true;
   }
 
   const data = await videoFile.arrayBuffer();
-  ffmpeg.writeFile('input.mp4', new Uint8Array(data));
+  await ffmpeg.writeFile('input.mp4', new Uint8Array(data));
 
   await ffmpeg.exec([
     '-i',
@@ -29,7 +27,7 @@ export const extractAudioFromVideo = async (videoFile) => {
 
   const output = await ffmpeg.readFile('output.wav');
   const audioBlob = new Blob([output], { type: 'audio/wav' });
-  const audioUrl = URL.createObjectURL(audioBlob);
+  const audioFile = new File([audioBlob], 'output.wav', { type: 'audio/wav' });
 
-  return audioUrl;
+  return audioFile;
 };

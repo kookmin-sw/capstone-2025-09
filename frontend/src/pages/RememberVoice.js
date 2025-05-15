@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import GradientButton from '../components/common/GradientButton';
-import useVoicepackSynthesis from '../hooks/useVoicepackSynthesis';
 import { ScaleLoader } from 'react-spinners';
 import AudioPlayer from '../components/common/AudioPlayer';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Maximize2 } from 'lucide-react';
 import { extractAudioFromVideo } from '../utils/extractAudioFromVideo';
+import useVedioToVoicepack from '../hooks/useVideoToVoicepack';
+import useVoicepackSynthesis from '../hooks/useVoicepackSynthesis';
+import SelectBox from '../components/common/SelectBox';
 
 const steps = ['영상 업로드', '텍스트 입력', '결과 확인'];
 
 const RememberVoice = () => {
-  const { synthesize } = useVoicepackSynthesis();
-
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [videoFile, setVideoFile] = useState(null);
+  const [audioFile, setAudioFile] = useState(null);
   const [videoUrl, setVideoUrl] = useState(null);
   const [videoRatio, setVideoRatio] = useState('landscape');
   const [scriptText, setScriptText] = useState('');
+  const [emotionType, setEmotionType] = useState(0);
   const [audioUrl, setAudioUrl] = useState(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const { startConversion } = useVedioToVoicepack();
 
   const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0];
@@ -45,8 +48,10 @@ const RememberVoice = () => {
         );
 
         try {
-          const wavUrl = await extractAudioFromVideo(file);
-          setAudioUrl(wavUrl); // 추출된 오디오 저장
+          const extractedAudioFile = await extractAudioFromVideo(file);
+          setAudioFile(extractedAudioFile);
+          const audioTempUrl = URL.createObjectURL(extractedAudioFile);
+          setAudioUrl(audioTempUrl);
         } catch (err) {
           console.error(err);
           alert('오디오 추출에 실패했습니다.');
@@ -55,6 +60,31 @@ const RememberVoice = () => {
         }
       };
     }
+  };
+
+  const emotionOptions = [
+    { label: '기본', value: 0 },
+    { label: '기쁨', value: 1 },
+    { label: '슬픔', value: 2 },
+    { label: '놀람', value: 3 },
+    { label: '화남', value: 4 },
+  ];
+
+  const handleRestore = async () => {
+    if (!audioFile || !scriptText) return;
+    setIsGenerating(true);
+    try {
+      const resultUrl = await startConversion({
+        audioFile,
+        prompt: scriptText,
+        emotionIndex: emotionType,
+      });
+      setAudioUrl(resultUrl);
+      setStep(3);
+    } catch (err) {
+      alert(err.message);
+    }
+    setIsGenerating(false);
   };
 
   const handleFullscreen = () => {
@@ -189,12 +219,19 @@ const RememberVoice = () => {
             >
               <div className="space-y-1">
                 <label className="block font-semibold text-gray-700 text-base">
-                  텍스트 입력
+                  감정 및 텍스트 설정
                 </label>
                 <p className="text-sm text-gray-500">
                   그 사람의 목소리로 듣고 싶은 말을 입력해 주세요.
                 </p>
               </div>
+              <SelectBox
+                label="감정"
+                value={emotionType}
+                onChange={(value) => setEmotionType(Number(value))}
+                options={emotionOptions}
+                placeholder="감정을 선택해주세요."
+              />
               <textarea
                 value={scriptText}
                 onChange={(e) => setScriptText(e.target.value)}
@@ -214,25 +251,8 @@ const RememberVoice = () => {
                 </GradientButton>
                 <GradientButton
                   className="px-3 py-1"
+                  onClick={handleRestore}
                   disabled={!scriptText}
-                  onClick={async () => {
-                    setIsGenerating(true);
-
-                    try {
-                      // const resultUrl = await synthesize(videoFile, scriptText);
-                      const resultUrl = audioUrl; // 이제 추출된 오디오 URL을 그대로 사용
-
-                      console.log(audioUrl, scriptText);
-                      setAudioUrl(resultUrl);
-                      setDirection(1);
-                      setStep(3);
-                    } catch (err) {
-                      console.error(err);
-                      alert('복원 실패');
-                    }
-
-                    setIsGenerating(false);
-                  }}
                 >
                   복원하기
                 </GradientButton>
