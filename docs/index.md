@@ -37,4 +37,4 @@
 | DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
 ### 👥 팀 소개
-<img src="assets/people.png" width=100% alt="대체 텍스트">
+<img src="/assets/people.png" width=100% alt="대체 텍스트">
