@@ -1,5 +1,5 @@
 ### 🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼
-<img src="assets/logo.svg" width=100% alt="COVOS logo">
+<img src="/assets/logo.svg" width=100% alt="COVOS logo">
 
 ### 🔗 목차
 - [🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼](#️-covos---ai-보이스팩-거래-및-활용-플랫폼)
