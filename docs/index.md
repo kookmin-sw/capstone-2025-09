@@ -7,6 +7,8 @@ permalink: /
 ---
 ## 🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼
 
+<br>
+
 <p align="center">
   <img src="assets/logo.svg" alt="COVOS Logo" width="100%"/>
 </p>
@@ -14,6 +16,8 @@ permalink: /
 ---
 
 ## 🔗 목차
+
+<br>
 
 1. [🚀 프로젝트 소개](#project-intro)
 2. [💡 핵심 기능](#core-features)  
