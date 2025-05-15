@@ -1,3 +1,11 @@
+---
+layout: default
+title: "메인"
+nav_order: 1
+has_toc: true
+description: "캡스톤디자인 2025"
+permalink: /
+---
 ### 🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼
 
 <br>
