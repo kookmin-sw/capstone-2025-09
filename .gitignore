@@ -19,3 +19,10 @@ env/
 .idea/
 *.iml
 *.DS_Store
+
+temp.py
+notion_parser.py
+app.py
+output.json
+
+*.pem
