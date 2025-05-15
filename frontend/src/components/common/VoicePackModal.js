@@ -212,7 +212,7 @@ const VoicePackModal = ({
               {pack.name}
             </h2>
             <p className="text-[11px] sm:text-sm text-slate-600 text-left">
-              {pack.author}
+              {pack.authorName}
             </p>
 
             <div className="flex justify-start gap-2 mt-2 flex-wrap">
@@ -220,7 +220,8 @@ const VoicePackModal = ({
                 pack.categories.slice(0, 2).map((category, index) => (
                   <span
                     key={index}
-                    className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg">
+                    className="text-sm px-3 py-1 bg-indigo-100 text-indigo-700 rounded-lg"
+                  >
                     # {category}
                   </span>
                 ))}

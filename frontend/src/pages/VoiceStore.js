@@ -24,18 +24,21 @@ const VoiceStore = () => {
   };
 
   useEffect(() => {
-    axiosInstance.get('/voicepack')
-      .then(res => setVoicePacks(res.data))
-      .catch(err => console.error('❌ 보이스팩 불러오기 실패:', err));
+    axiosInstance
+      .get('/voicepack')
+      .then((res) => setVoicePacks(res.data))
+      .catch((err) => console.error('❌ 보이스팩 불러오기 실패:', err));
   }, []);
 
   useEffect(() => {
     let result = [...voicePacks];
+
+    console.log(voicePacks);
     if (committedQuery) {
       result = result.filter(
         (pack) =>
           pack.name.toLowerCase().includes(committedQuery.toLowerCase()) ||
-          pack.author.toLowerCase().includes(committedQuery.toLowerCase())
+          pack.authorName.toLowerCase().includes(committedQuery.toLowerCase())
       );
     }
     if (sortOption === 'name') {
@@ -90,7 +93,9 @@ const VoiceStore = () => {
         <div className="min-h-screen">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 justify-center">
             {currentItems.length === 0 ? (
-              <p className="flex justify-center col-span-full text-gray-500 text-md mt-12">검색 결과가 없습니다.</p>
+              <p className="flex justify-center col-span-full text-gray-500 text-md mt-12">
+                검색 결과가 없습니다.
+              </p>
             ) : (
               currentItems.map((pack) => (
                 <VoicePackCard key={pack.id} pack={pack} type="voicestore" />
@@ -108,7 +113,6 @@ const VoiceStore = () => {
                     setCurrentPage(index + 1);
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
-
                   className={`px-3 py-1 rounded-md ${
                     currentPage === index + 1
                       ? 'bg-indigo-400 text-white'
