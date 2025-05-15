@@ -136,6 +136,8 @@ cd capstone-2025-09
 
 ...
 
+---
+
 ## 📂 폴더 구조
 {: #folder-structure }
 
