@@ -49,6 +49,8 @@ permalink: /
 ## 💡 핵심 기능
 {: #core-features }
 
+<br>
+
 ### 🗣️ AI 보이스팩 생성
 {: #feature-voicepack }
 
@@ -69,6 +71,8 @@ permalink: /
 ## 🎥 소개 영상
 {: #intro-video }
 
+<br>
+
 <p align="center">
   <iframe width="560" height="315" src="https://www.youtube.com/embed/HLSFtyEcC9E?si=JR25zfAydfEGVCk-" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 </p>
@@ -77,6 +81,8 @@ permalink: /
 
 ## 👥 팀 소개
 {: #team }
+
+<br>
 
 <p align="center">
   <img src="assets/people.png" width="100%" alt="COVOS people">
@@ -87,6 +93,8 @@ permalink: /
 ## 📐 시스템 구조도
 {: #architechture }
 
+<br>
+
 <p align="center">
   <img src="assets/architecture.png" width="100%" alt="COVOS Architecture">
 </p>
@@ -95,6 +103,8 @@ permalink: /
 
 ## 🧠 기술 스택
 {: #tech-stack }
+
+<br>
 
 | 영역              | 기술 및 도구                             |
 |------------------|------------------------------------------|
@@ -109,6 +119,8 @@ permalink: /
 ## 🛠️ 개발 환경 설정법
 {: #setup }
 
+<br>
+
 ### 1. 프로젝트 클론
 
 ```bash
@@ -122,6 +134,8 @@ cd capstone-2025-09
 
 ## 📂 폴더 구조
 {: #folder-structure }
+
+<br>
 
 ```bash
 capstone-2025-09/
