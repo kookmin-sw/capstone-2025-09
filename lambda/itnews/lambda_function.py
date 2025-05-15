@@ -130,8 +130,8 @@ def generate_news_briefing(headlines: list[str], tone: str) -> str:
 
 def upload_to_s3(bucket: str, content: str, tone: str) -> str:
     """생성된 브리핑 텍스트를 S3에 업로드합니다. 파일명에 톤을 포함합니다."""
-    # 시간대 정보 포함된 UTC 현재 시간 사용
-    now = datetime.datetime.now(datetime.timezone.utc)
+    # 시간대 정보 포함된 KST 현재 시간 사용
+    now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=9)))
     # S3 키 형식: prompt/YYYYMMDDHH/bbcnews/{tone}.txt
     s3_key = f"prompt/{now.strftime('%Y%m%d%H')}/itnews/{tone}.txt"
 
