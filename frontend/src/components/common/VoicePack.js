@@ -55,7 +55,7 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
               : isMypage
                 ? 'text-xs sm:text-sm md:text-base'
                 : 'text-sm sm:text-md md:text-lg'
-          } font-semibold mb-1`}
+          } font-semibold mb-1 truncate overflow-hidden whitespace-nowrap`}
         >
           {pack.name}
         </h2>
