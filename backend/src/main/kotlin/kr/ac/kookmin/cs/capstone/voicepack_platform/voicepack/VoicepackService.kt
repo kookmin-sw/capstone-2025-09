@@ -96,7 +96,7 @@ class VoicepackService(
         checkOngoingRequests(userId)
 
         // 이미지 처리 및 카테고리 JSON 변환
-        val imageS3Key = request.imageFile?.let { s3ObjectUploader.uploadImageToS3(it, request.name) }
+        val imageS3Key = request.imageFile?.let { s3ObjectUploader.uploadImageToS3(it, request.name, "voicepackImages") }
         val categoriesJson = objectMapper.writeValueAsString(request.categories) 
 
         // 보이스팩 요청 엔티티 생성

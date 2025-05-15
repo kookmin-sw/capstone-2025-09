@@ -1,6 +1,7 @@
 package kr.ac.kookmin.cs.capstone.voicepack_platform.user
 
 import jakarta.servlet.http.HttpSession
+import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3ObjectUploader
 import kr.ac.kookmin.cs.capstone.voicepack_platform.common.util.S3PresignedUrlGenerator
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserLoginRequest
 import kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto.UserSignupRequest
@@ -29,7 +30,8 @@ class UserService(
     private val saleRepository: SaleRepository,
     private val s3Client: S3Client,
     @Value("\${aws.s3.bucket-name}") private val bucketName: String,
-    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator
+    private val s3PresignedUrlGenerator: S3PresignedUrlGenerator,
+    private val s3ObjectUploader: S3ObjectUploader
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -46,10 +48,7 @@ class UserService(
         )
 
         // 프로필 이미지가 있는 경우 S3에 업로드
-        request.profileImage?.let { file ->
-            val objectKey = "profile-images/${UUID.randomUUID()}_${file.originalFilename}"
-            user.profileImageUrl = uploadFileToS3(objectKey, file)
-        }
+        user.profileImageUrl = request.profileImage?.let { s3ObjectUploader.uploadImageToS3(it, request.name, "userImages")}
 
         return userRepository.save(user).id
     }
@@ -98,21 +97,5 @@ class UserService(
             createdPacks = createdPacks,
             boughtPacks = boughtPacks
         )
-    }
-
-    private fun uploadFileToS3(objectKey: String, file: MultipartFile): String {
-        try {
-            s3Client.putObject(
-                PutObjectRequest.builder()
-                    .bucket(bucketName) // S3 버킷 이름 사용
-                    .key(objectKey)
-                    .build(),
-                RequestBody.fromInputStream(file.inputStream, file.size)
-            )
-            return objectKey
-        } catch (e: Exception) {
-            logger.error("S3 파일 업로드 실패: objectKey={}, error={}", objectKey, e.message, e)
-            throw RuntimeException("파일 업로드에 실패했습니다. 다시 시도해주세요.", e)
-        }
     }
 } 
