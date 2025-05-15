@@ -1,7 +1,6 @@
 name: "✨ Feature"
 description: "기능 추가, UI 개선, 문서 업데이트 요청을 위한 템플릿"
 title: "feat: "
-labels: ["feature"]
 body:
   - type: input
     attributes:

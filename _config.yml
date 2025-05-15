@@ -1,1 +1,4 @@
-theme: jekyll-theme-slate
+theme: jekyll-theme-minimal
+title: "COVOS"
+description: "AI 보이스팩 거래 및 활용 플랫폼"
+author: "VocaLab"

@@ -1,7 +1,3 @@
-
-# Pretrained model files
-pretrained_models/
-
 # VS Code settings
 .vscode/
 
@@ -9,6 +5,10 @@ pretrained_models/
 __pycache__/
 *.py[cod]
 *$py.class
+build/
+dist/
+wheels/
+*.egg-info
 
 # Virtual Environment
 venv/
