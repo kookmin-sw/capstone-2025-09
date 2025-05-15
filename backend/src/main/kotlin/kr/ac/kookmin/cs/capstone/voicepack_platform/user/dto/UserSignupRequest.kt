@@ -2,6 +2,7 @@ package kr.ac.kookmin.cs.capstone.voicepack_platform.user.dto
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import org.springframework.web.multipart.MultipartFile
 
 data class UserSignupRequest(
 
@@ -10,5 +11,10 @@ data class UserSignupRequest(
     val email: String,
 
     @field:NotBlank(message = "비밀번호는 필수입니다")
-    val password: String
+    val password: String,
+
+    @field:NotBlank(message = "이름은 필수입니다")
+    val name: String,
+
+    val profileImage: MultipartFile? = null
 ) 

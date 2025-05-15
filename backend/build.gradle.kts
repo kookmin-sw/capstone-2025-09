@@ -75,6 +75,11 @@ dependencies {
 	// AWS SDK SQS 의존성 추가
 	implementation("software.amazon.awssdk:sqs:2.21.42")
 	implementation("software.amazon.awssdk:url-connection-client:2.21.42")
+
+	
+    implementation("org.hibernate:hibernate-core:6.4.4.Final")
+    implementation("org.hibernate.common:hibernate-commons-annotations:6.0.6.Final")
+
 }
 
 kotlin {

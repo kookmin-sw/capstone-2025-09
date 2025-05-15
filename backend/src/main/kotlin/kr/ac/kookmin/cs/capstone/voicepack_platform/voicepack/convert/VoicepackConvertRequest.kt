@@ -30,7 +30,22 @@ data class VoicepackRequest(
     val createdAt: OffsetDateTime = OffsetDateTime.now(),
 
     @Column(name = "completed_at", nullable = true)
-    var completedAt: OffsetDateTime? = null
+    var completedAt: OffsetDateTime? = null,
+
+    @Column(name = "voicepack_id", nullable = true)
+    var voicepackId: Long? = null,
+
+    @Column(name = "is_video_based", nullable = false)
+    var isVideoBased: Boolean = false,
+
+    @Column(name = "temp_file_path", nullable = true)
+    var tempFilePath: String? = null,
+
+    @Column(name = "image_s3_key", nullable = true)
+    var imageS3Key: String? = null,
+
+    @Column(name = "categories_json", length = 1024, nullable = false)
+    var categoriesJson: String = ""
 )
 
 enum class VoicepackRequestStatus {
