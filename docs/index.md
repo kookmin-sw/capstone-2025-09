@@ -1,15 +1,5 @@
----
-layout: home
-title: "메인"
-nav_order: 1
-has_toc: true
-description: "캡스톤디자인 2025"
-permalink: /
----
-
-
 ### 🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼
-<img src="/assets/logo.svg" width=100% alt="COVOS logo">
+<img src="assets/logo.svg" width=100% alt="COVOS logo">
 
 ### 🔗 목차
 - [🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼](#️-covos---ai-보이스팩-거래-및-활용-플랫폼)
@@ -47,4 +37,4 @@ permalink: /
 | DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
 ### 👥 팀 소개
-<img src="/assets/people.png" width=100% alt="대체 텍스트">
+<img src="assets/people.png" width=100% alt="대체 텍스트">
