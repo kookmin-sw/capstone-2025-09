@@ -598,9 +598,9 @@ class VoicepackService(
     /**
      * 사용자가 보유한 보이스팩 목록 조회
      */
-    fun getVoicepacksByUserId(userId: Long): List<VoicepackUsageRightBriefDto> {
+    fun getVoicepacksByUserId(userId: Long, isVideoBased: Boolean): List<VoicepackUsageRightBriefDto> {
         logger.info("사용자의 보이스팩 목록 조회: userId={}", userId)
-        return voicepackUsageRightRepository.findVoicepackDtosByUserId(userId)
+        return voicepackUsageRightRepository.findVoicepackDtosByUserIdAndIsVideoBased(userId, isVideoBased)
     }
 
     /**

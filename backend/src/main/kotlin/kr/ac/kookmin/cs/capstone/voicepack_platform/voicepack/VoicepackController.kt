@@ -334,9 +334,10 @@ class VoicepackController(
     )
     @GetMapping("/usage-right")
     fun getUserVoicepacks(
-        @Parameter(description = "사용자 ID") @RequestParam userId: Long
+        @Parameter(description = "사용자 ID") @RequestParam userId: Long,
+        @Parameter(description = "영상 기반 보이스팩 여부") @RequestParam(required = false, defaultValue = "false") isVideoBased: Boolean
     ): ResponseEntity<List<VoicepackUsageRightBriefDto>> {
-        val voicepacks = voicepackService.getVoicepacksByUserId(userId)
+        val voicepacks = voicepackService.getVoicepacksByUserId(userId, isVideoBased)
         return ResponseEntity.ok(voicepacks)
     }
 

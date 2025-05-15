@@ -22,6 +22,15 @@ interface VoicepackUsageRightRepository : JpaRepository<VoicepackUsageRight, Lon
     """)
     fun findVoicepackDtosByUserId(@Param("userId") userId: Long): List<VoicepackUsageRightBriefDto>
 
+    @Query("""
+        SELECT new kr.ac.kookmin.cs.capstone.voicepack_platform.voicepack.usageright.VoicepackUsageRightBriefDto(
+            v.voicepack.id,
+            v.voicepack.name
+        )
+        FROM VoicepackUsageRight v  
+        WHERE v.user.id = :userId AND v.voicepack.isVideoBased = :isVideoBased
+    """)
+    fun findVoicepackDtosByUserIdAndIsVideoBased(@Param("userId") userId: Long, @Param("isVideoBased") isVideoBased: Boolean): List<VoicepackUsageRightBriefDto>
     // 사용자가 구매한 (즉, 자신이 생성하지 않은) 보이스팩 엔티티 목록 조회
     @Query("SELECT DISTINCT vur.voicepack FROM VoicepackUsageRight vur WHERE vur.user.id = :userId AND vur.voicepack.author.id <> :userId")
     fun findDistinctPurchasedVoicepacksByUserId(@Param("userId") userId: Long): List<Voicepack>
