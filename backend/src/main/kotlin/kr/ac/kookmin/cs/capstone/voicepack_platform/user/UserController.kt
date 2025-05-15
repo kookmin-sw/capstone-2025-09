@@ -29,9 +29,17 @@ class UserController(
         @RequestParam("password") password: String,
         @RequestParam("name") name: String,
         @RequestPart("profileImage", required = false) profileImage: MultipartFile?
-    ): ResponseEntity<Long> {
+    ): ResponseEntity<Any> {
         val request = UserSignupRequest(email, password, name, profileImage)
-        return ResponseEntity.ok(userService.signup(request))
+        return try {
+            ResponseEntity.ok(userService.signup(request))
+        } catch (e: IllegalArgumentException) {
+            // 이메일 중복과 같은 일반적인 잘못된 요청 오류 처리
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body(mapOf("error" to e.message))
+        } catch (e: RuntimeException) {
+            // S3 업로드 실패 등 런타임 예외 처리
+            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf("error" to e.message))
+        }
     }
 
 
