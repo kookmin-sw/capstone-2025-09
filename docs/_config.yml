@@ -31,11 +31,3 @@ aux_links:
 nav_sort: case_sensitive
 
 footer_content: "Copyright &copy; 2025 Kookmin Univ. All rights reserved."
-
-# Enable ordered navigation
-just_the_docs:
-  collections:
-    pages:
-      name: 매뉴얼
-      nav_fold: true
-      nav_order: 2
