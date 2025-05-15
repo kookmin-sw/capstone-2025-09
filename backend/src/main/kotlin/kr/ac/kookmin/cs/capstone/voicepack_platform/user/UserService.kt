@@ -48,8 +48,7 @@ class UserService(
         // 프로필 이미지가 있는 경우 S3에 업로드
         request.profileImage?.let { file ->
             val objectKey = "profile-images/${UUID.randomUUID()}_${file.originalFilename}"
-            val s3Url = uploadFileToS3(objectKey, file)
-            user.profileImageUrl = s3Url // S3 URL 저장
+            user.profileImageUrl = uploadFileToS3(objectKey, file)
         }
 
         return userRepository.save(user).id
@@ -102,13 +101,18 @@ class UserService(
     }
 
     private fun uploadFileToS3(objectKey: String, file: MultipartFile): String {
-        s3Client.putObject(
-            PutObjectRequest.builder()
-                .bucket(bucketName) // S3 버킷 이름 사용
-                .key(objectKey)
-                .build(),
-            RequestBody.fromInputStream(file.inputStream, file.size)
-        )
-        return "https://$bucketName.s3.amazonaws.com/$objectKey"
+        try {
+            s3Client.putObject(
+                PutObjectRequest.builder()
+                    .bucket(bucketName) // S3 버킷 이름 사용
+                    .key(objectKey)
+                    .build(),
+                RequestBody.fromInputStream(file.inputStream, file.size)
+            )
+            return objectKey
+        } catch (e: Exception) {
+            logger.error("S3 파일 업로드 실패: objectKey={}, error={}", objectKey, e.message, e)
+            throw RuntimeException("파일 업로드에 실패했습니다. 다시 시도해주세요.", e)
+        }
     }
 } 
