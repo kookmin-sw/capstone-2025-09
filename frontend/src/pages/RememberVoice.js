@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Maximize2 } from 'lucide-react';
 import { extractAudioFromVideo } from '../utils/extractAudioFromVideo';
 import useVedioToVoicepack from '../hooks/useVideoToVoicepack';
-import useVoicepackSynthesis from '../hooks/useVoicepackSynthesis';
 import SelectBox from '../components/common/SelectBox';
 
 const steps = ['영상 업로드', '텍스트 입력', '결과 확인'];
@@ -102,7 +101,7 @@ const RememberVoice = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">리멤버 보이스</h1>
+      <h1 className="text-xl font-bold">리멤버 보이스</h1>
       <div className="space-y-8 max-w-2xl mx-auto px-4">
         {isGenerating && (
           <div className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
