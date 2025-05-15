@@ -68,7 +68,7 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
                 : 'text-sm sm:text-md'
           } text-slate-600 break-all`}
         >
-          {pack.author}
+          {pack.authorName}
         </p>
         <p
           className={`${
@@ -90,7 +90,8 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
                       ? 'text-[10px] px-1 py-0.5'
                       : 'text-sm px-3 py-1'
                 } bg-indigo-100 text-indigo-700 rounded-lg`}
-              ># {category}
+              >
+                # {category}
               </span>
             ))}
         </div>
