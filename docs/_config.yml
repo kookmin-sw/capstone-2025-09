@@ -10,7 +10,7 @@ nav_external_links_new_tab: true
 
 # Collections for sidebar navigation
 collections:
-  documents:
+  pages:
     permalink: "/:collection/:path/"
     output: true
 
@@ -35,7 +35,7 @@ footer_content: "Copyright &copy; 2025 Kookmin Univ. All rights reserved."
 # Enable ordered navigation
 just_the_docs:
   collections:
-    documents:
-      name: 문서
+    pages:
+      name: Pages
       nav_fold: true
       nav_order: 2
