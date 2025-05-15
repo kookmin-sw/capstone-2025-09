@@ -11,6 +11,8 @@ permalink: /
   <img src="assets/logo.svg" alt="COVOS Logo" width="100%"/>
 </p>
 
+---
+
 ## 🔗 목차
 
 1. [🚀 프로젝트 소개](#project-intro)
@@ -21,6 +23,7 @@ permalink: /
 3. [🧠 기술 스택](#tech-stack)
 4. [👥 팀 소개](#team)
 
+---
 
 ## 🚀 프로젝트 소개
 {: #project-intro }
@@ -30,6 +33,8 @@ permalink: /
 - COVOS는 개인이 자신의 목소리를 AI로 학습시켜 보이스팩을 만들고 이를 사고팔 수 있는 플랫폼입니다.  
 - 최신 제로샷 음성합성 기술을 활용해 단 몇 초의 음성만으로도 고품질 AI 목소리를 생성할 수 있습니다.  
 - 자신의 AI 목소리를 보유하고, 콘텐츠에 활용하며, 나아가 새로운 디지털 자산 시장의 일원이 될 수 있도록 하는 것이 우리의 목표입니다
+
+---
 
 ## 💡 핵심 기능
 {: #core-features }
@@ -49,6 +54,35 @@ permalink: /
 
 - 구매한 보이스팩은 플레이그라운드에서 다양한 방식으로 활용할 수 있습니다.   
 
+---
+
+## 🎥 소개 영상
+{: #intro-video }
+
+<p align="center">
+  <iframe width="560" height="315" src="https://youtu.be/HLSFtyEcC9E?si=lQbzuEtz4FJCNL8Q" frameborder="0" allowfullscreen></iframe>
+</p>
+
+---
+
+## 👥 팀 소개
+{: #team }
+
+<p align="center">
+  <img src="assets/people.png" width="100%" alt="COVOS people">
+</p>
+
+---
+
+## 📐 시스템 구조도
+{: #architechture }
+
+<p align="center">
+  <img src="assets/architecture.png" width="100%" alt="COVOS Architecture">
+</p>
+
+---
+
 ## 🧠 기술 스택
 {: #tech-stack }
 
@@ -60,9 +94,16 @@ permalink: /
 | 인프라           | AWS ECS Fargate, GCP Cloud Run           |
 | DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
-## 👥 팀 소개
-{: #team }
+---
 
-<p align="center">
-  <img src="assets/people.png" width="100%" alt="COVOS people">
-</p>
+## 🛠️ 개발 환경 설정법
+{: #setup }
+
+### 1. 프로젝트 클론
+
+```bash
+git clone https://github.com/kookmin-sw/capstone-2025-09.git
+cd capstone-2025-09
+```
+
+...
