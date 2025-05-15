@@ -1,5 +1,5 @@
 ---
-title: 프론트엔드 메뉴얼입니다.
+title: "프론트엔드 메뉴얼입니다."
 layout: default
 nav_order: 1
 parent: 메뉴얼
