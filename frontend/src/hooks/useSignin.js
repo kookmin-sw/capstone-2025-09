@@ -25,7 +25,6 @@ export const useSignin = () => {
       if (response.status === 200) {
         const voicepacks = await getVoicepacksByUserId(data);
 
-        // 전역 상태 설정
         setUser({
           id: data,
           email: email,
@@ -35,16 +34,20 @@ export const useSignin = () => {
         alert(data.message || '로그인 성공!');
         navigate('/voice-store');
       } else {
-        alert(`로그인 실패: ${data.message || '알 수 없는 오류 발생'}`);
+        alert('로그인 실패: 알 수 없는 오류 발생');
       }
     } catch (error) {
       console.error('로그인 오류:', error);
 
-      if (error.response?.status === 401) {
-        alert('비밀번호가 일치하지 않습니다.');
+      const status = error.response?.status;
+
+      if (status === 401) {
+        alert('비밀번호가 틀렸습니다.');
+      } else if (status === 400) {
+        alert('존재하지 않는 이메일이거나 형식이 올바르지 않습니다.');
       } else {
         alert(
-          `로그인 중 오류가 발생했습니다: ${error.response?.data?.message || '서버 오류'}`
+          `로그인 중 오류가 발생했습니다: ${error.response?.data?.error || '서버 오류'}`
         );
       }
     } finally {

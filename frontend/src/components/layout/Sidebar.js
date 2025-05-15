@@ -72,7 +72,7 @@ const Sidebar = () => {
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/quote')}`}
         >
           <Quote size={20} />
-          <span>명언 생성</span>
+          <span>오늘의 명언</span>
         </Link>
         <Link
           to="/remember-voice"
