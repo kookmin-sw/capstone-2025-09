@@ -1,5 +1,5 @@
 ### 🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼
-<img src="https://raw.githubusercontent.com/miniwa00/test/main/logo.svg" width=100% alt="대체 텍스트">
+<img src="assets/logo.svg" width=100% alt="COVOS logo">
 
 ### 🔗 목차
 - [🎙️ COVOS - AI 보이스팩 거래 및 활용 플랫폼](#️-covos---ai-보이스팩-거래-및-활용-플랫폼)
@@ -37,4 +37,4 @@
 | DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
 
 ### 👥 팀 소개
-<img src="https://raw.githubusercontent.com/miniwa00/test/main/team-profile.png" width=100% alt="대체 텍스트">
+<img src="assets/people.png" width=100% alt="대체 텍스트">
