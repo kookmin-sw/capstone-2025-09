@@ -25,7 +25,7 @@ permalink: /
 5. [📐 시스템 구조도](#architechture)
 6. [🧠 기술 스택](#tech-stack)
 7. [🛠️ 개발 환경 설정법](#setup)  
-
+8. [📂 폴더 구조](#folder-structure)
 ---
 
 ## 🚀 프로젝트 소개
@@ -113,6 +113,21 @@ permalink: /
 ```bash
 git clone https://github.com/kookmin-sw/capstone-2025-09.git
 cd capstone-2025-09
+
+
 ```
 
 ...
+
+## 📂 폴더 구조
+{: #folder-structure }
+
+```bash
+capstone-2025-09/
+├── backend/
+├── frontend/
+├── docs/
+├── .gitignore
+├── .env
+
+```
