@@ -654,7 +654,8 @@ class VoicepackService(
             // 새 유저 생성
             val newUser = User(
                 email = "test@test.com",
-                password = "test"
+                password = "test",
+                name = "test",
             )
             userRepository.save(newUser)
             newUser
