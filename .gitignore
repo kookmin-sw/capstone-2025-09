@@ -20,3 +20,10 @@ env/
 *.iml
 *.DS_Store
 python/
+
+*.pem
+
+temp.py
+notion_parser.py
+app.py
+output.json
