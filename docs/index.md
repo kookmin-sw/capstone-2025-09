@@ -3,7 +3,7 @@
 <br>
 
 <p align="center">
-  <img src="{{ site.baseurl }}//assets/logo.svg" alt="COVOS Logo" width="200"/>
+  <img src="assets/logo.svg" alt="COVOS Logo" width="200"/>
 </p>
 
 <br>
