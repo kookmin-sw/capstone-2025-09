@@ -8,11 +8,11 @@ has_toc: false
 
 # 서버리스 인프라 활용 가이드
 
-{ .no_toc }
+{: .no_toc }
 
 ## 목차
 
-{ .no_toc }
+{: .no_toc }
 
 1. TOC
 {:toc}

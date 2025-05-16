@@ -13,7 +13,7 @@ has_toc: false
 
 ## 목차
 
-{ .no_toc }
+{: .no_toc }
 
 - TOC
 {:toc}

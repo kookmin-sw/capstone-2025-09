@@ -8,11 +8,11 @@ has_toc: false
 
 # 백엔드 개발 가이드
 
-{ .no_toc }
+{: .no_toc }
 
 ## 목차
 
-{ .no_toc }
+{: .no_toc }
 
 - TOC
 {:toc}
