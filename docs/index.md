@@ -113,7 +113,7 @@ permalink: /
 | 영역              | 기술 및 도구                             |
 |------------------|------------------------------------------|
 | AI/ML            | Zonos: Zero-shot Voice Cloning, PyTorch, HuggingFace |
-| Backend          | Kotlin, Spring Boot, MySQL                |
+| Backend          | Spring Boot, Kotlin, MySQL                |
 | Frontend         | React, JavaScript, Tailwind                         |
 | 인프라           | AWS (EC2, RDS, S3, Lambda, Amazon MQ),  GCP Cloud Run           |
 | DevOps & 협업도구 | GitHub, Notion, Slack            |
