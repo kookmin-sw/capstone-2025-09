@@ -102,6 +102,33 @@ const RememberVoice = () => {
   return (
     <div className="space-y-6">
       <h1 className="text-xl font-bold">리멤버 보이스</h1>
+      {/* 단계 진행 표시 UI */}
+      <div className="flex items-center justify-center gap-4 text-sm font-medium text-gray-500">
+        {steps.map((label, index) => (
+          <div key={index} className="flex items-center gap-2">
+            <div
+              className={`w-6 h-6 flex items-center justify-center rounded-full border ${
+                step === index + 1
+                  ? 'bg-indigo-500 text-white border-indigo-500'
+                  : 'bg-white text-gray-500 border-gray-300'
+              }`}
+            >
+              {index + 1}
+            </div>
+            <span
+              className={`${
+                step === index + 1 ? 'text-indigo-600 font-semibold' : ''
+              }`}
+            >
+              {label}
+            </span>
+            {index < steps.length - 1 && (
+              <div className="w-6 h-px bg-gray-300 mx-1" />
+            )}
+          </div>
+        ))}
+      </div>
+
       <div className="space-y-8 max-w-2xl mx-auto px-4">
         {isGenerating && (
           <div className="absolute inset-0 bg-violet-50 bg-opacity-40 backdrop-blur-sm flex flex-col items-center justify-center z-50 rounded-xl">
