@@ -250,12 +250,33 @@ Lambda 콘솔에서 직접 함수를 테스트할 수 있습니다.
 3.  이벤트 이름 입력.
 4.  **이벤트 템플릿**: 다양한 서비스의 이벤트 형식을 선택할 수 있습니다. AWS MQ for RabbitMQ의 경우, 사용 중인 AWS MQ for RabbitMQ 구성에 맞는 이벤트 템플릿을 사용하거나 직접 JSON을 작성합니다. 실제 AWS MQ for RabbitMQ 메시지 구조를 반영해야 합니다.
     ```text
+    // AWS MQ for RabbitMQ 이벤트 예시 (여러 메시지를 포함하는 경우):
+    // 중요: 이 구조는 매우 일반화된 예시입니다.
+    // 실제 Lambda가 수신하는 이벤트 구조는 사용하는 AWS MQ for RabbitMQ 구성 및 Lambda 통합 방식에 따라 매우 다릅니다.
+    // 반드시 해당 AWS MQ for RabbitMQ 구성 및 Lambda 트리거 이벤트 문서를 참조하여
+    // 실제 수신될 이벤트 구조를 확인하고 코드를 작성해야 합니다.
     {
-      "jobId": "unique-job-id-123",
-      "userId": "user-abc",
-      "text": "오늘 날씨 정말 좋네요.",
-      "voiceModelId": "voice-model-xyz",
-      "callbackUrl": "https://api.covos.com/synthesis/callback" 
+      "eventSourceIdentifier": "name-or-arn-of-the-mq-source", // 예: 큐 이름, 토픽 이름 등
+      "messages": [ // 또는 "Records", "data" 등, 메시지 배열을 나타내는 키
+        {
+          "messageId": "unique-id-for-message-1",
+          "messageBody": "{\"jobId\": \"job-123\", \"text\": \"첫 번째 메시지 내용입니다.\"}", // 실제 메시지 페이로드 (종종 JSON 문자열)
+          "messageAttributes": { // 사용자 정의 속성 또는 추가 메타데이터 (선택적)
+            "contentType": "application/json",
+            "priority": "high"
+          },
+          "receivedTimestamp": "2023-10-27T12:00:00Z" // Lambda가 메시지를 받은 시간 (추정)
+        },
+        {
+          "messageId": "unique-id-for-message-2",
+          "messageBody": "{\"jobId\": \"job-456\", \"text\": \"두 번째 메시지입니다.\"}",
+          "messageAttributes": {
+            "contentType": "text/plain"
+          },
+          "receivedTimestamp": "2023-10-27T12:00:05Z"
+        }
+        // ... 추가 메시지들
+      ]
     }
     ```
 5.  "저장" 후 "테스트" 버튼 클릭.
