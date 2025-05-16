@@ -31,7 +31,6 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
         const hh = String(startTime.getHours()).padStart(2, '0');
         const mm = String(startTime.getMinutes()).padStart(2, '0');
         const ss = String(startTime.getSeconds()).padStart(2, '0');
-        console.log(`[Polling] 최초 폴링 시작 시각: ${hh}:${mm}:${ss}`);
         hasLoggedStartTime = true;
       }
 
@@ -52,13 +51,10 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
 
       const pollStatus = async () => {
         try {
-          console.log(`[Polling] 요청 ID: ${requestId} → 상태 확인 요청 중...`);
           const res = await axiosInstance.get(
             `ai-assistant/synthesis/status/${requestId}`
           );
           const { status, results } = res.data;
-
-          console.log(`[Polling] 상태 응답: ${status}`);
 
           if (status === 'SUCCESS') {
             const audioUrls = Object.entries(results)

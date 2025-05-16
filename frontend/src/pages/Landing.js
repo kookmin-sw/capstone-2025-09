@@ -246,11 +246,20 @@ const Landing = () => {
 
       {/* Section 1 - Hero*/}
       <section
-        className="relative flex flex-col justify-center items-center"
+        className="relative flex flex-col justify-center items-center overflow-hidden"
         style={{ minHeight: 'calc(100vh - 96px)' }}
       >
-        <div className="flex justify-center items-center h-full w-full">
-          <div className="w-[50%] h-[80vh] flex justify-end items-end pl-20">
+        {/* Animated gradient background layer */}
+        <div className="absolute inset-0  animate-gradient-slow z-0" />
+
+        <div className="flex justify-center items-center h-full w-full relative z-10">
+          {/* 좌측 - 3D 구체 */}
+          <motion.div
+            className="w-[50%] h-[80vh] flex justify-end items-end pl-20"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+          >
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
               <ambientLight intensity={0.3} />
               <directionalLight
@@ -266,20 +275,45 @@ const Landing = () => {
                 autoRotateSpeed={0.5}
               />
             </Canvas>
-          </div>
+          </motion.div>
 
-          <div className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-gray-800">
-            <h1 className="text-4xl font-bold mb-4">나만의 AI 보이스를</h1>
-            <h1 className="text-4xl font-bold mb-10 ">
-              만들고 공유하고 활용하세요
-            </h1>
-            <GradientButton
-              onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
-              className="text-lg py-3 px-8"
+          {/* 우측 - 텍스트 + 버튼 */}
+          <motion.div
+            className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-black"
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+          >
+            <motion.h1
+              className="text-4xl font-bold mb-4"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6 }}
             >
-              COVOS 시작하기
-            </GradientButton>
-          </div>
+              나만의 AI 보이스를
+            </motion.h1>
+            <motion.h1
+              className="text-4xl font-bold mb-10"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+            >
+              만들고 공유하고 활용하세요
+            </motion.h1>
+
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+            >
+              <GradientButton
+                onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
+                className="text-lg py-3 px-8 hover:scale-105 transition-transform"
+              >
+                COVOS 시작하기
+              </GradientButton>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
