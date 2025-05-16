@@ -46,7 +46,7 @@ permalink: /
 
 - COVOS는 개인이 자신의 목소리를 AI로 학습시켜 보이스팩을 만들고 이를 사고팔 수 있는 플랫폼입니다.  
 - 최신 제로샷 음성합성 기술을 활용해 단 몇 초의 음성만으로도 고품질 AI 목소리를 생성할 수 있습니다.  
-- 자신의 AI 목소리를 보유하고, 콘텐츠에 활용하며, 나아가 새로운 디지털 자산 시장의 일원이 될 수 있도록 하는 것이 우리의 목표입니다
+- 자신의 AI 목소리를 보유하고, 콘텐츠에 활용하며, 나아가 새로운 디지털 자산 시장의 일원이 될 수 있도록 하는 것이 우리의 목표입니다.
 
 ---
 
@@ -112,11 +112,11 @@ permalink: /
 
 | 영역              | 기술 및 도구                             |
 |------------------|------------------------------------------|
-| AI/ML            | Zero-shot Voice Cloning, PyTorch, HuggingFace |
-| Backend          | Python, FastAPI, Supabase                |
-| Frontend         | React, TypeScript                        |
-| 인프라           | AWS ECS Fargate, GCP Cloud Run           |
-| DevOps & 협업도구 | GitHub, Notion, Slack, Trello            |
+| AI/ML            | Zonos: Zero-shot Voice Cloning, PyTorch, HuggingFace |
+| Backend          | Kotlin, Spring Boot, MySQL                |
+| Frontend         | React, JavaScript, Tailwind                         |
+| 인프라           | AWS (EC2, RDS, S3, Lambda, Amazon MQ),  GCP Cloud Run           |
+| DevOps & 협업도구 | GitHub, Notion, Slack            |
 
 ---
 
