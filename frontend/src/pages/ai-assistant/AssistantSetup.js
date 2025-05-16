@@ -6,7 +6,7 @@ import useAssistantSetup from '../../hooks/useAssistantSetup';
 
 // 상수로 유지될 항목들
 const WRITING_STYLES = ['존댓말', '반말', '밝은 톤', '차분한 톤'];
-const CATEGORIES = ['BBC 뉴스', 'Google 뉴스', 'IT 뉴스'];
+const CATEGORIES = ['BBC 뉴스', 'Google 뉴스', 'IT 뉴스', '경제', '스포츠'];
 
 const AssistantSetup = ({ setIsConfigured }) => {
   const voicepacksRaw = useVoicepackUsage('available').voicepacks;
@@ -77,58 +77,63 @@ const AssistantSetup = ({ setIsConfigured }) => {
       </p>
 
       {/* 보이스팩 & 문체 선택 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <SelectBox
-          label="보이스팩"
-          value={selectedVoiceId}
-          onChange={(val) => setSelectedVoiceId(Number(val))}
-          options={voicepackOptions}
-          placeholder={placeholderText}
-        />
-        <SelectBox
-          label="문체"
-          value={selectedWritingStyle}
-          onChange={(val) => setSelectedWritingStyle(Number(val))}
-          options={writingStyleOptions}
-          placeholder="문체를 선택해주세요."
-        />
-      </div>
-
-      {/* 카테고리 */}
-      <div>
-        <p className="text-sm font-medium mb-2">카테고리 (최대 3개)</p>
-        <div className="flex gap-4 flex-wrap">
-          {CATEGORIES.map((name, i) => {
-            const selected = selectedCategories.includes(i);
-            return (
-              <button
-                key={i}
-                onClick={() => toggleCategory(i)}
-                className={`px-6 py-2 rounded-md font-medium transition ${
-                  selected
-                    ? 'bg-[#A88BFF] text-white'
-                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                {name}
-              </button>
-            );
-          })}
+      <div className="flex flex-col md:flex-row mb-4 gap-4">
+        <div className="w-full md:w-1/4">
+          <SelectBox
+            label="보이스팩"
+            value={selectedVoiceId}
+            onChange={(val) => setSelectedVoiceId(Number(val))}
+            options={voicepackOptions}
+            placeholder={placeholderText}
+          />
+        </div>
+        <div className="w-full md:w-1/4">
+          <SelectBox
+            label="문체"
+            value={selectedWritingStyle}
+            onChange={(val) => setSelectedWritingStyle(Number(val))}
+            options={writingStyleOptions}
+            placeholder="문체를 선택해주세요."
+          />
         </div>
       </div>
 
-      {/* 세팅 버튼 */}
-      <div className="flex justify-end">
-        <GradientButton
-          className="px-6 py-3"
-          onClick={handleSetting}
-          disabled={!isValid}
-        >
-          세팅하기
-        </GradientButton>
-      </div>
-    </div>
-  );
-};
 
-export default AssistantSetup;
+      {/* 카테고리 */}
+        <div>
+          <p className="text-sm font-medium mb-2">카테고리 (최대 3개)</p>
+          <div className="flex gap-4 flex-wrap">
+            {CATEGORIES.map((name, i) => {
+              const selected = selectedCategories.includes(i);
+              return (
+                <button
+                  key={i}
+                  onClick={() => toggleCategory(i)}
+                  className={`px-6 py-2 rounded-md font-medium transition ${
+                    selected
+                      ? 'bg-[#A88BFF] text-white'
+                      : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {name}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* 세팅 버튼 */}
+        <div className="flex justify-end">
+          <GradientButton
+            className="px-6 py-3"
+            onClick={handleSetting}
+            disabled={!isValid}
+          >
+            세팅하기
+          </GradientButton>
+        </div>
+      </div>
+      );
+      };
+
+      export default AssistantSetup;

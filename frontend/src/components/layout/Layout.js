@@ -30,7 +30,7 @@ const Layout = ({ children }) => {
           </div>
 
           {/* 콘텐츠 영역 */}
-          <div className="relative z-0 mb-12">
+          <div className={`relative z-0 ${!isNoLayout ? 'pb-12' : ''}`}>
             {isNoLayout ? children : <PageContainer>{children}</PageContainer>}
           </div>
         </main>
