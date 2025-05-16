@@ -6,7 +6,11 @@ parent: 메뉴얼
 ---
 # COVOS 사용자 매뉴얼
 
+{: .no_toc }
+
 ## 서비스 소개
+
+{: .no_toc }
 
 <p align="center">
   <img src="../assets/logo.svg" alt="COVOS Logo" width="60%"/>
