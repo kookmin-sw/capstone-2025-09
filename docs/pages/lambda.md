@@ -5,8 +5,7 @@ nav_order: 5
 parent: 매뉴얼
 has_toc: false
 ---
-
-# 서버리스 인프라 활용 가이드
+# **서버리스 인프라 활용 가이드**
 
 {: .no_toc }
 

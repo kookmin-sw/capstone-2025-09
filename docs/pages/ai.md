@@ -5,11 +5,9 @@ nav_order: 5
 parent: 매뉴얼
 has_toc: false
 ---
-# AI 모델 및 추론 서버 개발 가이드
+# **AI 모델 및 추론 서버 개발 가이드**
 
 {: .no_toc }
-
----
 
 ## 목차
 
@@ -23,7 +21,7 @@ has_toc: false
 ## 소개
 ZONOS는 Zyphra에서 개발한 오픈소스 텍스트-음성 변환(TTS) 솔루션입니다. 사용자 음성 등록부터 감정을 포함한 음성 합성까지 다양한 기능을 제공합니다.
 
-ZONOS GitHub 레포지토리: [https://github.com/Zyphra/Zonos](https://github.com/Zyphra/Zonos)
+**ZONOS GitHub 레포지토리: [https://github.com/Zyphra/Zonos](https://github.com/Zyphra/Zonos)**
 
 ---
 
