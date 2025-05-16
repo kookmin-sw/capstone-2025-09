@@ -1,5 +1,5 @@
 ---
-layout: default
+layout: page
 title: "COVOS"
 nav_order: 1
 description: "캡스톤디자인 2025"
