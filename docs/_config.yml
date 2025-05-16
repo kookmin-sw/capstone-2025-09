@@ -31,3 +31,9 @@ aux_links:
 nav_sort: case_sensitive
 
 footer_content: "Copyright &copy; 2025 Kookmin Univ. All rights reserved."
+
+plugins:
+  - jekyll-include-cache
+
+include:
+  - _includes/head_custom.html
