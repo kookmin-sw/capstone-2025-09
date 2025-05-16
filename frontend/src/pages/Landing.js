@@ -1,20 +1,21 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useRef, useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 import logo from '../assets/logo-new.svg';
 import BlurBackgrounds from '../components/visual/BlurBackground';
 import WaveAninmation from '../components/visual/WaveAninmation';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import {Canvas} from '@react-three/fiber';
+import {OrbitControls} from '@react-three/drei';
 import WaveSphere from '../components/visual/WaveSphere';
 import GradientButton from '../components/common/GradientButton';
 import useUserStore from '../utils/userStore';
-import { LogOut } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {LogOut} from 'lucide-react';
+import {motion} from 'framer-motion';
 import reportereImage from '../assets/landing-reporter.png';
 import quoteImage from '../assets/landing-quote.png';
 import basicVoiceImage from '../assets/landing-basicVoice.png';
 import rememberVoiceImage from '../assets/landing-rememberVoice.png';
 import LandingpageVoicepack from "../components/common/LandingpageVoicepack";
+
 const Landing = () => {
   const navigate = useNavigate();
   const user = useUserStore((state) => state.user);
@@ -81,18 +82,18 @@ const Landing = () => {
     },
   ];
 
-  const Card = ({ item, isActive, innerRef }) => {
+  const Card = ({item, isActive, innerRef}) => {
     return (
       <motion.div
         ref={innerRef}
         className="flex flex-col md:flex-row items-center rounded-[20px] px-6 py-10 md:p-10 shadow-xl"
-        initial={{ opacity: 0.5, scale: 0.95, y: 20 }}
+        initial={{opacity: 0.5, scale: 0.95, y: 20}}
         animate={{
           opacity: isActive ? 1 : 0.5,
           scale: isActive ? 1.05 : 0.95,
           y: isActive ? 0 : 20,
         }}
-        transition={{ duration: 0.6, ease: 'easeOut' }}
+        transition={{duration: 0.6, ease: 'easeOut'}}
         style={{
           background: 'rgba(244, 245, 247, 0.2)',
           boxShadow: 'rgba(255, 255, 255, 0.2) 0px 0px 40px 0px inset',
@@ -149,24 +150,6 @@ const Landing = () => {
 
   return (
     <div className="relative overflow-hidden">
-      <style>
-        {`
-        @keyframes marquee {
-          0% { transform: translateX(0%); }
-          100% { transform: translateX(-100%); }
-        }
-        @keyframes marquee-reverse {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(0%); }
-        }
-        .animate-marquee {
-          animation: marquee 30s linear infinite;
-        }
-        .animate-marquee-reverse {
-          animation: marquee-reverse 30s linear infinite;
-        }
-      `}
-      </style>
       {/* Blur background를 절대 위치로 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <BlurBackgrounds/>
@@ -234,8 +217,53 @@ const Landing = () => {
       </section>
       {/* Section 2 - 무한 슬라이딩 보이스팩 */}
       <section className="flex flex-col items-center text-black mt-10 overflow-hidden relative py-20">
-      </section>
+        <h2 className="text-2xl mb-2 font-semibold">마켓 플레이스</h2>
+        <p className="mb-10">나만의 보이스팩을 업로드하고 수익을 창출하세요</p>
 
+        {/* 상단 슬라이드 */}
+        <div className="w-full overflow-hidden">
+          <div className="max-w-screen-xl mx-auto overflow-hidden">
+            <div className="flex animate-marquee gap-6 min-w-fit">
+              {Array.from({length: 5}).map((_, i) => (
+                <LandingpageVoicepack
+                  key={`top-${i}`}
+                  name={`보이스팩 ${i + 1}`}
+                  duration="00:20 / 01:00"
+                />
+              ))}
+              {Array.from({length: 5}).map((_, i) => (
+                <LandingpageVoicepack
+                  key={`top-repeat-${i}`}
+                  name={`보이스팩 ${i + 1}`}
+                  duration="00:20 / 01:00"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* 하단 슬라이드 */}
+        <div className="w-full overflow-hidden mt-6">
+          <div className="max-w-screen-xl mx-auto overflow-hidden">
+            <div className="flex animate-marquee-reverse gap-6 min-w-fit">
+              {Array.from({length: 5}).map((_, i) => (
+                <LandingpageVoicepack
+                  key={`bottom-${i}`}
+                  name={`보이스팩 ${i + 6}`}
+                  duration="00:20 / 01:00"
+                />
+              ))}
+              {Array.from({length: 5}).map((_, i) => (
+                <LandingpageVoicepack
+                  key={`bottom-repeat-${i}`}
+                  name={`보이스팩 ${i + 6}`}
+                  duration="00:20 / 01:00"
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
 
       {/* Section 3 */}
@@ -291,35 +319,19 @@ const Landing = () => {
       </section>
 
       {/* Section 5 */}
-      {/*<section className="pt-40 pb-40 bg-black text-white text-center">*/}
-      {/*  <h2 className="text-4xl mb-8 font-semibold">*/}
-      {/*    지금,*/}
-      {/*    <br />*/}
-      {/*    당신의 AI 보이스를 만들어보세요.*/}
-      {/*  </h2>*/}
-      {/*  <button*/}
-      {/*    onClick={() => navigate(user ? '/voice-store' : '/sign-in')}*/}
-      {/*    className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"*/}
-      {/*  >*/}
-      {/*    시작하기*/}
-      {/*  </button>*/}
-      {/*  <div className="absolute bottom-0 w-full z-0">*/}
-      {/*    <WaveAninmation />*/}
-      {/*  </div>*/}
-      {/*</section>*/}
-      <section className="pt-40 pb-40 text-gray-800 text-center">
+      <section className="pt-40 pb-40 bg-gray-900 text-white text-center">
         <h2 className="text-4xl mb-8 font-semibold">
           지금,
           <br/>
           당신의 AI 보이스를 만들어보세요.
         </h2>
-        <GradientButton
+        <button
           onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
-        </GradientButton>
-        <div className="absolute bottom-0  w-full z-0">
+        </button>
+        <div className="absolute bottom-0 w-full z-0">
           <WaveAninmation/>
         </div>
       </section>

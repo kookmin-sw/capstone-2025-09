@@ -6,9 +6,9 @@ const LandingpageVoicepack = ({
                                 duration = '00:16 / 01:00',
                               }) => {
   return (
-    <div className="w-48 h-64 bg-white rounded-2xl shadow-lg flex flex-col items-center justify-between px-4 py-6 transition-transform hover:scale-105 hover:shadow-2xl">
+    <div className="w-48 h-64 bg-white rounded-2xl flex flex-col items-center justify-between px-4 py-6 transition-transform">
       {/* 썸네일 영역 */}
-      <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mb-4 shadow-md">
+      <div className="w-24 h-24 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center mb-4">
         <div className="w-10 h-10 bg-white rounded-full" />
       </div>
 
@@ -26,11 +26,11 @@ const LandingpageVoicepack = ({
 
         {/* 컨트롤러 */}
         <div className="flex items-center justify-between text-indigo-500">
-          <button className="p-1 rounded hover:bg-indigo-100">
+          <button className="p-1 rounded">
             <Play size={18} />
           </button>
           <p className="text-xs text-gray-500">{duration}</p>
-          <button className="p-1 rounded hover:bg-indigo-100">
+          <button className="p-1 rounded">
             <Pause size={18} />
           </button>
         </div>
