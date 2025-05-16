@@ -66,7 +66,7 @@ backend/
 │   ├── main/
 │   │   ├── kotlin/
 │   │   │   └── kr/ac/kookmin/cs/capstone/voicepack_platform/
-│   │   │       ├── aiAssistant/      - AI 비서 관련 기능
+│   │   │       ├── aiAssistant/      - AI 리포터 관련 기능
 │   │   │       ├── common/           - 공통 유틸리티
 │   │   │       ├── config/           - 설정 클래스
 │   │   │       ├── credit/           - 크레딧 시스템
@@ -124,9 +124,9 @@ backend/
 - `GET /api/sales/summary` - 판매 통계 조회
 - `GET /api/sales/history` - 판매 내역 조회
 
-### 8. AI 비서
-- `POST /api/ai-assistant/setting` - AI 비서 설정
-- `POST /api/ai-assistant/synthesis` - AI 비서 음성 합성
+### 8. AI 리포터
+- `POST /api/ai-assistant/setting` - AI 리포터 설정
+- `POST /api/ai-assistant/synthesis` - AI 리포터 음성 합성
 
 ---
 
