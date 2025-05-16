@@ -32,8 +32,6 @@ const VoiceStore = () => {
 
   useEffect(() => {
     let result = [...voicePacks];
-
-    console.log(voicePacks);
     if (committedQuery) {
       result = result.filter(
         (pack) =>
@@ -61,12 +59,12 @@ const VoiceStore = () => {
     <>
       <h1 className="text-xl font-bold">마켓플레이스</h1>
       <div className="container mx-auto px-4">
-        <div className="flex justify-end items-center mb-6">
-          <div className="flex gap-2">
+        <div className="flex justify-end items-center mb-6 gap2">
+          <div className="flex w-1/3 gap-2">
             <SelectBox
               label=""
               value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
+              onChange={(value) => setSortOption(value)}
               options={[
                 { label: '이름순', value: 'name' },
                 { label: '최근 등록순', value: 'latest' },
@@ -74,13 +72,14 @@ const VoiceStore = () => {
               ]}
               placeholder="정렬"
             />
-            <div className="flex items-center border border-[#D9D9D9] px-2 rounded-lg text-sm bg-white mt-1">
+
+            <div className="flex w-full border border-gray-300 px-2 rounded-lg text-sm bg-white mt-1">
               <button onClick={handleSearch} className="mr-2">
                 <Search className="w-5 h-5 text-gray-400" />
               </button>
               <input
                 type="search"
-                placeholder="보이스팩을 검색해보세요."
+                placeholder="보이스팩 또는 제작자를 검색해보세요."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
