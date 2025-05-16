@@ -6,11 +6,11 @@
 - **COVOS**는 누구나 자신의 목소리를 디지털 자산으로 만들고 이를 수익화할 수 있는 
   **AI 보이스팩 거래 및 활용 플랫폼**입니다.    
 
-### ❤️ Prototype 웹사이트 주소
+### 🌐 COVOS 웹사이트 주소
 - [클릭하여 COVOS와 함께 마음껏 놀아보세요!](https://capstone-2025-09-zeta.vercel.app)  
 
-### ❤️ Prototype 웹사이트 주소
-- [COVOS의 데모 영상을 시청해보세요!](https://youtu.be/8UAyx8bgYoY?si=LAz3QkCm6mobHCbX)  
+### 🎥 COVOS 소개 영상
+- [COVOS의 소개 영상을 시청해보세요!](https://youtu.be/8UAyx8bgYoY?si=LAz3QkCm6mobHCbX)  
 
 ### 💡 COVOS 상세 소개 페이지
 - [클릭하여 COVOS의 상세한 소개를 받아보새요!](https://kookmin-sw.github.io/capstone-2025-09/)  
