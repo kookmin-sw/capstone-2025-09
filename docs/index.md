@@ -73,6 +73,10 @@ permalink: /
 {: #feature-playground }
 
 - 구매한 보이스팩은 플레이그라운드에서 다양한 방식으로 활용할 수 있습니다.   
+  - 베이직 보이스: 텍스트를 보이스팩 목소리로 읽어주는 TTS 기능입니다.
+  - AI 리포터: 여러 카테고리의 뉴스를 통합하여, 설정한 보이스와 말투로 음성 리포트를 제공하는 기능입니다.
+  - 오늘의 명언: 감정과 지역을 입력하면 AI가 명언을 생성하고 보이스팩 목소리로 읽어주는 기능입니다.
+  - 리멤버 보이스: 업로드한 영상에서 목소리를 추출하여 나만의 AI 보이스팩을 체험할 수 있습니다.
 
 ---
 
@@ -173,14 +177,12 @@ cd capstone-2025-09
 
 1. **필수 소프트웨어**
    - Node.js 18.x 이상
-   - npm 또는 yarn
+   - npm
 
 2. **패키지 설치**
    ```bash
    cd ../frontend
    npm install
-   # 또는
-   yarn install
    ```
 
 3. **환경 변수 파일(.env) 작성**
@@ -194,10 +196,50 @@ cd capstone-2025-09
 4. **개발 서버 실행**
    ```bash
    npm start
-   # 또는
-   yarn start
    ```
 
+<br>
+
+### 4. AI 모델 및 추론 서버 개발 환경 설정 (Python, FastAPI, Docker)
+
+1. **필수 소프트웨어**
+   - Python 3.10 이상
+   - Docker
+   - (로컬 GPU 사용 시) NVIDIA 드라이버, CUDA Toolkit, cuDNN (버전은 모델 호환성에 따라 다름)
+
+2. **환경 변수 파일(.env) 작성**
+   - 프로젝트 루트에 `.env.example` 파일을 참고하여 `.env` 파일을 생성하고, 필요한 API 키 및 AWS 설정값 입력
+     ```
+     # OpenAI API 키
+     OPENAI_API_KEY=sk-your-api-key-here
+
+     # AWS S3 설정
+     AWS_ACCESS_KEY_ID=your-access-key
+     AWS_SECRET_ACCESS_KEY=your-secret-key
+     AWS_DEFAULT_REGION=ap-northeast-2
+     AWS_BUCKET_NAME=your-bucket-name
+
+     # AWS SQS 설정
+     AWS_SQS_REGISTER_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+     AWS_SQS_SYNTHESIZE_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+     AWS_SQS_ASSISTANT_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+     ```
+   - `AI/.env` 파일도 동일하게 생성 및 설정합니다. (Cloud Run 배포 시에는 Secret Manager 사용)
+
+
+3. **Docker 이미지 빌드 및 실행**
+   ```bash
+   cd ../AI
+   # Docker 이미지 빌드
+   docker build -t zonos-tts .
+
+   # Docker 컨테이너 실행 (환경 변수 파일 사용)
+   # 로컬 GPU를 사용하려면 Docker 실행 명령어에 --gpus all 옵션 등을 추가해야 할 수 있습니다.
+   # (예: docker run --gpus all -p 8080:8080 --env-file .env zonos-tts)
+   docker run -p 8080:8080 --env-file .env zonos-tts
+   ```
+   - 서버 실행 후 `http://localhost:8080/docs`에서 API 문서를 확인할 수 있습니다.
+   - **참고**: AI 모델은 GPU 환경(예: NVIDIA RTX 3070 이상)에서의 실행을 권장합니다. GPU 없이 실행 시 성능 문제가 발생할 수 있습니다.
 
 ---
 
@@ -250,34 +292,121 @@ capstone-2025-09/
 │   │   └── test/
 │   └── gradle/
 ├── frontend/
-│   ├── package.json
-│   ├── public/
+│   ├── node_modules/                      # 프로젝트 의존성 모듈
+│   ├── public/                            # 정적 파일 (index.html, favicon 등)
+│   │   └── index.html
 │   ├── src/
-│   │   ├── api/                 # API 통신 함수 모음
-│   │   ├── assets/              # 이미지, 폰트 등 정적 리소스
-│   │   ├── components/
-│   │   │   ├── common/          # 공통 UI 컴포넌트
-│   │   │   ├── layout/          # 레이아웃 관련 컴포넌트
-│   │   │   └── visual/          # 시각적 효과/비주얼 컴포넌트
-│   │   ├── data/                # 더미 데이터, 상수 등
-│   │   ├── hooks/               # 커스텀 React 훅
-│   │   ├── pages/
-│   │   │   ├── ai-assistant/    # AI 비서 관련 페이지
+│   │   ├── api/                           # API 요청 함수
+│   │   │   ├── getVoicepacks.js
+│   │   │   └── user.js
+│   │   ├── assets/                        # 이미지, 폰트 등 정적 에셋
+│   │   │   ├── blur-gray.svg
+│   │   │   ├── blur100.svg
+│   │   │   ├── blur50.svg
+│   │   │   ├── cosmic-fusion.jpeg
+│   │   │   ├── deep-ocean.jpeg
+│   │   │   ├── hollogram.jpeg
+│   │   │   ├── imaginarium.jpeg
+│   │   │   ├── iridescent.jpeg
+│   │   │   ├── landing-basicVoice.png
+│   │   │   ├── landing-quote.png
+│   │   │   ├── landing-rememberVoice.png
+│   │   │   ├── landing-reporter.png
+│   │   │   ├── landing-store.png
+│   │   │   ├── logo-new.svg
+│   │   │   ├── logo-white.svg
+│   │   │   ├── logo.png
+│   │   │   ├── logo.svg
+│   │   │   └── lp.svg
+│   │   │   └── sirens.jpeg
+│   │   ├── components/                    # UI 컴포넌트
+│   │   │   ├── common/                    # 공통으로 사용되는 컴포넌트
+│   │   │   │   ├── AudioListPlayer.js
+│   │   │   │   ├── AudioPlayer.js
+│   │   │   │   ├── GradientButton.js
+│   │   │   │   ├── LandingpageVoicepack.js
+│   │   │   │   ├── PageContainer.js
+│   │   │   │   ├── SelectBox.js
+│   │   │   │   ├── VoicePack.js
+│   │   │   │   └── VoicePackModal.js
+│   │   │   ├── layout/                    # 페이지 레이아웃 컴포넌트
+│   │   │   │   ├── Header.js
+│   │   │   │   ├── Layout.js
+│   │   │   │   └── Sidebar.js
+│   │   │   ├── mypage/                    # 마이페이지 관련 컴포넌트
+│   │   │   │   ├── CreditTransactionTabs.js
+│   │   │   │   └── Section.js
+│   │   │   └── visual/                    # 시각적 효과 관련 컴포넌트
+│   │   │       ├── BlurBackground.js
+│   │   │       ├── WaveAninmation.js
+│   │   │       └── WaveSphere.js
+│   │   ├── hooks/                         # 커스텀 React Hooks
+│   │   │   ├── useAiAssistant.js
+│   │   │   ├── useAssistantSetup.js
+│   │   │   ├── useBuyVoicepack.js
+│   │   │   ├── useSignin.js
+│   │   │   ├── useUserInfo.js
+│   │   │   ├── useVideoToVoicepack.js
+│   │   │   ├── useVoicepackConvert.js
+│   │   │   ├── useVoicepackDelete.js
+│   │   │   ├── useVoicepackDetail.js
+│   │   │   ├── useVoicepackQuote.js
+│   │   │   ├── useVoicepackSynthesis.js
+│   │   │   └── useVoicepackUsage.js
+│   │   ├── pages/                         # 라우팅될 페이지 컴포넌트
+│   │   │   ├── ai-assistant/              # AI 리포터 관련 페이지
 │   │   │   │   ├── AssistantReadyScreen.js
 │   │   │   │   ├── AssistantSetup.js
 │   │   │   │   ├── ScriptPlayer.js
 │   │   │   │   └── index.js
-│   │   │   ├── BasicVoice.js    # 기본 보이스팩 페이지
-│   │   │   ├── Landing.js       # 랜딩(메인) 페이지
-│   │   │   ├── MyPage.js        # 마이페이지
-│   │   │   ├── SignIn.js        # 로그인 페이지
-│   │   │   ├── SignUp.js        # 회원가입 페이지
-│   │   │   ├── VoiceCreate.js   # 보이스팩 생성 페이지
-│   │   │   └── VoiceStore.js    # 보이스팩 마켓/스토어
-│   │   ├── utils/               # 유틸리티 함수
-│   │   ├── App.js
-│   │   └── index.js
-│   └── node_modules/
+│   │   │   ├── mypage/                    # 마이페이지 관련 페이지
+│   │   │   │   ├── MyDashboard.js
+│   │   │   │   ├── MyPayments.js
+│   │   │   │   ├── MyRevenue.js
+│   │   │   │   ├── MyVoicepacks.js
+│   │   │   │   └── index.js
+│   │   │   ├── BasicVoice.js              # 기본 보이스팩 페이지
+│   │   │   ├── JoinAgreement.js           # 회원가입 동의 페이지
+│   │   │   ├── Landing.js                 # 랜딩 페이지
+│   │   │   ├── Quote.js                   # 오늘의 명언 페이지
+│   │   │   ├── RememberVoice.js           # 리멤버 보이스 페이지
+│   │   │   ├── SignIn.js                  # 로그인 페이지
+│   │   │   ├── SignUp.js                  # 회원가입 페이지
+│   │   │   ├── VoiceCreate.js             # 보이스팩 생성 페이지
+│   │   │   └── VoiceStore.js              # 보이스팩 스토어 페이지
+│   │   ├── utils/                         # 유틸리티 함수
+│   │   │   ├── axiosInstance.js
+│   │   │   ├── extractAudioFromVideo.js
+│   │   │   ├── s3Uploader.js
+│   │   │   └── userStore.js
+│   │   ├── App.css                        # App 컴포넌트 스타일
+│   │   ├── App.js                         # 메인 애플리케이션 컴포넌트
+│   │   ├── index.css                      # 전역 스타일
+│   │   └── index.js                       # 애플리케이션 진입점
+│   ├── .DS_Store
+│   ├── .gitignore
+│   ├── .prettierrc
+│   ├── README.md
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   └── vercel.json
+├── lambda/
+│   ├── ai_assistant_lambda.py             # AI 비서 기능 AWS Lambda 함수
+│   ├── packages_layer.zip                 # Lambda Layer 패키지
+│   ├── register_speaker_lambda.py         # 화자 등록 AWS Lambda 함수
+│   ├── synthesize_lambda.py               # 음성 합성 AWS Lambda 함수
+│   ├── bbcnews/                           # BBC 뉴스 크롤링 Lambda
+│   │   └── lambda_function.py
+│   ├── economy/                           # 경제 뉴스 크롤링 Lambda
+│   │   └── lambda_function.py
+│   ├── googlenews/                        # 구글 뉴스 크롤링 Lambda
+│   │   └── lambda_function.py
+│   ├── itnews/                            # IT 뉴스 크롤링 Lambda
+│   │   └── lambda_function.py
+│   └── sports/                            # 스포츠 뉴스 크롤링 Lambda
+│       └── lambda_function.py
 ├── .gitignore
 └── .env
 ```
