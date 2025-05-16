@@ -1,10 +1,20 @@
 ---
-title: "AI 모델 및 추론 서버 개발 가이드"
+title: "AI 메뉴얼입니다."
 layout: default
 nav_order: 5
 parent: 메뉴얼
 ---
 # AI 모델 및 추론 서버 개발 가이드
+
+## 목차
+- [소개](#소개)
+- [주요 기능](#주요-기능)
+- [기술 스택](#기술-스택)
+- [디렉토리 구조](#디렉토리-구조)
+- [API 엔드포인트](#api-엔드포인트)
+- [설치 및 실행](#설치-및-실행)
+- [개발자 환경 설정](#개발자-환경-설정)
+- [클라우드 런 배포](#클라우드-런-배포)
 
 ## 소개
 ZONOS는 Zyphra에서 개발한 오픈소스 텍스트-음성 변환(TTS) 솔루션입니다. 사용자 음성 등록부터 감정을 포함한 음성 합성까지 다양한 기능을 제공합니다.
@@ -63,9 +73,28 @@ AI/
 ```bash
 # 도커 이미지 빌드
 docker build -t zonos-tts .
+```
 
-# 도커 컨테이너 실행
-docker run -p 8080:8080 zonos-tts
+### 환경 변수 설정
+프로젝트 루트에 `.env` 파일을 다음과 같이 생성합니다:
+
+```
+# OpenAI API 키
+OPENAI_API_KEY=sk-your-api-key-here
+
+# AWS S3 설정
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_DEFAULT_REGION=ap-northeast-2
+S3_BUCKET_NAME=your-bucket-name
+
+# AWS SQS 설정
+SQS_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+```
+
+```bash
+# 도커 컨테이너 실행 (환경 변수 포함)
+docker run -p 8080:8080 --env-file .env zonos-tts
 ```
 
 ## 개발자 환경 설정
@@ -78,6 +107,91 @@ source venv/bin/activate  # 윈도우: venv\Scripts\activate
 pip install uv
 uv pip install -e .
 
-# 서버 실행
+# Python-dotenv 패키지 설치 (환경 변수 로드용)
+pip install python-dotenv
+```
+
+### 환경 변수 설정
+프로젝트 루트에 `.env` 파일을 다음과 같이 생성합니다:
+
+```
+# OpenAI API 키
+OPENAI_API_KEY=sk-your-api-key-here
+
+# AWS S3 설정
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_DEFAULT_REGION=ap-northeast-2
+S3_BUCKET_NAME=your-bucket-name
+
+# AWS SQS 설정
+SQS_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+```
+
+```bash
+# 서버 실행 (환경 변수 적용)
 uvicorn main:app --host 0.0.0.0 --port 8080
 ```
+
+## 클라우드 런 배포
+ZONOS 서비스는 Google Cloud Run을 통해 배포됩니다. 모델의 성능을 위해 GPU를 사용하는 배포 과정은 다음과 같습니다:
+
+1. **GPU 사용을 위한 사전 준비**
+```bash
+# GPU 할당량 확인
+gcloud compute quotas list --project=[프로젝트-ID] | grep -i gpu
+
+# 필요한 경우 GPU 할당량 증가 요청 (콘솔에서 진행)
+# https://console.cloud.google.com/iam-admin/quotas
+```
+
+2. **컨테이너 이미지 빌드 및 푸시**
+```bash
+# 이미지 빌드
+docker build -t gcr.io/[프로젝트-ID]/zonos-tts-gpu:latest .
+
+# Container Registry에 이미지 푸시
+docker push gcr.io/[프로젝트-ID]/zonos-tts-gpu:latest
+```
+
+3. **Secret Manager에 환경 변수 등록**
+Cloud Run은.env 파일을 직접 지원하지 않기 때문에, Google Secret Manager를 사용하여 민감한 환경 변수를 저장합니다. 다음 명령어로 필요한 비밀들을 등록합니다:
+
+```bash
+# OpenAI API 키 등록
+gcloud secrets create openai-api-key --data-file=- <<< "sk-your-api-key-here"
+
+# AWS 자격 증명 등록f
+gcloud secrets create aws-access-key --data-file=- <<< "your-access-key"
+gcloud secrets create aws-secret-key --data-file=- <<< "your-secret-key"
+
+# S3 버킷 및 SQS URL 등록
+gcloud secrets create s3-bucket-name --data-file=- <<< "your-bucket-name"
+gcloud secrets create sqs-url --data-file=- <<< "https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name"
+```
+
+4. **Cloud Run 서비스 배포**
+등록한 Secret Manager의 비밀들을 환경 변수로 사용하여 GPU가 지원되는 Cloud Run 서비스를 배포합니다:
+
+```bash
+gcloud run deploy zonos-tts \
+  --image gcr.io/[프로젝트-ID]/zonos-tts-gpu:latest \
+  --platform managed \
+  --region us-central1 \  # GPU를 지원하는 리전 선택
+  --memory 4Gi \
+  --cpu 4 \
+  --gpu 1 \  # GPU 수량 지정
+  --gpu-type=nvidia-tesla-t4 \  # GPU 유형 지정
+  --allow-unauthenticated \
+  --set-secrets="OPENAI_API_KEY=openai-api-key:latest,AWS_ACCESS_KEY_ID=aws-access-key:latest,AWS_SECRET_ACCESS_KEY=aws-secret-key:latest,S3_BUCKET_NAME=s3-bucket-name:latest,SQS_URL=sqs-url:latest"
+```
+
+5. **GPU 활용 확인 및 모니터링**
+   - Nvidia-SMI 명령어를 통한 GPU 사용량 확인
+   - Cloud Monitoring을 통한 GPU 사용량 모니터링
+   - Cloud Logging을 통한 로그 확인
+
+6. **비용 최적화**
+   - 최소 인스턴스 설정 (--min-instances)
+   - 자동 스케일링 설정 (--max-instances)
+   - GPU 사용량에 따른 비용 모니터링
