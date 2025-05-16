@@ -5,7 +5,7 @@ nav_order: 1
 parent: 매뉴얼
 has_toc: false
 ---
-# **COVOS 사용자 매뉴얼**
+# **COVOS 사용자 가이드**
 
 {: .no_toc }
 

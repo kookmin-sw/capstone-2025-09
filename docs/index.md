@@ -10,7 +10,11 @@ permalink: /
 <br>
 
 <p align="center">
-  <img src="assets/logo.svg" alt="COVOS Logo" width="100%"/>
+  <a href="https://capstone-2025-09-zeta.vercel.app" target="_blank">
+    <img src="assets/logo.svg" alt="COVOS Logo" width="100%"/>
+  </a>
+  <br/>
+  <sub>이미지를 클릭하면 COVOS 플랫폼으로 이동합니다</sub>
 </p>
 
 ---
