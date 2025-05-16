@@ -1,4 +1,3 @@
-theme: just-the-docs
 remote_theme: just-the-docs/just-the-docs
 
 title: COVOS
@@ -22,11 +21,6 @@ defaults:
       type: documents
     values:
       layout: default
-  - scope:
-      path: ""
-      type: pages
-    values:
-      layout: page
 
 # Configure the JTD navigation structure
 aux_links:
