@@ -130,11 +130,68 @@ permalink: /
 ```bash
 git clone https://github.com/kookmin-sw/capstone-2025-09.git
 cd capstone-2025-09
-
-
 ```
 
-...
+<br>
+
+### 2. 백엔드 개발 환경 설정 (Spring Boot, Kotlin)
+
+1. **필수 소프트웨어**
+   - JDK 17 이상
+   - Gradle 7.x 이상 (권장: Wrapper 사용)
+   - MySQL (로컬 개발 시)
+   - Docker (선택, DB 등 컨테이너 실행용)
+
+2. **설정 파일 준비**
+   - `backend/src/main/resources/application.yaml-example` 파일을 복사해 `application.yaml`로 이름 변경 후, DB 및 AWS 등 환경 변수 입력
+
+   ```bash
+   cp backend/src/main/resources/application.yaml-example backend/src/main/resources/application.yaml
+   # application.yaml 파일을 열어 DB, AWS, OPENAI 등 키를 입력
+   ```
+
+3. **서버 실행**
+   ```bash
+   cd backend
+   ./gradlew bootRun
+   ```
+
+4. **테스트 실행**
+   ```bash
+   ./gradlew test
+   ```
+
+<br>
+
+### 3. 프론트엔드 개발 환경 설정 (React)
+
+1. **필수 소프트웨어**
+   - Node.js 18.x 이상
+   - npm 또는 yarn
+
+2. **패키지 설치**
+   ```bash
+   cd ../frontend
+   npm install
+   # 또는
+   yarn install
+   ```
+
+3. **환경 변수 파일(.env) 작성**
+   - `.env.example` 파일을 참고해 `.env` 파일을 생성하고, API 서버 주소 등 환경 변수 입력
+
+   ```bash
+   cp .env.example .env
+   # .env 파일을 열어 필요한 값 입력
+   ```
+
+4. **개발 서버 실행**
+   ```bash
+   npm start
+   # 또는
+   yarn start
+   ```
+
 
 ---
 
@@ -146,9 +203,57 @@ cd capstone-2025-09
 ```bash
 capstone-2025-09/
 ├── backend/
+│   ├── build.gradle.kts
+│   ├── Dockerfile
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── kotlin/
+│   │   │   │   └── kr/ac/kookmin/cs/capstone/voicepack_platform/
+│   │   │   │       ├── aiAssistant/
+│   │   │   │       ├── common/
+│   │   │   │       ├── config/
+│   │   │   │       ├── credit/
+│   │   │   │       ├── notification/
+│   │   │   │       ├── quote/
+│   │   │   │       ├── sale/
+│   │   │   │       ├── user/
+│   │   │   │       ├── video2voicepack/
+│   │   │   │       ├── voicepack/
+│   │   │   │       └── VoicepackPlatformApplication.kt
+│   │   │   └── resources/
+│   │   │       ├── application.yaml
+│   │   │       └── application.yaml-example
+│   │   └── test/
+│   └── gradle/
 ├── frontend/
-├── docs/
+│   ├── package.json
+│   ├── public/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   │   ├── common/
+│   │   │   ├── layout/
+│   │   │   └── visual/
+│   │   ├── data/
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   │   ├── ai-assistant/
+│   │   │   │   ├── AssistantReadyScreen.js
+│   │   │   │   ├── AssistantSetup.js
+│   │   │   │   ├── ScriptPlayer.js
+│   │   │   │   └── index.js
+│   │   │   ├── BasicVoice.js
+│   │   │   ├── Landing.js
+│   │   │   ├── MyPage.js
+│   │   │   ├── SignIn.js
+│   │   │   ├── SignUp.js
+│   │   │   ├── VoiceCreate.js
+│   │   │   └── VoiceStore.js
+│   │   ├── utils/
+│   │   ├── App.js
+│   │   └── index.js
+│   └── node_modules/
 ├── .gitignore
 ├── .env
-
 ```
