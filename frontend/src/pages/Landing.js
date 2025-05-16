@@ -33,14 +33,14 @@ const Landing = () => {
       description:
         '나의 목소리를 AI로 학습해\n보이스팩으로 만들고 마켓에서 거래하며\n수익을 창출할 수 있어요.\n이제 목소리도 디지털 자산이 됩니다.',
       badge: 'VALUE',
-      color: 'bg-indigo-200',
+      color: 'bg-violet-100',
     },
     {
       title: '텍스트를 콘텐츠로',
       description:
         '원하는 문장을 입력하면\n보이스팩으로 음성을 생성해\n즉시 오디오 콘텐츠로 활용할 수 있어요.\n광고, 영상, 나레이션까지 바로 가능해요.',
       badge: 'CREATION',
-      color: 'bg-violet-200',
+      color: 'bg-indigo-200',
     },
     {
       title: '크리에이터와 함께 성장',
@@ -149,6 +149,72 @@ const Landing = () => {
     };
   }, []);
 
+  const topVoicepacks = [
+    '감성 보이스 연우',
+    '카리스마 보이스 준혁',
+    '애자일 마스터 종민',
+    '시크한 인공지능 준교',
+    '밝은 안내 음성 민재',
+    '잔잔한 톤의 소민',
+    '논리적인 설명 도윤',
+    '감정 담은 책읽는 나연',
+    '맑고 또렷한 수연',
+    '센스있는 성우 찬우',
+  ];
+
+  const bottomVoicepacks = [
+    '설렘 가득 ASMR 유리',
+    '뉴스 전하는 강호',
+    '에너지 넘치는 소민',
+    '영어 리딩 보이스 에린',
+    '연기력 좋은 래온',
+    '깊은 울림의 진우',
+    '달콤한 이야기 지유',
+    '빠른 스포츠 톤 태민',
+    '중성 AI 음성 성원',
+    '부드러운 성우 성호',
+  ];
+
+  const allGradients = [
+    'from-indigo-500 to-purple-500',
+    'from-pink-400 to-red-500',
+    'from-green-400 to-emerald-500',
+    'from-yellow-400 to-orange-500',
+    'from-blue-400 to-sky-500',
+    'from-fuchsia-400 to-rose-500',
+    'from-teal-400 to-cyan-500',
+    'from-lime-400 to-green-500',
+    'from-amber-400 to-yellow-500',
+    'from-sky-500 to-indigo-400',
+    'from-rose-500 to-pink-400',
+    'from-purple-500 to-blue-500',
+    'from-orange-400 to-amber-500',
+    'from-emerald-400 to-teal-500',
+    'from-cyan-400 to-sky-500',
+    'from-lime-300 to-green-400',
+    'from-violet-400 to-fuchsia-500',
+    'from-yellow-300 to-orange-400',
+    'from-blue-300 to-indigo-400',
+    'from-zinc-400 to-slate-500',
+  ];
+
+  // Fisher-Yates 셔플 함수
+  const shuffle = (arr) => {
+    const array = [...arr];
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  const totalCount = (topVoicepacks.length + bottomVoicepacks.length) * 2;
+
+  const shuffledGradients = shuffle(allGradients).slice(0, totalCount);
+
+  // 그냥 공통으로 하나만 씀
+  const gradientList = shuffledGradients;
+
   return (
     <div className="relative overflow-hidden">
       {/* Blur background를 절대 위치로 */}
@@ -224,29 +290,38 @@ const Landing = () => {
           <h2 className="text-3xl mb-2 font-semibold text-center">
             마켓 플레이스
           </h2>
-          <p className="mb-10 text-center">
+          <p className="mb-20 text-center">
             나만의 보이스팩을 업로드하고 수익을 창출하세요
           </p>
 
-          {/* 공통 슬라이더 스타일 */}
-          {['top', 'bottom'].map((position, idx) => (
-            <div key={position} className="w-full overflow-hidden mb-6">
-              <div
-                className="flex animate-marquee gap-6 min-w-fit"
-                style={{ animationDirection: idx === 1 ? 'reverse' : 'normal' }}
-              >
-                {[...Array(2)].flatMap((_, groupIdx) =>
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <LandingpageVoicepack
-                      key={`${position}-${groupIdx}-${i}`}
-                      name={`보이스팩 ${idx * 5 + i + 1}`}
-                      duration="00:20 / 01:00"
-                    />
-                  ))
-                )}
+          {['top', 'bottom'].map((position, idx) => {
+            const voicepackList =
+              position === 'top' ? topVoicepacks : bottomVoicepacks;
+
+            return (
+              <div key={position} className="w-full overflow-hidden mb-6">
+                <div
+                  className="flex animate-marquee gap-10 min-w-fit"
+                  style={{
+                    animationDirection:
+                      position === 'bottom' ? 'reverse' : 'normal',
+                  }}
+                >
+                  {[...Array(2)].flatMap((_, groupIdx) =>
+                    voicepackList.map((name, i) => (
+                      <LandingpageVoicepack
+                        key={`${position}-${groupIdx}-${i}`}
+                        name={name}
+                        gradient={
+                          gradientList[groupIdx * voicepackList.length + i]
+                        }
+                      />
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -257,7 +332,7 @@ const Landing = () => {
           <h2 className="text-white text-3xl font-bold text-center mb-24">
             COVOS만의 기능
           </h2>
-          <div className="space-y-10">
+          <div className="space-y-10 z-10">
             {contents.map((item, index) => (
               <Card
                 key={index}
@@ -276,7 +351,7 @@ const Landing = () => {
           <h2 className="text-3xl font-bold mb-24">
             COVOS, 당신의 목소리에 새로운 가치를 더하다
           </h2>
-          <div className="grid md:grid-cols-3 gap-12">
+          <div className="grid md:grid-cols-3 z-10 gap-12">
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
@@ -302,7 +377,7 @@ const Landing = () => {
       </section>
 
       {/* Section 5 */}
-      <section className="pt-40 pb-40 bg-gray-900 text-white text-center">
+      <section className="pt-40 pb-40 bg-black text-white text-center">
         <h2 className="text-4xl mb-8 font-semibold">
           지금,
           <br />
@@ -310,7 +385,7 @@ const Landing = () => {
         </h2>
         <button
           onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
-          className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
+          className="bg-white text-indigo-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
         </button>
