@@ -14,7 +14,7 @@ import reportereImage from '../assets/landing-reporter.png';
 import quoteImage from '../assets/landing-quote.png';
 import basicVoiceImage from '../assets/landing-basicVoice.png';
 import rememberVoiceImage from '../assets/landing-rememberVoice.png';
-
+import LandingpageVoicepack from "../components/common/LandingpageVoicepack";
 const Landing = () => {
   const navigate = useNavigate();
   const user = useUserStore((state) => state.user);
@@ -83,20 +83,21 @@ const Landing = () => {
 
   const Card = ({ item, isActive, innerRef }) => {
     return (
-      <div
+      <motion.div
         ref={innerRef}
-        className={`flex flex-col md:flex-row items-center rounded-[20px] px-6 py-10 md:p-10 shadow-xl transition-all duration-500 ${
-          isActive ? 'scale-110' : 'scale-100 opacity-70'
-        }`}
+        className="flex flex-col md:flex-row items-center rounded-[20px] px-6 py-10 md:p-10 shadow-xl"
+        initial={{ opacity: 0.5, scale: 0.95, y: 20 }}
+        animate={{
+          opacity: isActive ? 1 : 0.5,
+          scale: isActive ? 1.05 : 0.95,
+          y: isActive ? 0 : 20,
+        }}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
         style={{
-          background: 'rgba(244, 245, 247, 0.2)', // 반투명 유리 느낌
-          boxShadow: 'rgba(255, 255, 255, 0.2) 0px 0px 40px 0px inset', // 안쪽에서 빛나는 효과
-          backdropFilter: 'blur(4px)', // 블러 처리
-          WebkitBackdropFilter: 'blur(4px)', // Safari 대응
-          transform: isActive
-            ? 'scale(1.1) translateZ(0)'
-            : 'scale(1) translateZ(0)',
-          transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
+          background: 'rgba(244, 245, 247, 0.2)',
+          boxShadow: 'rgba(255, 255, 255, 0.2) 0px 0px 40px 0px inset',
+          backdropFilter: 'blur(4px)',
+          WebkitBackdropFilter: 'blur(4px)',
           zIndex: isActive ? 10 : 1,
         }}
       >
@@ -106,19 +107,18 @@ const Landing = () => {
           className="w-full md:w-1/2 rounded-xl object-cover mb-2 md:mb-0 md:mr-8"
         />
         <div className="text-white space-y-6 py-8">
-          <span className="inline-block bg-violet-300 text-black text-sm font-bold px-3 py-1 rounded-full">
-            {item.badge}
-          </span>
+        <span className="inline-block bg-violet-300 text-black text-sm font-bold px-3 py-1 rounded-full">
+          {item.badge}
+        </span>
           <h1 className="text-3xl font-bold whitespace-pre-line">
             {item.title}
           </h1>
-          <p className="text-gray-300 whitespace-pre-line">
-            {item.description}
-          </p>
+          <p className="text-gray-300 whitespace-pre-line">{item.description}</p>
         </div>
-      </div>
+      </motion.div>
     );
   };
+
 
   const containerRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -149,21 +149,39 @@ const Landing = () => {
 
   return (
     <div className="relative overflow-hidden">
+      <style>
+        {`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes marquee-reverse {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(0%); }
+        }
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
+        }
+        .animate-marquee-reverse {
+          animation: marquee-reverse 30s linear infinite;
+        }
+      `}
+      </style>
       {/* Blur background를 절대 위치로 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <BlurBackgrounds />
+        <BlurBackgrounds/>
       </div>
 
       {/* Header */}
       <header className="flex justify-between items-end h-[96px] px-28 z-10 relative">
-        <img src={logo} alt="COVOS" width={150} />
+        <img src={logo} alt="COVOS" width={150}/>
 
         {user ? (
           <button
             onClick={handleLogout}
             className="flex items-center space-x-2 p-2 rounded text-gray-400 font-bold"
           >
-            <LogOut size={20} />
+            <LogOut size={20}/>
             <span>로그아웃</span>
           </button>
         ) : (
@@ -179,19 +197,19 @@ const Landing = () => {
       {/* Section 1 - Hero*/}
       <section
         className="relative flex flex-col justify-center items-center"
-        style={{ minHeight: 'calc(100vh - 96px)' }}
+        style={{minHeight: 'calc(100vh - 96px)'}}
       >
         <div className="flex justify-center items-center h-full w-full">
           <div className="w-[50%] h-[80vh] flex justify-end items-end pl-20">
-            <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
-              <ambientLight intensity={0.3} />
+            <Canvas shadows camera={{position: [0, 0, 6], fov: 50}}>
+              <ambientLight intensity={0.3}/>
               <directionalLight
                 position={[5, 5, 5]}
                 intensity={1.2}
                 shadow-mapSize-width={1024}
                 shadow-mapSize-height={1024}
               />
-              <WaveSphere />
+              <WaveSphere/>
               <OrbitControls
                 enableZoom={false}
                 autoRotate
@@ -200,7 +218,7 @@ const Landing = () => {
             </Canvas>
           </div>
 
-          <div className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-black">
+          <div className="w-[50%] flex flex-col items-start justify-start text-left px-4 text-gray-800">
             <h1 className="text-4xl font-bold mb-4">나만의 AI 보이스를</h1>
             <h1 className="text-4xl font-bold mb-10 ">
               만들고 공유하고 활용하세요
@@ -214,15 +232,11 @@ const Landing = () => {
           </div>
         </div>
       </section>
-
-      {/* Section 2 */}
-      <section className="h-screen flex flex-col justify-center items-center text-black mt-10">
-        <h2 className="text-2xl mb-2 font-semibold">🛍 마켓 플레이스</h2>
-        <p className="mb-10">나만의 보이스팩을 업로드하고 수익을 창출하세요</p>
-        <div className="flex justify-center items-center w-full h-2/3 bg-gray-400 opacity-30">
-          LP 컴포넌트 구역
-        </div>
+      {/* Section 2 - 무한 슬라이딩 보이스팩 */}
+      <section className="flex flex-col items-center text-black mt-10 overflow-hidden relative py-20">
       </section>
+
+
 
       {/* Section 3 */}
 
@@ -254,13 +268,14 @@ const Landing = () => {
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
+                initial={{opacity: 0, y: 50}}
+                whileInView={{opacity: 1, y: 0}}
+                viewport={{once: true}}
+                transition={{duration: 0.6, delay: index * 0.2}}
                 className={`p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02] ${benefit.color}`}
               >
-                <span className="inline-block mb-4 px-3 py-[2px] text-xs font-bold text-gray-800 bg-white/60 rounded-full shadow">
+                <span
+                  className="inline-block mb-4 px-3 py-[2px] text-xs font-bold text-gray-800 bg-white/60 rounded-full shadow">
                   {benefit.badge}
                 </span>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -276,20 +291,36 @@ const Landing = () => {
       </section>
 
       {/* Section 5 */}
-      <section className="pt-40 pb-40 bg-black text-white text-center">
+      {/*<section className="pt-40 pb-40 bg-black text-white text-center">*/}
+      {/*  <h2 className="text-4xl mb-8 font-semibold">*/}
+      {/*    지금,*/}
+      {/*    <br />*/}
+      {/*    당신의 AI 보이스를 만들어보세요.*/}
+      {/*  </h2>*/}
+      {/*  <button*/}
+      {/*    onClick={() => navigate(user ? '/voice-store' : '/sign-in')}*/}
+      {/*    className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"*/}
+      {/*  >*/}
+      {/*    시작하기*/}
+      {/*  </button>*/}
+      {/*  <div className="absolute bottom-0 w-full z-0">*/}
+      {/*    <WaveAninmation />*/}
+      {/*  </div>*/}
+      {/*</section>*/}
+      <section className="pt-40 pb-40 text-gray-800 text-center">
         <h2 className="text-4xl mb-8 font-semibold">
           지금,
-          <br />
+          <br/>
           당신의 AI 보이스를 만들어보세요.
         </h2>
-        <button
+        <GradientButton
           onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-blue-500 px-12 py-2 rounded font-semibold  relative z-10"
         >
           시작하기
-        </button>
-        <div className="absolute bottom-0 w-full z-0">
-          <WaveAninmation />
+        </GradientButton>
+        <div className="absolute bottom-0  w-full z-0">
+          <WaveAninmation/>
         </div>
       </section>
     </div>
@@ -297,3 +328,4 @@ const Landing = () => {
 };
 
 export default Landing;
+
