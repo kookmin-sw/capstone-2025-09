@@ -14,7 +14,8 @@ parent: 메뉴얼
 - [API 엔드포인트](#api-엔드포인트)
 - [환경 변수 설정](#환경-변수-설정)
 - [설치 및 실행](#설치-및-실행)
-- [클라우드 런 배포](#클라우드-런-배포)
+- [Cloud Run 배포](#cloud-run-배포)
+- [FAQ](#faq)
 
 ## 소개
 ZONOS는 Zyphra에서 개발한 오픈소스 텍스트-음성 변환(TTS) 솔루션입니다. 사용자 음성 등록부터 감정을 포함한 음성 합성까지 다양한 기능을 제공합니다.
@@ -58,6 +59,7 @@ AI/
 **화자 등록 (/register_speaker)**
 - 음성 파일 업로드 및 화자 ID 등록
 - 음성팩 생성 및 저장
+- 샘플 보이스 합성
 
 **음성 합성 (/synthesize)**
 - 텍스트를 사용자 음성으로 변환
@@ -101,7 +103,7 @@ docker build -t zonos-tts .
 docker run -p 8080:8080 --env-file .env zonos-tts
 ```
 
-## 클라우드 런 배포
+## Cloud Run 배포
 ZONOS 서비스는 Google Cloud Run을 통해 배포됩니다. 모델의 성능을 위해 GPU를 사용하는 배포 과정은 다음과 같습니다:
 
 ### GPU 사용을 위한 사전 준비
@@ -167,3 +169,18 @@ gcloud run deploy zonos-tts \
 - 최소 인스턴스 설정 (--min-instances)
 - 자동 스케일링 설정 (--max-instances)
 - GPU 사용량에 따른 비용 모니터링
+
+## FAQ
+
+### Q: API 문서는 어떻게 확인할 수 있나요?
+A: 서버 실행 후 `http://localhost:8080/docs`에서 API 문서를 확인할 수 있습니다.
+
+### Q: 샘플 보이스로 만들어지는 텍스트를 변경할 수 있나요?
+A: `config/sample_texts.json` 파일에 리스트 형식으로 텍스트를 추가해주세요.
+
+### Q: 로컬에서 GPU를 사용하지 않고 실행할 수 있나요?
+A: 현재는 GTX 30~ 시리즈에서 실행됨이 보장됩니다. GPU가 없는 환경에서는 실행을 하지 않는 것이 추천됩니다.
+
+### Q: 사용할 수 있는 감정을 추가할 수 있나요? 감정을 추가하기 위해서는 어떻게 하면 되나요?
+A: `AI/utils/voice_synthesizer.py`의 EMOTION_PROFILE 리스트를 수정하는 식으로 진행할 수 있습니다.  
+총 8개의 세부 감정 파라미터를 조정할 수 있으며 각 파라미터는 순서대로 Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other 및 Neutral입니다.
