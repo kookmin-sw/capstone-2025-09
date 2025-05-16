@@ -1,20 +1,20 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useNavigate} from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-new.svg';
 import BlurBackgrounds from '../components/visual/BlurBackground';
 import WaveAninmation from '../components/visual/WaveAninmation';
-import {Canvas} from '@react-three/fiber';
-import {OrbitControls} from '@react-three/drei';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import WaveSphere from '../components/visual/WaveSphere';
 import GradientButton from '../components/common/GradientButton';
 import useUserStore from '../utils/userStore';
-import {LogOut} from 'lucide-react';
-import {motion} from 'framer-motion';
+import { LogOut } from 'lucide-react';
+import { motion } from 'framer-motion';
 import reportereImage from '../assets/landing-reporter.png';
 import quoteImage from '../assets/landing-quote.png';
 import basicVoiceImage from '../assets/landing-basicVoice.png';
 import rememberVoiceImage from '../assets/landing-rememberVoice.png';
-import LandingpageVoicepack from "../components/common/LandingpageVoicepack";
+import LandingpageVoicepack from '../components/common/LandingpageVoicepack';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -82,18 +82,18 @@ const Landing = () => {
     },
   ];
 
-  const Card = ({item, isActive, innerRef}) => {
+  const Card = ({ item, isActive, innerRef }) => {
     return (
       <motion.div
         ref={innerRef}
         className="flex flex-col md:flex-row items-center rounded-[20px] px-6 py-10 md:p-10 shadow-xl"
-        initial={{opacity: 0.5, scale: 0.95, y: 20}}
+        initial={{ opacity: 0.5, scale: 0.95, y: 20 }}
         animate={{
           opacity: isActive ? 1 : 0.5,
           scale: isActive ? 1.05 : 0.95,
           y: isActive ? 0 : 20,
         }}
-        transition={{duration: 0.6, ease: 'easeOut'}}
+        transition={{ duration: 0.6, ease: 'easeOut' }}
         style={{
           background: 'rgba(244, 245, 247, 0.2)',
           boxShadow: 'rgba(255, 255, 255, 0.2) 0px 0px 40px 0px inset',
@@ -108,18 +108,19 @@ const Landing = () => {
           className="w-full md:w-1/2 rounded-xl object-cover mb-2 md:mb-0 md:mr-8"
         />
         <div className="text-white space-y-6 py-8">
-        <span className="inline-block bg-violet-300 text-black text-sm font-bold px-3 py-1 rounded-full">
-          {item.badge}
-        </span>
+          <span className="inline-block bg-violet-300 text-black text-sm font-bold px-3 py-1 rounded-full">
+            {item.badge}
+          </span>
           <h1 className="text-3xl font-bold whitespace-pre-line">
             {item.title}
           </h1>
-          <p className="text-gray-300 whitespace-pre-line">{item.description}</p>
+          <p className="text-gray-300 whitespace-pre-line">
+            {item.description}
+          </p>
         </div>
       </motion.div>
     );
   };
-
 
   const containerRefs = useRef([]);
   const [activeIndex, setActiveIndex] = useState(-1);
@@ -152,19 +153,19 @@ const Landing = () => {
     <div className="relative overflow-hidden">
       {/* Blur background를 절대 위치로 */}
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <BlurBackgrounds/>
+        <BlurBackgrounds />
       </div>
 
       {/* Header */}
       <header className="flex justify-between items-end h-[96px] px-28 z-10 relative">
-        <img src={logo} alt="COVOS" width={150}/>
+        <img src={logo} alt="COVOS" width={150} />
 
         {user ? (
           <button
             onClick={handleLogout}
             className="flex items-center space-x-2 p-2 rounded text-gray-400 font-bold"
           >
-            <LogOut size={20}/>
+            <LogOut size={20} />
             <span>로그아웃</span>
           </button>
         ) : (
@@ -180,19 +181,19 @@ const Landing = () => {
       {/* Section 1 - Hero*/}
       <section
         className="relative flex flex-col justify-center items-center"
-        style={{minHeight: 'calc(100vh - 96px)'}}
+        style={{ minHeight: 'calc(100vh - 96px)' }}
       >
         <div className="flex justify-center items-center h-full w-full">
           <div className="w-[50%] h-[80vh] flex justify-end items-end pl-20">
-            <Canvas shadows camera={{position: [0, 0, 6], fov: 50}}>
-              <ambientLight intensity={0.3}/>
+            <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
+              <ambientLight intensity={0.3} />
               <directionalLight
                 position={[5, 5, 5]}
                 intensity={1.2}
                 shadow-mapSize-width={1024}
                 shadow-mapSize-height={1024}
               />
-              <WaveSphere/>
+              <WaveSphere />
               <OrbitControls
                 enableZoom={false}
                 autoRotate
@@ -215,56 +216,39 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
       {/* Section 2 - 무한 슬라이딩 보이스팩 */}
       <section className="flex flex-col items-center text-black mt-10 overflow-hidden relative py-20">
-        <h2 className="text-2xl mb-2 font-semibold">마켓 플레이스</h2>
-        <p className="mb-10">나만의 보이스팩을 업로드하고 수익을 창출하세요</p>
-
         {/* 상단 슬라이드 */}
-        <div className="w-full overflow-hidden">
-          <div className="max-w-screen-xl mx-auto overflow-hidden">
-            <div className="flex animate-marquee gap-6 min-w-fit">
-              {Array.from({length: 5}).map((_, i) => (
-                <LandingpageVoicepack
-                  key={`top-${i}`}
-                  name={`보이스팩 ${i + 1}`}
-                  duration="00:20 / 01:00"
-                />
-              ))}
-              {Array.from({length: 5}).map((_, i) => (
-                <LandingpageVoicepack
-                  key={`top-repeat-${i}`}
-                  name={`보이스팩 ${i + 1}`}
-                  duration="00:20 / 01:00"
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+        <div className="w-screen overflow-hidden py-20">
+          <h2 className="text-3xl mb-2 font-semibold text-center">
+            마켓 플레이스
+          </h2>
+          <p className="mb-10 text-center">
+            나만의 보이스팩을 업로드하고 수익을 창출하세요
+          </p>
 
-        {/* 하단 슬라이드 */}
-        <div className="w-full overflow-hidden mt-6">
-          <div className="max-w-screen-xl mx-auto overflow-hidden">
-            <div className="flex animate-marquee-reverse gap-6 min-w-fit">
-              {Array.from({length: 5}).map((_, i) => (
-                <LandingpageVoicepack
-                  key={`bottom-${i}`}
-                  name={`보이스팩 ${i + 6}`}
-                  duration="00:20 / 01:00"
-                />
-              ))}
-              {Array.from({length: 5}).map((_, i) => (
-                <LandingpageVoicepack
-                  key={`bottom-repeat-${i}`}
-                  name={`보이스팩 ${i + 6}`}
-                  duration="00:20 / 01:00"
-                />
-              ))}
+          {/* 공통 슬라이더 스타일 */}
+          {['top', 'bottom'].map((position, idx) => (
+            <div key={position} className="w-full overflow-hidden mb-6">
+              <div
+                className="flex animate-marquee gap-6 min-w-fit"
+                style={{ animationDirection: idx === 1 ? 'reverse' : 'normal' }}
+              >
+                {[...Array(2)].flatMap((_, groupIdx) =>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <LandingpageVoicepack
+                      key={`${position}-${groupIdx}-${i}`}
+                      name={`보이스팩 ${idx * 5 + i + 1}`}
+                      duration="00:20 / 01:00"
+                    />
+                  ))
+                )}
+              </div>
             </div>
-          </div>
+          ))}
         </div>
       </section>
-
 
       {/* Section 3 */}
 
@@ -296,14 +280,13 @@ const Landing = () => {
             {benefits.map((benefit, index) => (
               <motion.div
                 key={index}
-                initial={{opacity: 0, y: 50}}
-                whileInView={{opacity: 1, y: 0}}
-                viewport={{once: true}}
-                transition={{duration: 0.6, delay: index * 0.2}}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
                 className={`p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all hover:scale-[1.02] ${benefit.color}`}
               >
-                <span
-                  className="inline-block mb-4 px-3 py-[2px] text-xs font-bold text-gray-800 bg-white/60 rounded-full shadow">
+                <span className="inline-block mb-4 px-3 py-[2px] text-xs font-bold text-gray-800 bg-white/60 rounded-full shadow">
                   {benefit.badge}
                 </span>
                 <h3 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -322,7 +305,7 @@ const Landing = () => {
       <section className="pt-40 pb-40 bg-gray-900 text-white text-center">
         <h2 className="text-4xl mb-8 font-semibold">
           지금,
-          <br/>
+          <br />
           당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
@@ -332,7 +315,7 @@ const Landing = () => {
           시작하기
         </button>
         <div className="absolute bottom-0 w-full z-0">
-          <WaveAninmation/>
+          <WaveAninmation />
         </div>
       </section>
     </div>
@@ -340,4 +323,3 @@ const Landing = () => {
 };
 
 export default Landing;
-
