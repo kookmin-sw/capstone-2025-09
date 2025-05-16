@@ -209,16 +209,16 @@ capstone-2025-09/
 │   │   ├── main/
 │   │   │   ├── kotlin/
 │   │   │   │   └── kr/ac/kookmin/cs/capstone/voicepack_platform/
-│   │   │   │       ├── aiAssistant/
-│   │   │   │       ├── common/
-│   │   │   │       ├── config/
-│   │   │   │       ├── credit/
-│   │   │   │       ├── notification/
-│   │   │   │       ├── quote/
-│   │   │   │       ├── sale/
-│   │   │   │       ├── user/
-│   │   │   │       ├── video2voicepack/
-│   │   │   │       ├── voicepack/
+│   │   │   │       ├── aiAssistant/         # AI 비서 관련 백엔드 로직
+│   │   │   │       ├── common/              # 공통 유틸리티 및 상수
+│   │   │   │       ├── config/              # 환경설정 및 설정 클래스
+│   │   │   │       ├── credit/              # 크레딧(포인트) 관리
+│   │   │   │       ├── notification/        # 알림 기능
+│   │   │   │       ├── quote/               # 견적/명언 등 부가 기능
+│   │   │   │       ├── sale/                # 보이스팩 판매/구매 관리
+│   │   │   │       ├── user/                # 사용자 관리 및 인증
+│   │   │   │       ├── video2voicepack/     # 영상 기반 보이스팩 생성
+│   │   │   │       ├── voicepack/           # 보이스팩 생성/관리/합성
 │   │   │   │       └── VoicepackPlatformApplication.kt
 │   │   │   └── resources/
 │   │   │       ├── application.yaml
@@ -229,28 +229,28 @@ capstone-2025-09/
 │   ├── package.json
 │   ├── public/
 │   ├── src/
-│   │   ├── api/
-│   │   ├── assets/
+│   │   ├── api/                 # API 통신 함수 모음
+│   │   ├── assets/              # 이미지, 폰트 등 정적 리소스
 │   │   ├── components/
-│   │   │   ├── common/
-│   │   │   ├── layout/
-│   │   │   └── visual/
-│   │   ├── data/
-│   │   ├── hooks/
+│   │   │   ├── common/          # 공통 UI 컴포넌트
+│   │   │   ├── layout/          # 레이아웃 관련 컴포넌트
+│   │   │   └── visual/          # 시각적 효과/비주얼 컴포넌트
+│   │   ├── data/                # 더미 데이터, 상수 등
+│   │   ├── hooks/               # 커스텀 React 훅
 │   │   ├── pages/
-│   │   │   ├── ai-assistant/
+│   │   │   ├── ai-assistant/    # AI 비서 관련 페이지
 │   │   │   │   ├── AssistantReadyScreen.js
 │   │   │   │   ├── AssistantSetup.js
 │   │   │   │   ├── ScriptPlayer.js
 │   │   │   │   └── index.js
-│   │   │   ├── BasicVoice.js
-│   │   │   ├── Landing.js
-│   │   │   ├── MyPage.js
-│   │   │   ├── SignIn.js
-│   │   │   ├── SignUp.js
-│   │   │   ├── VoiceCreate.js
-│   │   │   └── VoiceStore.js
-│   │   ├── utils/
+│   │   │   ├── BasicVoice.js    # 기본 보이스팩 페이지
+│   │   │   ├── Landing.js       # 랜딩(메인) 페이지
+│   │   │   ├── MyPage.js        # 마이페이지
+│   │   │   ├── SignIn.js        # 로그인 페이지
+│   │   │   ├── SignUp.js        # 회원가입 페이지
+│   │   │   ├── VoiceCreate.js   # 보이스팩 생성 페이지
+│   │   │   └── VoiceStore.js    # 보이스팩 마켓/스토어
+│   │   ├── utils/               # 유틸리티 함수
 │   │   ├── App.js
 │   │   └── index.js
 │   └── node_modules/
