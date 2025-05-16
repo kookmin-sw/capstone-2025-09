@@ -130,11 +130,68 @@ permalink: /
 ```bash
 git clone https://github.com/kookmin-sw/capstone-2025-09.git
 cd capstone-2025-09
-
-
 ```
 
-...
+<br>
+
+### 2. 백엔드 개발 환경 설정 (Spring Boot, Kotlin)
+
+1. **필수 소프트웨어**
+   - JDK 17 이상
+   - Gradle 7.x 이상 (권장: Wrapper 사용)
+   - MySQL (로컬 개발 시)
+   - Docker (선택, DB 등 컨테이너 실행용)
+
+2. **설정 파일 준비**
+   - `backend/src/main/resources/application.yaml-example` 파일을 복사해 `application.yaml`로 이름 변경 후, DB 및 AWS 등 환경 변수 입력
+
+   ```bash
+   cp backend/src/main/resources/application.yaml-example backend/src/main/resources/application.yaml
+   # application.yaml 파일을 열어 DB, AWS, OPENAI 등 키를 입력
+   ```
+
+3. **서버 실행**
+   ```bash
+   cd backend
+   ./gradlew bootRun
+   ```
+
+4. **테스트 실행**
+   ```bash
+   ./gradlew test
+   ```
+
+<br>
+
+### 3. 프론트엔드 개발 환경 설정 (React)
+
+1. **필수 소프트웨어**
+   - Node.js 18.x 이상
+   - npm 또는 yarn
+
+2. **패키지 설치**
+   ```bash
+   cd ../frontend
+   npm install
+   # 또는
+   yarn install
+   ```
+
+3. **환경 변수 파일(.env) 작성**
+   - `.env.example` 파일을 참고해 `.env` 파일을 생성하고, API 서버 주소 등 환경 변수 입력
+
+   ```bash
+   cp .env.example .env
+   # .env 파일을 열어 필요한 값 입력
+   ```
+
+4. **개발 서버 실행**
+   ```bash
+   npm start
+   # 또는
+   yarn start
+   ```
+
 
 ---
 
@@ -146,9 +203,57 @@ cd capstone-2025-09
 ```bash
 capstone-2025-09/
 ├── backend/
+│   ├── build.gradle.kts
+│   ├── Dockerfile
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── kotlin/
+│   │   │   │   └── kr/ac/kookmin/cs/capstone/voicepack_platform/
+│   │   │   │       ├── aiAssistant/         # AI 비서 관련 백엔드 로직
+│   │   │   │       ├── common/              # 공통 유틸리티 및 상수
+│   │   │   │       ├── config/              # 환경설정 및 설정 클래스
+│   │   │   │       ├── credit/              # 크레딧(포인트) 관리
+│   │   │   │       ├── notification/        # 알림 기능
+│   │   │   │       ├── quote/               # 견적/명언 등 부가 기능
+│   │   │   │       ├── sale/                # 보이스팩 판매/구매 관리
+│   │   │   │       ├── user/                # 사용자 관리 및 인증
+│   │   │   │       ├── video2voicepack/     # 영상 기반 보이스팩 생성
+│   │   │   │       ├── voicepack/           # 보이스팩 생성/관리/합성
+│   │   │   │       └── VoicepackPlatformApplication.kt
+│   │   │   └── resources/
+│   │   │       ├── application.yaml
+│   │   │       └── application.yaml-example
+│   │   └── test/
+│   └── gradle/
 ├── frontend/
-├── docs/
+│   ├── package.json
+│   ├── public/
+│   ├── src/
+│   │   ├── api/                 # API 통신 함수 모음
+│   │   ├── assets/              # 이미지, 폰트 등 정적 리소스
+│   │   ├── components/
+│   │   │   ├── common/          # 공통 UI 컴포넌트
+│   │   │   ├── layout/          # 레이아웃 관련 컴포넌트
+│   │   │   └── visual/          # 시각적 효과/비주얼 컴포넌트
+│   │   ├── data/                # 더미 데이터, 상수 등
+│   │   ├── hooks/               # 커스텀 React 훅
+│   │   ├── pages/
+│   │   │   ├── ai-assistant/    # AI 비서 관련 페이지
+│   │   │   │   ├── AssistantReadyScreen.js
+│   │   │   │   ├── AssistantSetup.js
+│   │   │   │   ├── ScriptPlayer.js
+│   │   │   │   └── index.js
+│   │   │   ├── BasicVoice.js    # 기본 보이스팩 페이지
+│   │   │   ├── Landing.js       # 랜딩(메인) 페이지
+│   │   │   ├── MyPage.js        # 마이페이지
+│   │   │   ├── SignIn.js        # 로그인 페이지
+│   │   │   ├── SignUp.js        # 회원가입 페이지
+│   │   │   ├── VoiceCreate.js   # 보이스팩 생성 페이지
+│   │   │   └── VoiceStore.js    # 보이스팩 마켓/스토어
+│   │   ├── utils/               # 유틸리티 함수
+│   │   ├── App.js
+│   │   └── index.js
+│   └── node_modules/
 ├── .gitignore
 ├── .env
-
 ```
