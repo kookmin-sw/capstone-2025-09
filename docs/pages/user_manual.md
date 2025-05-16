@@ -3,6 +3,7 @@ title: "COVOS 사용자 매뉴얼"
 layout: default
 nav_order: 1
 parent: 매뉴얼
+has_toc: false
 ---
 # COVOS 사용자 매뉴얼
 
@@ -24,7 +25,7 @@ parent: 매뉴얼
 
 {: .no_toc }
 
-1. TOC
+- TOC
 {:toc}
 
 ---

@@ -3,22 +3,26 @@ title: "백엔드 개발 가이드"
 layout: default
 nav_order: 4
 parent: 매뉴얼
+has_toc: false
 ---
 
 # 백엔드 개발 가이드
 
+{ .no_toc }
+
 ## 목차
-- [소개](#소개)
-- [시스템 아키텍처](#시스템-아키텍처)
-- [기술 스택](#기술-스택)
-- [프로젝트 구조](#프로젝트-구조)
-- [API 엔드포인트](#api-엔드포인트)
-- [개발 환경 설정](#개발-환경-설정)
-- [배포 방법](#배포-방법)
-- [FAQ](#faq)
+
+{ .no_toc }
+
+- TOC
+{:toc}
+
+---
 
 ## 소개
 본 백엔드 시스템은 Covos 플랫폼을 위한 서버 애플리케이션입니다. 사용자가 보이스팩을 생성, 판매, 구매할 수 있는 API를 제공하며, AI 음성 합성 및 영상 기반 보이스팩 생성 등의 기능을 제공합니다.
+
+---
 
 ## 시스템 아키텍처
 이 시스템은 Spring Boot 기반의 백엔드 서버로 구현되어 있으며 다음과 같은 구성요소로 이루어져 있습니다:
@@ -28,6 +32,8 @@ parent: 매뉴얼
 - **AWS S3** - 음성 파일, 이미지 등 미디어 저장
 - **AWS SQS/RabbitMQ** - 비동기 작업 처리를 위한 메시지 큐
 - **AI 모델 서비스 연동** - 보이스팩 생성 및 합성을 위한 외부 AI 서비스 연동
+
+---
 
 ## 기술 스택
 
@@ -48,6 +54,8 @@ parent: 매뉴얼
 - Ktor Client
 - AWS SDK (S3, SQS)
 - RabbitMQ
+
+---
 
 ## 프로젝트 구조
 백엔드 프로젝트는 다음과 같은 구조로 되어 있습니다:
@@ -75,6 +83,8 @@ backend/
 ├── build.gradle.kts                  - 빌드 설정
 └── Dockerfile                        - 컨테이너 배포 설정
 ```
+
+---
 
 ## API 엔드포인트
 
@@ -118,6 +128,8 @@ backend/
 - `POST /api/ai-assistant/setting` - AI 비서 설정
 - `POST /api/ai-assistant/synthesis` - AI 비서 음성 합성
 
+---
+
 ## 개발 환경 설정
 
 ### 필수 요구사항
@@ -148,6 +160,8 @@ backend/
    ./gradlew test
    ```
 
+---
+
 ## 배포 방법
 
 ### Docker를 이용한 배포
@@ -161,8 +175,6 @@ backend/
    ```bash
    docker run -p 8080:8080 voicepack-platform-backend
    ```
-
-
 
 ### CI/CD (Github Actions 기반 자동 배포)
 
@@ -251,6 +263,8 @@ jobs:
             # 사용하지 않는 Docker 이미지 및 캐시 정리
             sudo docker system prune -f
 ```
+
+---
 
 ## FAQ
 
