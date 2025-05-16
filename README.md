@@ -10,7 +10,7 @@
 - [클릭하여 COVOS와 함께 마음껏 놀아보세요!](https://capstone-2025-09-zeta.vercel.app)  
 
 ### 🎥 COVOS 소개 영상
-- [COVOS의 소개 영상을 시청해보세요!](https://youtu.be/8UAyx8bgYoY?si=LAz3QkCm6mobHCbX)  
+- [클릭하여 COVOS의 소개 영상을 시청해보세요!](https://youtu.be/8UAyx8bgYoY?si=LAz3QkCm6mobHCbX)  
 
 ### 💡 COVOS 상세 소개 페이지
 - [클릭하여 COVOS의 상세한 소개를 받아보새요!](https://kookmin-sw.github.io/capstone-2025-09/)  
