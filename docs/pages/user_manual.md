@@ -1,8 +1,8 @@
 ---
-title: "COVOS 사용자 매뉴얼"
+title: "COVOS 사용자 가이드"
 layout: default
 nav_order: 1
-parent: 매뉴얼
+parent: 가이드
 has_toc: false
 ---
 # **COVOS 사용자 가이드**
