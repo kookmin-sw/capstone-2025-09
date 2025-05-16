@@ -7,7 +7,7 @@ import PageContainer from '../common/PageContainer';
 
 const Layout = ({ children }) => {
   const location = useLocation();
-  const noLayoutPaths = ['/', '/sign-in', '/sign-up'];
+  const noLayoutPaths = ['/', '/sign-in', '/sign-up','/join-agreement'];
   const isNoLayout = noLayoutPaths.includes(location.pathname);
 
   return (
@@ -30,7 +30,7 @@ const Layout = ({ children }) => {
           </div>
 
           {/* 콘텐츠 영역 */}
-          <div className="relative z-0">
+          <div className={`relative z-0 ${!isNoLayout ? 'pb-12' : ''}`}>
             {isNoLayout ? children : <PageContainer>{children}</PageContainer>}
           </div>
         </main>

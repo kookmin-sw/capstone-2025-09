@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import useUserStore from '../utils/userStore';
 import { getVoicepacksByUserId } from '../api/getVoicepacks';
 
-const useVoicepackUsage = () => {
+const useVoicepackUsage = (filter = 'available', refreshKey = 0) => {
   const [voicepacks, setVoicepacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,9 +16,15 @@ const useVoicepackUsage = () => {
     }
 
     const fetch = async () => {
+      setLoading(true);
       try {
-        const data = await getVoicepacksByUserId(user.id);
-        setVoicepacks(data);
+        const data = await getVoicepacksByUserId(user.id, filter);
+        const filtered = data.filter((v) => v.isVideoBased === false);
+
+        const sorted = [...filtered].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setVoicepacks(sorted);
       } catch (err) {
         setError(err);
       } finally {
@@ -27,8 +33,7 @@ const useVoicepackUsage = () => {
     };
 
     fetch();
-  }, [user?.id]);
-
+  }, [user?.id, filter, refreshKey]);
   return { voicepacks, loading, error };
 };
 

@@ -1,53 +1,81 @@
-import React from 'react';
-import GradientButton from '../../components/common/GradientButton';
+import React, { useEffect, useState } from 'react';
+import AudioListPlayer from '../../components/common/AudioListPlayer';
 
 const ScriptPlayer = ({ onEdit }) => {
+  const [audios, setAudios] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [reportTime, setReportTime] = useState(null);
+
+  const CATEGORY_MAP = ['BBC 뉴스', 'GOOGLE 뉴스', 'IT 소식', '경제', '스포츠'];
+
+  useEffect(() => {
+    const audioList = localStorage.getItem('assistant-result-audios');
+    const config = localStorage.getItem('ai-assistant-config');
+
+    if (audioList) {
+      const parsed = JSON.parse(audioList);
+      setAudios(parsed);
+
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const h = String(now.getHours()).padStart(2, '0');
+      setReportTime(`${y}년 ${m}월 ${d}일 ${h}시 기준`);
+    }
+
+    if (config) {
+      const parsed = JSON.parse(config);
+      setCategories(parsed.categories); // 인덱스 배열
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">AI 비서</h1>
-        <GradientButton onClick={onEdit} className="px-4 py-2 text-sm">
-          수정하기
-        </GradientButton>
-      </div>
+      <h1 className="text-xl font-semibold">AI 리포터</h1>
+      <p className="text-sm text-slate-500 mt-1">
+        오늘의 뉴스 요약 리포트를 전달해드립니다.
+      </p>
 
-      {/* 오디오 스크립트 */}
-      <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-        <p className="text-sm">
-          안녕하세요. 오늘 0월 0일 0요일 날씨는 맑음입니다. 오늘 주요 뉴스는 ~~
-          입니다.
-        </p>
-        <div className="flex items-center justify-between border-t pt-4">
-          <div className="flex items-center gap-2">
-            <button>⏮️</button>
-            <button>▶️</button>
-            <button>⏭️</button>
+      <div className="text-sm text-slate-600 space-y-2">
+        {reportTime && (
+          <p className="flex items-center gap-1">
+            🕒 <span className="font-medium text-slate-700">{reportTime}</span>
+          </p>
+        )}
+        <div className="flex flex-row gap-2 items-center">
+          <p className="flex items-center gap-1 font-medium text-slate-700">
+            📰 <span>선택한 카테고리</span>
+          </p>
+          <div className="flex gap-2 flex-wrap">
+            {categories.map((i) => (
+              <span
+                key={i}
+                className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-700"
+              >
+                {CATEGORY_MAP[i]}
+              </span>
+            ))}
           </div>
-          <span className="text-sm text-blue-500">00:16:00</span>
         </div>
       </div>
 
-      {/* 출처 리스트 */}
-      <div>
-        <p className="text-sm font-medium mb-2">정보 출처</p>
-        <ul className="space-y-2">
-          {[1, 2].map((i) => (
-            <li
-              key={i}
-              className="bg-[#F8F5FF] rounded-md px-4 py-3 text-sm flex items-center justify-between"
-            >
-              <span className="font-medium text-gray-700">출처 {i}</span>
-              <a
-                href="https://www.link.com"
-                className="text-blue-600 underline break-all ml-2"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                www.link.com/Lorem ipsum dolor sit amet consectetur.
-              </a>
-            </li>
-          ))}
-        </ul>
+      {audios ? (
+        <div className="bg-white/80 backdrop-blur rounded-md border border-slate-200 p-4">
+          {/* DOM 렌더 후 시점 보장 */}
+          <div className="w-full h-auto">
+            <AudioListPlayer audioUrls={audios} />
+          </div>
+        </div>
+      ) : null}
+
+      <div className="flex justify-center">
+        <button
+          onClick={onEdit}
+          className="text-sm underline text-slate-500 hover:text-slate-700"
+        >
+          설정 다시 하기
+        </button>
       </div>
     </div>
   );

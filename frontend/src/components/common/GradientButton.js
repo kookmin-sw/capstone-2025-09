@@ -6,12 +6,14 @@ const GradientButton = ({
   onClick,
   className = '',
   type = 'button',
+  disabled = false,
 }) => {
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold rounded-lg shadow-sm hover:opacity-90 transition ${className}`}
+      disabled={disabled}
+      className={`bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold rounded-lg shadow-sm hover:opacity-70  disabled:opacity-50  transition ${className}`}
     >
       {children}
     </button>
@@ -23,6 +25,7 @@ GradientButton.propTypes = {
   onClick: PropTypes.func,
   className: PropTypes.string,
   type: PropTypes.string,
+  disabled: PropTypes.bool,
 };
 
 export default GradientButton;

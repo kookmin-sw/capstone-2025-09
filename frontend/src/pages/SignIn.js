@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSignin } from '../hooks/useSignin';
 import GradientButton from '../components/common/GradientButton';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff } from 'lucide-react';
+import useUserStore from '../utils/userStore';
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -11,12 +12,21 @@ const SignIn = () => {
   const { signin, loading } = useSignin();
   const navigate = useNavigate();
 
+  const user = useUserStore((state) => state.user);
+
+  // 로그인 상태라면 자동 리다이렉트
+  useEffect(() => {
+    if (user) {
+      navigate('/voice-store');
+    }
+  }, [user, navigate]);
+
   const handleSignIn = () => {
     signin({ email, password });
   };
 
   return (
-    <div className="max-w-md mx-auto p-8 space-y-6">
+    <div className="max-w-md mx-auto p-4 space-y-6">
       <h1 className="text-2xl font-bold text-center">로그인</h1>
 
       <div className="space-y-4">
@@ -62,7 +72,7 @@ const SignIn = () => {
       <p className="text-center text-sm text-gray-600">
         계정이 없으신가요?{' '}
         <button
-          onClick={() => navigate('/sign-up')}
+          onClick={() => navigate('/join-agreement')}
           className="text-indigo-400 underline font-semibold"
         >
           회원가입

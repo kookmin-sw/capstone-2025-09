@@ -6,6 +6,8 @@ import {
   ShoppingBag,
   LogOut,
   AudioLines,
+  Quote,
+  BookUser,
 } from 'lucide-react';
 import logo from '../../assets/logo-new.svg';
 import useUserStore from '../../utils/userStore';
@@ -22,7 +24,8 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     clearUser();
-    sessionStorage.removeItem('user-storage');
+    sessionStorage.clear();
+    localStorage.clear();
     navigate('/'); // 랜딩 페이지로 이동
   };
 
@@ -62,7 +65,21 @@ const Sidebar = () => {
           className={`flex items-center space-x-2 p-2 rounded ${isActive('/ai-assistant')}`}
         >
           <BotMessageSquare size={20} />
-          <span>AI 비서</span>
+          <span>AI 리포터</span>
+        </Link>
+        <Link
+          to="/quote"
+          className={`flex items-center space-x-2 p-2 rounded ${isActive('/quote')}`}
+        >
+          <Quote size={20} />
+          <span>오늘의 명언</span>
+        </Link>
+        <Link
+          to="/remember-voice"
+          className={`flex items-center space-x-2 p-2 rounded ${isActive('/remember-voice')}`}
+        >
+          <BookUser size={20} />
+          <span>리멤버 보이스</span>
         </Link>
       </div>
 

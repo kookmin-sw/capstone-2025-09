@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 body {
+  overflow-x: hidden;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -14,4 +15,35 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+@layer utilities {
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  .animate-marquee-reverse {
+    animation: marquee-reverse 30s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes marquee-reverse {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(50%); }
+  }
+
+  @keyframes gradient-slow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .animate-gradient-slow {
+    background-size: 200% 200%;
+    animation: gradient-slow 15s ease infinite;
+  }
 }
