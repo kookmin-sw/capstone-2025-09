@@ -202,6 +202,24 @@ cd capstone-2025-09
 
 ```bash
 capstone-2025-09/
+├── AI/                       
+│   ├── config/
+│   │   ├── sample_texts.json              # 음성 합성 테스트용 샘플 텍스트
+│   │   └── settings.py                    # 애플리케이션 설정 및 환경 변수 관리
+│   ├── utils/                             
+│   │   ├── sqs_handler.py                 # AWS SQS 메시지 큐 처리
+│   │   ├── storage_manager.py             # AWS S3 스토리지 관리
+│   │   ├── synthesis_handler.py           # 음성 합성 및 AI 비서 요청 처리
+│   │   ├── text_converter.py              # 텍스트 변환 및 전처리
+│   │   ├── voice_registration_handler.py  # 화자 등록 및 보이스팩 생성
+│   │   └── voice_synthesizer.py           # 음성 합성 핵심 로직
+│   ├── zonos/                             # 제로샷 음성 복제 모델 
+│   ├── .dockerignore        
+│   ├── .python-version
+│   ├── Dockerfile          
+│   ├── main.py                            # FastAPI 기반 메인 서버 애플리케이션
+│   ├── pyproject.toml      
+│   └── uv.lock             
 ├── backend/
 │   ├── build.gradle.kts
 │   ├── Dockerfile
