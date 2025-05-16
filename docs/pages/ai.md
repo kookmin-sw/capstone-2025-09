@@ -2,7 +2,7 @@
 title: "AI 모델 및 추론 서버 개발 가이드"
 layout: default
 nav_order: 5
-parent: 메뉴얼
+parent: 매뉴얼
 ---
 # AI 모델 및 추론 서버 개발 가이드
 

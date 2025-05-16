@@ -1,5 +1,5 @@
 ---
-title: 메뉴얼
+title: 매뉴얼
 layout: default
 nav_order: 2
 has_children: true

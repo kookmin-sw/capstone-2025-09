@@ -2,7 +2,7 @@
 title: "COVOS 사용자 매뉴얼"
 layout: default
 nav_order: 1
-parent: 메뉴얼
+parent: 매뉴얼
 ---
 # COVOS 사용자 매뉴얼
 
