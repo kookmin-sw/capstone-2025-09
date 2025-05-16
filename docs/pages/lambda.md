@@ -1,5 +1,5 @@
 ---
-title: "AWS Lambda 활용 가이드"
+title: "Serverless 인프라 활용 가이드"
 layout: default
 nav_order: 5
 parent: 메뉴얼
