@@ -10,8 +10,6 @@ const useAssistantSetup = () => {
       return;
     }
 
-    console.log('설정 저장 요청:', user.id, config);
-
     try {
       const response = await axiosInstance.post(
         `ai-assistant/settings`,
@@ -27,7 +25,6 @@ const useAssistantSetup = () => {
           },
         }
       );
-      console.log('설정 저장 성공:', response.data);
     } catch (error) {
       console.error('설정 저장 실패:', error);
     }

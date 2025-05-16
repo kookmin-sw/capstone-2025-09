@@ -108,7 +108,7 @@ const Quote = () => {
       <h1 className="text-xl font-bold">오늘의 명언</h1>
 
       <div>
-        <div className="flex gap-8 mb-4">
+        <div className="flex flex-col md:flex-row mb-4 gap-4">
           <div className="w-1/4">
             <SelectBox
               label="보이스팩"

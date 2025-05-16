@@ -6,12 +6,12 @@ const ScriptPlayer = ({ onEdit }) => {
   const [categories, setCategories] = useState([]);
   const [reportTime, setReportTime] = useState(null);
 
-  const CATEGORY_MAP = ['BBC 뉴스', 'GOOGLE 뉴스', 'IT 소식'];
+  const CATEGORY_MAP = ['BBC 뉴스', 'GOOGLE 뉴스', 'IT 소식', '경제', '스포츠'];
 
   useEffect(() => {
     const audioList = localStorage.getItem('assistant-result-audios');
     const config = localStorage.getItem('ai-assistant-config');
-    console.log(config);
+
     if (audioList) {
       const parsed = JSON.parse(audioList);
       setAudios(parsed);
