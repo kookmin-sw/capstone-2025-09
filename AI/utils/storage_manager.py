@@ -128,3 +128,21 @@ class StorageManager:
             return True
         except ClientError:
             return False
+
+    def get_audio_url(self, file_path: str) -> bool:
+        """S3에서 오디오 파일의 존재 여부를 확인하고 URL 반환
+        
+        Args:
+            file_path (str): S3 버킷 내의 파일 경로
+            
+        Returns:
+            bool: 파일이 존재하면 True, 없으면 False 반환
+        """
+        try:
+            self.s3_client.head_object(
+                Bucket=self.bucket_name,
+                Key=file_path
+            )
+            return True
+        except ClientError:
+            return False

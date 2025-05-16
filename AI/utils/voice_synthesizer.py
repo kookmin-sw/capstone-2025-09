@@ -234,10 +234,19 @@ class VoiceSynthesizer:
             if not self.storage_manager.speaker_exists(voicepackName):
                 raise HTTPException(status_code=404, detail="Speaker not found")
                 
+            # 파일 경로 생성
+            file_path = f"ai-assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
+            
+            # 파일이 이미 존재하는지 확인
+            existing_url = self.storage_manager.get_audio_url(file_path)
+            if existing_url:
+                logger.info(f"Found existing audio file: {file_path}")
+                return file_path, 0
+                
             features = self.storage_manager.get_speaker_features(voicepackName)
             if features is None:
                 raise HTTPException(status_code=500, detail="Failed to load speaker features")
-                
+            
             audio_data, duration = self._synthesize_speech_internal(
                 text=prompt,
                 features=features,
@@ -248,7 +257,6 @@ class VoiceSynthesizer:
                 raise ValueError("Failed to synthesize assistant speech")
                 
             # S3에 저장
-            file_path = f"ai-assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
             audio_url = self.storage_manager.save_audio(audio_data, file_path)
                 
             if not audio_url:
