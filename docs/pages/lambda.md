@@ -5,7 +5,7 @@ nav_order: 5
 parent: 메뉴얼
 ---
 
-# AWS Lambda 활용 가이드
+# Serverless 인프라 활용 가이드
 
 ## 목차
 - [서론](#서론)
@@ -349,57 +349,94 @@ Covos 플랫폼은 다양한 기능에서 AWS Lambda를 효과적으로 사용�
     def lambda_handler(event, context):
         # AWS MQ for RabbitMQ 이벤트는 보통 단일 메시지 또는 메시지 리스트를 포함할 수 있으며, 구조는 Lambda 통합 설정에 따라 다릅니다.
         # 예시: event.get('messages') 또는 event directamente 메시지 객체일 수 있음
-        messages = event.get('rmqMessagesByQueue', {}).get('YOUR_QUEUE_NAME::YOUR_VIRTUAL_HOST', []) # 실제 이벤트 구조 확인 필요
+        # messages = event.get('rmqMessagesByQueue', {}).get('YOUR_QUEUE_NAME::YOUR_VIRTUAL_HOST', []) # 실제 이벤트 구조 확인 필요
+        # 위 라인은 매우 구체적인 이벤트 구조를 가정하므로, 더 일반적인 접근은 아래와 같습니다.
+        # print("Raw event:", json.dumps(event))
+        
+        # 우선 단일 메시지 또는 메시지 리스트를 처리할 수 있도록 event 구조를 확인해야 합니다.
+        # 아래는 event가 메시지 리스트를 담고 있는 'messages' 키를 가지고 있다고 가정합니다.
+        # 실제 RabbitMQ 이벤트 구조는 Lambda 트리거 설정 및 메시지 발행 방식에 따라 다릅니다.
 
-        for message_wrapper in messages: # 실제 메시지 반복 구조는 이벤트 형식에 따름
-            # AWS MQ for RabbitMQ 메시지 본문은 'data' 필드에 base64 인코딩된 형태로 있을 수 있습니다. 디코딩 후 JSON 파싱이 필요할 수 있습니다.
-            payload_str_b64 = message_wrapper.get('data')
+        actual_messages = []
+        if isinstance(event, list):
+            actual_messages = event # 이벤트 자체가 메시지 리스트일 경우
+        elif isinstance(event, dict) and 'messages' in event:
+            actual_messages = event['messages'] # 'messages' 키에 메시지 리스트가 있는 경우
+        elif isinstance(event, dict) and 'rmqMessagesByQueue' in event: # AWS 콘솔 테스트 이벤트와 유사한 구조
+            # 이 구조는 { "queue_name::vhost": [ { "basicProperties": {...}, "data": "..." }, ... ] } 형태를 가질 수 있습니다.
+            # 실제 사용하는 큐 이름과 가상 호스트로 대체해야 합니다.
+            # 여기서는 첫 번째 큐의 메시지만 가져오는 예시입니다.
+            for queue_key, msgs_in_queue in event['rmqMessagesByQueue'].items():
+                actual_messages.extend(msgs_in_queue)
+                break # 하나의 큐만 처리하는 예시
+        elif isinstance(event, dict) and 'data' in event: # 단일 메시지 이벤트로 'data' 필드만 있는 경우
+            actual_messages.append(event)
+
+        for message_data_obj in actual_messages:
+            payload_str_b64 = message_data_obj.get('data')
             if not payload_str_b64:
+                print("Warning: Message data is empty or not found.")
                 continue
             
-            # import base64
-            # payload_str = base64.b64decode(payload_str_b64).decode('utf-8')
-            # payload = json.loads(payload_str)
-            payload = json.loads(base64.b64decode(payload_str_b64).decode('utf-8')) # 직접 디코딩 및 파싱
+            try:
+                import base64
+                payload_str = base64.b64decode(payload_str_b64).decode('utf-8')
+                payload = json.loads(payload_str)
+            except Exception as parse_error:
+                print(f"Error decoding/parsing message data: {parse_error}")
+                print(f"Original b64 data: {payload_str_b64}")
+                continue
             
             job_id = payload.get('jobId')
             text_to_synthesize = payload.get('text')
             voice_model_id = payload.get('voiceModelId')
             # ... 기타 파라미터
 
+            print(f"Processing job_id: {job_id}")
+
             try:
                 # 1. (필요시) DB에서 voiceModelId 관련 추가 정보 조회
                 
                 # 2. Cloud Run 음성 합성 서비스 호출
+                # CLOUD_RUN_SYNTHESIS_URL_actual = os.environ.get('CLOUD_RUN_SYNTHESIS_URL')
+                # S3_BUCKET_NAME_actual = os.environ.get('S3_BUCKET_NAME')
+
+                # if not CLOUD_RUN_SYNTHESIS_URL_actual or not S3_BUCKET_NAME_actual:
+                #     print("Error: CLOUD_RUN_SYNTHESIS_URL or S3_BUCKET_NAME environment variables not set.")
+                #     continue
+
                 # synthesis_request_payload = {
                 #    "text": text_to_synthesize,
                 #    "model": voice_model_id,
                 #    # ... 기타 필요한 파라미터
                 # }
-                # response = requests.post(CLOUD_RUN_SYNTHESIS_URL, json=synthesis_request_payload, timeout=60)
+                # response = requests.post(CLOUD_RUN_SYNTHESIS_URL_actual, json=synthesis_request_payload, timeout=60)
                 # response.raise_for_status() # 오류 시 예외 발생
                 # synthesis_result = response.json() # 예: {"audioS3Path": "s3://bucket/path/to/audio.mp3"}
                 
                 # 임시 결과 (실제로는 Cloud Run 호출)
-                audio_file_name = f"{job_id}.mp3"
+                audio_file_name = f"{job_id or 'unknown_job'}.mp3"
                 # s3_client = boto3.client('s3')
-                # s3_client.put_object(Bucket=S3_BUCKET_NAME, Key=f"results/{audio_file_name}", Body=b"dummy_audio_content")
-                # audio_s3_path = f"s3://{S3_BUCKET_NAME}/results/{audio_file_name}"
-                audio_s3_path = f"https://{os.environ.get('S3_BUCKET_NAME', 'your-s3-bucket')}.s3.amazonaws.com/results/{audio_file_name}" # Public URL 예시
+                # s3_client.put_object(Bucket=S3_BUCKET_NAME_actual, Key=f"results/{audio_file_name}", Body=b"dummy_audio_content")
+                # audio_s3_path = f"s3://{S3_BUCKET_NAME_actual}/results/{audio_file_name}"
+                S3_BUCKET_FOR_URL = os.environ.get('S3_BUCKET_NAME', 'your-s3-bucket') # 환경 변수에서 S3 버킷 이름 가져오기
+                audio_s3_path = f"https://{S3_BUCKET_FOR_URL}.s3.amazonaws.com/results/{audio_file_name}" # Public URL 예시
 
                 # 3. (필요시) 결과 DB에 업데이트 또는 콜백 호출
                 # db_update_status(job_id, "SUCCESS", audio_s3_path)
-                # requests.post(payload.get('callbackUrl'), json={"jobId": job_id, "status": "SUCCESS", "resultUrl": audio_s3_path})
+                # if payload.get('callbackUrl'):
+                #     requests.post(payload.get('callbackUrl'), json={"jobId": job_id, "status": "SUCCESS", "resultUrl": audio_s3_path})
 
                 print(f"Job {job_id} processed successfully. Audio at {audio_s3_path}")
 
             except Exception as e:
                 print(f"Error processing job {job_id}: {e}")
                 # db_update_status(job_id, "FAILURE", str(e))
-                # requests.post(payload.get('callbackUrl'), json={"jobId": job_id, "status": "FAILURE", "error": str(e)})
+                # if payload.get('callbackUrl'):
+                #     requests.post(payload.get('callbackUrl'), json={"jobId": job_id, "status": "FAILURE", "error": str(e)})
                 # DLQ로 보내기 위해 예외를 다시 발생시킬 수도 있음
-                raise e 
-    
+                raise e # 처리 실패 시 메시지를 DLQ로 보내려면 여기서 예외를 다시 발생시키거나 Lambda 구성에서 DLQ 설정
+    ```
 4.  **환경 변수 활용**: `CLOUD_RUN_SYNTHESIS_URL`, `S3_BUCKET_NAME` 등을 환경 변수로 설정하여 유연하게 관리합니다.
 5.  **Layer 활용**: `requests`와 같은 외부 HTTP 클라이언트 라이브러리나 `boto3`의 특정 버전이 필요하다면 Layer로 관리합니다.
 
