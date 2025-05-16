@@ -11,7 +11,7 @@ const ScriptPlayer = ({ onEdit }) => {
   useEffect(() => {
     const audioList = localStorage.getItem('assistant-result-audios');
     const config = localStorage.getItem('ai-assistant-config');
-    console.log(config);
+
     if (audioList) {
       const parsed = JSON.parse(audioList);
       setAudios(parsed);
