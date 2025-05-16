@@ -12,7 +12,7 @@ logger.setLevel(logging.INFO)
 
 # --- 상수 설정 ---
 BBC_RSS_URL = 'http://feeds.bbci.co.uk/news/rss.xml'
-HEADLINES_COUNT = 5
+HEADLINES_COUNT = 3
 OPENAI_MODEL = "gpt-4o-mini"
 
 # --- 프롬프트 지시사항 템플릿 및 대상 톤 설정 ---
