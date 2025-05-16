@@ -18,7 +18,7 @@ parent: 메뉴얼
 - [FAQ](#faq)
 
 ## 소개
-본 백엔드 시스템은 VoicePack 플랫폼을 위한 서버 애플리케이션입니다. 사용자가 보이스팩을 생성, 판매, 구매할 수 있는 API를 제공하며, AI 음성 합성 및 영상 기반 보이스팩 생성 등의 기능을 제공합니다.
+본 백엔드 시스템은 Covos 플랫폼을 위한 서버 애플리케이션입니다. 사용자가 보이스팩을 생성, 판매, 구매할 수 있는 API를 제공하며, AI 음성 합성 및 영상 기반 보이스팩 생성 등의 기능을 제공합니다.
 
 ## 시스템 아키텍처
 이 시스템은 Spring Boot 기반의 백엔드 서버로 구현되어 있으며 다음과 같은 구성요소로 이루어져 있습니다:
@@ -48,7 +48,6 @@ parent: 메뉴얼
 - Ktor Client
 - AWS SDK (S3, SQS)
 - RabbitMQ
-- JUnit 5, Mockk (테스트)
 
 ## 프로젝트 구조
 백엔드 프로젝트는 다음과 같은 구조로 되어 있습니다:
@@ -81,30 +80,41 @@ backend/
 
 백엔드는 다음과 같은 주요 API 엔드포인트를 제공합니다:
 
-### 사용자 관리
+### 1. 사용자 관리
 - `POST /api/users/signup` - 회원가입
 - `POST /api/users/login` - 로그인
 - `GET /api/users/profile` - 사용자 프로필 조회
 
-### 보이스팩
-- `POST /api/voicepack/upload` - 보이스팩 업로드
-- `GET /api/voicepack/{id}` - 보이스팩 정보 조회
-- `GET /api/voicepack/list` - 보이스팩 목록 조회
-- `POST /api/voicepack/synthesis` - 텍스트 음성 합성 요청
+### 2. 보이스팩 관리
+- `GET /api/voicepack` - 보이스팩 목록 조회 (필터 및 사용자 ID로 조회 가능)
+- `GET /api/voicepack/{voicepackId}` - 보이스팩 1개 상세 조회
+- `DELETE /api/voicepack/{voicepackId}` - 보이스팩 삭제
+- `PATCH /api/voicepack/{voicepackId}` - 보이스팩 공개 여부 변경
 
-### 영상 기반 보이스팩
+### 3. 보이스팩 변환/합성
+- `POST /api/voicepack/convert` - 음성 파일을 보이스팩으로 변환 (multipart/form-data)
+- `GET /api/voicepack/convert/status/{id}` - 보이스팩 변환 상태 조회 (Polling)
+- `POST /api/voicepack/synthesis` - 보이스팩 기반 TTS(음성합성) 생성 요청 (비동기)
+- `GET /api/voicepack/synthesis/status/{id}` - 음성합성(TTS) 상태 조회 (Polling)
+- `GET /api/voicepack/example/{voicepackId}` - 보이스팩 예시 음성 파일 조회
+
+### 4. 보이스팩 사용권
+- `POST /api/voicepack/usage-right` - 보이스팩 사용권 획득(구매/제작자 자동 획득)
+- `GET /api/voicepack/usage-right` - 사용자가 보유한 보이스팩 목록 조회
+
+### 5. 영상 기반 보이스팩
 - `POST /api/video2voicepack` - 영상 기반 보이스팩 생성
 
-### 크레딧 관리
+### 6. 크레딧 관리
 - `POST /api/credits/purchase` - 크레딧 구매
 - `GET /api/credits/balance/{userId}` - 잔액 조회
 - `GET /api/credits/history/{userId}` - 거래 내역 조회
 
-### 판매 관리
+### 7. 판매 관리
 - `GET /api/sales/summary` - 판매 통계 조회
 - `GET /api/sales/history` - 판매 내역 조회
 
-### AI 비서
+### 8. AI 비서
 - `POST /api/ai-assistant/setting` - AI 비서 설정
 - `POST /api/ai-assistant/synthesis` - AI 비서 음성 합성
 
