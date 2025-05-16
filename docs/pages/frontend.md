@@ -92,7 +92,7 @@ npm install
 ```
 
 ### 3. 환경 변수 설정
-```env
+```
 REACT_APP_BASE_URL=https://vocalab.kro.kr/api/
 ```
 
