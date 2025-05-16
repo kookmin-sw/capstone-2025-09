@@ -175,12 +175,30 @@ gcloud run deploy zonos-tts \
 ### Q: API 문서는 어떻게 확인할 수 있나요?
 A: 서버 실행 후 `http://localhost:8080/docs`에서 API 문서를 확인할 수 있습니다.
 
+
 ### Q: 샘플 보이스로 만들어지는 텍스트를 변경할 수 있나요?
 A: `config/sample_texts.json` 파일에 리스트 형식으로 텍스트를 추가해주세요.
 
+
 ### Q: 로컬에서 GPU를 사용하지 않고 실행할 수 있나요?
-A: 현재는 GTX 30~ 시리즈에서 실행됨이 보장됩니다. GPU가 없는 환경에서는 실행을 하지 않는 것이 추천됩니다.
+A: 현재는 RTX 3070에서 실행됨을 확인했습니다. GPU가 없는 환경에서는 실행을 하지 않는 것이 추천됩니다.
+
 
 ### Q: 사용할 수 있는 감정을 추가할 수 있나요? 감정을 추가하기 위해서는 어떻게 하면 되나요?
-A: `AI/utils/voice_synthesizer.py`의 EMOTION_PROFILE 리스트를 수정하는 식으로 진행할 수 있습니다.  
+A: `AI/utils/voice_synthesizer.py`의 EMOTION_PROFILE 리스트를 수정하는 식으로 진행할 수 있습니다. 
+
+
 총 8개의 세부 감정 파라미터를 조정할 수 있으며 각 파라미터는 순서대로 Happiness, Sadness, Disgust, Fear, Surprise, Anger, Other 및 Neutral입니다.
+
+
+### Q: Cloud Run 배포를 GUI로 진행하는 방법이 알고싶어요!
+A: [노션 페이지](https://sprout-angle-4de.notion.site/Cloud-run-with-Docker-1a0599a329d58049890dda8ff53f016c?pvs=4) 를 참고하시면 됩니다.
+
+
+### Q: Cloud Run을 통해 배포를 진행했는데 서버가 켜지는 데에 시간이 오래 걸려요. 자동으로 서버가 닫히기도 하는데 정상인가요?
+A: 정상입니다. 
+
+Cloud Run은 Auto Scaling을 통해 일정 시간 동안 트래픽이 없으면 자동으로 컨테이너를 종료하고, 다시 요청이 들어오면 종료된 컨테이너를 재실행하는 데에 초기화하는 과정이 필요합니다.
+
+
+이 초기화하는 과정 및 자동 종료가 불편하다면, 최소 인스턴스 수를 1로 설정하여 서버가 계속 켜져있게 하는 방법도 존재합니다.
