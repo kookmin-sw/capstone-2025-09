@@ -1,7 +1,6 @@
 name: "🐛 Bug Report"
 description: "버그를 제보하기 위한 템플릿"
 title: "bug: "
-labels: ["bug"]
 body:
   - type: input
     attributes:
@@ -21,6 +20,20 @@ body:
       label: ✅ 재현 방법
       description: 버그를 재현할 수 있는 단계를 설명해주세요.
       placeholder: 1. ...을 실행한다. 2. ...을 클릭한다. 3. ... 문제가 발생한다.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: 🔧 해야 할 작업 목록 (선택)
+      description:   이번 수정 또는 개선을 위해 수행한 작업들을 체크리스트 형태로 작성해주세요.
+      placeholder: |
+        <ex. 예시 지문>
+        - [ ] <체크 1>
+        - [ ] <체크 2>
+      value: |
+        - [ ] 
+        - [ ]
+        - [ ]
     validations:
       required: true
   - type: textarea

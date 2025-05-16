@@ -9,9 +9,15 @@ data class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
 
+    @Column(nullable = true)
+    val name: String,
+
     @Column(nullable = false, unique = true)
     val email: String,
 
     @Column(nullable = false)
-    val password: String
+    val password: String,
+
+    @Column(name = "profile_image_url")
+    var profileImageUrl: String? = null
 ) 

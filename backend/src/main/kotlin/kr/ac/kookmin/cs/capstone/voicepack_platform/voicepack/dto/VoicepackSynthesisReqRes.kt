@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile
 @Serializable
 data class VoicepackSynthesisRequest(
     val voicepackId: Long,
+    val emotionIndex: Int,
     val prompt: String
 )
 
@@ -19,7 +20,8 @@ data class VoicepackSynthesisResponse(
 data class VoicepackSynthesisAIModelRequest(
     val userId: Long,
     val voicepackId: String,
-    val prompt: String
+    val prompt: String,
+    val emotionIndex: Int
 )
 
 @Serializable

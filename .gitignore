@@ -19,10 +19,10 @@ env/
 .idea/
 *.iml
 *.DS_Store
+python/
 
 temp.py
 notion_parser.py
 app.py
 output.json
-
 *.pem

@@ -2,22 +2,64 @@ spring:
   application:
     name: VoicepackPlatform
 
+  # multipart 크기 제한 설정
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+  rabbitmq:
+    host: ~
+    port: ~
+    username: ~
+    password: ~
+    virtual-host: /
+    ssl:
+      enabled: true
+
   datasource:
-    url: your-jdbc-url
-    driver-class-name: your-driver-class-name
-    username: your-username
-    password: your-password
+    url: ~
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ~
+    password: ~
+    
+  jpa:
+    hibernate:
+      ddl-auto: update
 
 ai:
   model:
     service:
-      voicepack_creation: https://your-ai-service-url.com/voicepack_creation
-      voicepack_synthesis: https://your-ai-service-url.com/voicepack_synthesis
+      voicepack_creation: ~
+      voicepack_synthesis: ~
 
 # AWS S3 설정
 aws:
+  region: ~
   s3:
-    access-key: YOUR_AWS_ACCESS_KEY_HERE
-    secret-key: YOUR_AWS_SECRET_KEY_HERE
-    region: your-aws-region
-    bucket-name: your-voicepack-bucket
+    access-key: ~
+    secret-key: ~
+    region: ~
+    bucket-name: ~
+  sqs:
+    voicepack-creation-callback-queue-url: ~
+    voicepack-synthesis-callback-queue-url: ~
+    ai-assistant-callback-queue-url: ~
+
+openai:
+  api:
+    key: ~
+
+google:
+  api:
+    key: ~
+  cx:
+    id: ~
+
+# 세션 로그인 설정
+server:
+  servlet:
+    session:
+      cookie:
+        secure: true
+        same-site: None

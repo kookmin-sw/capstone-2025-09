@@ -1,0 +1,33 @@
+remote_theme: just-the-docs/just-the-docs
+
+title: COVOS
+description: 캡스톤 디자인 9조
+search_enabled: false
+logo: "/assets/logo.svg"
+
+# Enable navigation structure
+nav_external_links_new_tab: true
+
+# Collections for sidebar navigation
+collections:
+  pages:
+    permalink: "/:collection/:path/"
+    output: true
+
+# Set Just the Docs defaults
+defaults:
+  - scope:
+      path: ""
+      type: documents
+    values:
+      layout: default
+
+# Configure the JTD navigation structure
+aux_links:
+  "COVOS on GitHub":
+    - "//github.com/kookmin-sw/capstone-2025-09"
+
+# Set a navigation order
+nav_sort: case_sensitive
+
+footer_content: "Copyright &copy; 2025 Kookmin Univ. All rights reserved."
