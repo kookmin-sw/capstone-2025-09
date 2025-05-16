@@ -257,7 +257,7 @@ capstone-2025-09/
 │   ├── utils/                             
 │   │   ├── sqs_handler.py                 # AWS SQS 메시지 큐 처리
 │   │   ├── storage_manager.py             # AWS S3 스토리지 관리
-│   │   ├── synthesis_handler.py           # 음성 합성 및 AI 비서 요청 처리
+│   │   ├── synthesis_handler.py           # 음성 합성 및 AI 리포터 요청 처리
 │   │   ├── text_converter.py              # 텍스트 변환 및 전처리
 │   │   ├── voice_registration_handler.py  # 화자 등록 및 보이스팩 생성
 │   │   └── voice_synthesizer.py           # 음성 합성 핵심 로직
@@ -275,7 +275,7 @@ capstone-2025-09/
 │   │   ├── main/
 │   │   │   ├── kotlin/
 │   │   │   │   └── kr/ac/kookmin/cs/capstone/voicepack_platform/
-│   │   │   │       ├── aiAssistant/         # AI 비서 관련 백엔드 로직
+│   │   │   │       ├── aiAssistant/         # AI 리포터 관련 백엔드 로직
 │   │   │   │       ├── common/              # 공통 유틸리티 및 상수
 │   │   │   │       ├── config/              # 환경설정 및 설정 클래스
 │   │   │   │       ├── credit/              # 크레딧(포인트) 관리
@@ -393,7 +393,7 @@ capstone-2025-09/
 │   ├── tailwind.config.js
 │   └── vercel.json
 ├── lambda/
-│   ├── ai_assistant_lambda.py             # AI 비서 기능 AWS Lambda 함수
+│   ├── ai_assistant_lambda.py             # AI 리포터 기능 AWS Lambda 함수
 │   ├── packages_layer.zip                 # Lambda Layer 패키지
 │   ├── register_speaker_lambda.py         # 화자 등록 AWS Lambda 함수
 │   ├── synthesize_lambda.py               # 음성 합성 AWS Lambda 함수

@@ -30,7 +30,6 @@ has_toc: false
 
 ###  보이스팩 활용 기능
 - **텍스트 변환(TTS)**: 스크립트를 선택한 보이스로 음성 출력
-- **맞춤형 AI 비서**: 뉴스, 명언, 일정 등 카테고리 음성을 자동 제공
 - **AI 리포터**: 뉴스 카테고리 선택 → AI 프롬프트 생성 → 선택 보이스로 뉴스 리포트
 - **오늘의 명언**: 감정 기반 + 지역(동양/서양/한국) 선택 → 명언 생성 및 낭독
 - **리멤버 보이스**: 영상 기반 고인의 음성 복원 및 보이스팩화
@@ -42,7 +41,6 @@ has_toc: false
 
 ### 인터랙션 및 UI/UX
 - 반응형 디자인 (Tailwind CSS 기반)
-- Sonner 기반 알림 시스템
 - Framer Motion으로 부드러운 인터랙션 효과
 - Three.js 적용 랜딩페이지 (3D 시각 효과)
 
@@ -103,36 +101,43 @@ npm start
 ## 프로젝트 구조
 
 ```
-.
-├── public/                    # 정적 파일 및 ffmpeg WASM 리소스
-│   └── ffmpeg/                # 브라우저 기반 음성 추출용 wasm 파일
-│
+frontend/
+├── node_modules/                      # 프로젝트 의존성 모듈
+├── public/                            # 정적 파일 (index.html, favicon, ffmpeg WASM 등)
+│   └── index.html
+│   └── ffmpeg/                        # 브라우저 기반 음성 추출용 wasm 파일
 ├── src/
-│   ├── App.js / App.css       # 애플리케이션 루트 및 전역 스타일
-│   ├── index.js / index.css   # React 진입점 및 Tailwind 초기화
-│
-│   ├── api/                   # 사용자 및 보이스팩 관련 API 모듈
-│
-│   ├── assets/                # 이미지, 배경, 로고 등 리소스
-│
-│   ├── components/            # 공통 UI 컴포넌트 모음
-│   │   ├── common/            # 버튼, 모달 등 범용 UI
-│   │   ├── layout/            # Header, Sidebar 등 레이아웃
-│   │   ├── visual/            # 배경 효과
-│   │   └── mypage/            # 마이페이지 전용 섹션 UI
-│
-│   ├── hooks/                 # 보이스팩, 로그인, AI 리포터 등 기능별 커스텀 훅
-│
-│   ├── pages/                 # 각 기능별 라우팅 페이지
-│   │   ├── 사용자 인증: SignIn, SignUp, JoinAgreement
-│   │   ├── 서비스 기능: VoiceCreate, VoiceStore, BasicVoice, ai-assistant/*, Quote, RememberVoice, mypage/*
-
-│
-│   └── utils/                 # axios 설정, S3 업로드, Zustand 스토어 등 유틸
-│
-├── tailwind.config.js         # Tailwind CSS 구성
-├── vercel.json                # Vercel 배포 설정
-└── package.json               # 종속성과 스크립트 정의
+│   ├── api/                           # API 요청 함수 (user, voicepacks 등)
+│   ├── assets/                        # 이미지, 폰트, 로고 등 정적 에셋
+│   ├── components/                    # UI 컴포넌트
+│   │   ├── common/                    # 공통 UI (Button, Modal, Player 등)
+│   │   ├── layout/                    # 레이아웃 (Header, Sidebar, Layout)
+│   │   ├── mypage/                    # 마이페이지 전용 컴포넌트
+│   │   └── visual/                    # 시각 효과 컴포넌트 (Blur, Wave)
+│   ├── hooks/                         # 커스텀 React Hooks (로그인, 보이스팩, AI 리포터 등)
+│   ├── pages/                         # 라우팅 페이지 컴포넌트
+│   │   ├── ai-assistant/              # AI 리포터 관련 페이지
+│   │   ├── mypage/                    # 마이페이지 관련 페이지
+│   │   ├── BasicVoice.js              # 기본 보이스팩 페이지
+│   │   ├── JoinAgreement.js           # 회원가입 동의 페이지
+│   │   ├── Landing.js                 # 랜딩 페이지
+│   │   ├── Quote.js                   # 오늘의 명언 페이지
+│   │   ├── RememberVoice.js           # 리멤버 보이스 페이지
+│   │   ├── SignIn.js                  # 로그인 페이지
+│   │   ├── SignUp.js                  # 회원가입 페이지
+│   │   ├── VoiceCreate.js             # 보이스팩 생성 페이지
+│   │   └── VoiceStore.js              # 보이스팩 스토어 페이지
+│   ├── utils/                         # 유틸리티 함수 (axios, s3Uploader, Zustand 스토어 등)
+│   ├── App.css                        # App 컴포넌트 스타일
+│   ├── App.js                         # 메인 애플리케이션 컴포넌트
+│   ├── index.css                      # 전역 스타일 (Tailwind 초기화 포함)
+│   └── index.js                       # 애플리케이션 진입점
+├── .gitignore
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+└── vercel.json                        # Vercel 배포 설정
 ```
 
 ---
@@ -146,15 +151,15 @@ npm run build
 ---
 
 ## 배포 
-Vercel 자동 배포
+**Vercel 자동 배포**  
+
 이 프로젝트는 Vercel 플랫폼을 사용하여 자동 배포됩니다.
+기본적으로 `main` 또는 `release/*` 브랜치에 푸시되면 자동으로 배포가 진행됩니다.
+`vercel.json` 파일을 통해 redirect, clean URL, rewrite 등의 설정을 정의합니다.
 
-기본적으로 main 또는 release/* 브랜치에 푸시되면 자동으로 배포가 진행됩니다.
+예시: `vercel.json`
 
-vercel.json 파일을 통해 redirect, clean URL, rewrite 등의 설정을 정의합니다.
-
-예시: vercel.json
-```
+```json
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }

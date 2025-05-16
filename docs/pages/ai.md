@@ -28,7 +28,7 @@ ZONOS는 Zyphra에서 개발한 오픈소스 텍스트-음성 변환(TTS) 솔루
 ## 주요 기능
 - **화자 등록**: 사용자 음성을 등록하여 개인화된 음성팩 생성
 - **음성 합성**: 텍스트를 사용자 음성으로 변환
-- **AI 비서**: 카테고리와 작성 스타일에 맞는 응답 생성 및 음성 합성
+- **AI 리포터**: 카테고리와 작성 스타일에 맞는 응답 생성 및 음성 합성
 - **감정 표현**: 음성에 다양한 감정 부여 가능
 
 ---
@@ -52,7 +52,7 @@ AI/
 │   ├── voice_synthesizer.py   # 음성 합성 핵심 로직
 │   ├── storage_manager.py     # S3 스토리지 관리 
 │   ├── sqs_handler.py         # AWS SQS 메시지 처리
-│   ├── synthesis_handler.py   # 음성 합성 및 AI 비서 요청 처리
+│   ├── synthesis_handler.py   # 음성 합성 및 AI 리포터 요청 처리
 │   ├── text_converter.py      # 텍스트 변환 및 전처리
 │   └── voice_registration_handler.py # 화자 등록 및 음성팩 생성
 ├── config/                    # 설정 파일 디렉토리
@@ -75,7 +75,7 @@ AI/
 - 감정 조절 가능
 - S3에 결과 저장 및 SQS로 알림
 
-**AI 비서 (/assistant)**
+**AI 리포터 (/assistant)**
 - 프롬프트, 카테고리, 작성 스타일 기반 응답 생성
 - 생성된 응답을 음성으로 합성
 - S3에 결과 저장 및 SQS로 알림
