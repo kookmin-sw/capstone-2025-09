@@ -12,8 +12,8 @@ parent: 메뉴얼
 - [기술 스택](#기술-스택)
 - [디렉토리 구조](#디렉토리-구조)
 - [API 엔드포인트](#api-엔드포인트)
+- [환경 변수 설정](#환경-변수-설정)
 - [설치 및 실행](#설치-및-실행)
-- [개발자 환경 설정](#개발자-환경-설정)
 - [클라우드 런 배포](#클라우드-런-배포)
 
 ## 소개
@@ -69,81 +69,44 @@ AI/
 4. **상태 확인 (/health)**
    - 서비스 상태 모니터링
 
+## 환경 변수 설정
+프로젝트 루트에 `.env` 파일을 다음과 같이 생성합니다:
+
+```
+# OpenAI API 키
+OPENAI_API_KEY=sk-your-api-key-here
+
+# AWS S3 설정
+AWS_ACCESS_KEY_ID=your-access-key
+AWS_SECRET_ACCESS_KEY=your-secret-key
+AWS_DEFAULT_REGION=ap-northeast-2
+AWS_BUCKET_NAME=your-bucket-name
+
+# AWS SQS 설정
+AWS_SQS_REGISTER_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+AWS_SQS_SYNTHESIZE_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+AWS_SQS_ASSISTANT_QUEUE_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
+```
+
 ## 설치 및 실행
 ```bash
 # 도커 이미지 빌드
 docker build -t zonos-tts .
-```
-
-### 환경 변수 설정
-프로젝트 루트에 `.env` 파일을 다음과 같이 생성합니다:
-
-```
-# OpenAI API 키
-OPENAI_API_KEY=sk-your-api-key-here
-
-# AWS S3 설정
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_DEFAULT_REGION=ap-northeast-2
-S3_BUCKET_NAME=your-bucket-name
-
-# AWS SQS 설정
-SQS_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
-```
-
-```bash
 # 도커 컨테이너 실행 (환경 변수 포함)
 docker run -p 8080:8080 --env-file .env zonos-tts
 ```
 
-## 개발자 환경 설정
-```bash
-# Python 버전 설정
-python -m venv venv
-source venv/bin/activate  # 윈도우: venv\Scripts\activate
-
-# 의존성 설치
-pip install uv
-uv pip install -e .
-
-# Python-dotenv 패키지 설치 (환경 변수 로드용)
-pip install python-dotenv
-```
-
-### 환경 변수 설정
-프로젝트 루트에 `.env` 파일을 다음과 같이 생성합니다:
-
-```
-# OpenAI API 키
-OPENAI_API_KEY=sk-your-api-key-here
-
-# AWS S3 설정
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_DEFAULT_REGION=ap-northeast-2
-S3_BUCKET_NAME=your-bucket-name
-
-# AWS SQS 설정
-SQS_URL=https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name
-```
-
-```bash
-# 서버 실행 (환경 변수 적용)
-uvicorn main:app --host 0.0.0.0 --port 8080
-```
 
 ## 클라우드 런 배포
 ZONOS 서비스는 Google Cloud Run을 통해 배포됩니다. 모델의 성능을 위해 GPU를 사용하는 배포 과정은 다음과 같습니다:
 
 1. **GPU 사용을 위한 사전 준비**
-```bash
-# GPU 할당량 확인
-gcloud compute quotas list --project=[프로젝트-ID] | grep -i gpu
 
-# 필요한 경우 GPU 할당량 증가 요청 (콘솔에서 진행)
-# https://console.cloud.google.com/iam-admin/quotas
+```bash
+gcloud compute quotas list --project=[프로젝트-ID] | grep -i gpu
 ```
+해당 링크에서 GPU 할당량 증가 요청을 승인받아야 합니다.
+https://console.cloud.google.com/iam-admin/quotas
 
 2. **컨테이너 이미지 빌드 및 푸시**
 ```bash
@@ -154,8 +117,8 @@ docker build -t gcr.io/[프로젝트-ID]/zonos-tts-gpu:latest .
 docker push gcr.io/[프로젝트-ID]/zonos-tts-gpu:latest
 ```
 
-3. **Secret Manager에 환경 변수 등록**
-Cloud Run은.env 파일을 직접 지원하지 않기 때문에, Google Secret Manager를 사용하여 민감한 환경 변수를 저장합니다. 다음 명령어로 필요한 비밀들을 등록합니다:
+3. **Secret Manager에 환경 변수 등록**  
+Cloud Run은 .env 파일을 직접 지원하지 않기 때문에, Google Secret Manager를 사용하여 민감한 환경 변수를 저장합니다. 다음 명령어로 필요한 비밀들을 등록합니다:
 
 ```bash
 # OpenAI API 키 등록
@@ -170,7 +133,7 @@ gcloud secrets create s3-bucket-name --data-file=- <<< "your-bucket-name"
 gcloud secrets create sqs-url --data-file=- <<< "https://sqs.ap-northeast-2.amazonaws.com/your-account-id/your-queue-name"
 ```
 
-4. **Cloud Run 서비스 배포**
+4. **Cloud Run 서비스 배포**  
 등록한 Secret Manager의 비밀들을 환경 변수로 사용하여 GPU가 지원되는 Cloud Run 서비스를 배포합니다:
 
 ```bash
