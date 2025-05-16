@@ -249,7 +249,7 @@ Lambda 콘솔에서 직접 함수를 테스트할 수 있습니다.
 2.  "새 이벤트 생성" 선택.
 3.  이벤트 이름 입력.
 4.  **이벤트 템플릿**: 다양한 서비스의 이벤트 형식을 선택할 수 있습니다. AWS MQ for RabbitMQ의 경우, 사용 중인 AWS MQ for RabbitMQ 구성에 맞는 이벤트 템플릿을 사용하거나 직접 JSON을 작성합니다. 실제 AWS MQ for RabbitMQ 메시지 구조를 반영해야 합니다.
-    ```json
+    ```text
     {
       "jobId": "unique-job-id-123",
       "userId": "user-abc",
