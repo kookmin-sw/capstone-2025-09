@@ -1,11 +1,11 @@
 ---
-title: "서버리스 인프라 활용 가이드"
+title: "서버리스 인프라 개발 가이드"
 layout: default
 nav_order: 5
 parent: 가이드
 has_toc: false
 ---
-# **서버리스 인프라 활용 가이드**
+# **서버리스 인프라 개발 가이드**
 
 {: .no_toc }
 
