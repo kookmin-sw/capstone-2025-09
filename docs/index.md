@@ -97,7 +97,7 @@ permalink: /
 <br>
 
 <p align="center">
-  <img src="assets/people.png" width="100%" alt="COVOS people">
+  <img src="assets/people_horizontal.jpg" width="100%" alt="COVOS people">
 </p>
 
 ---
