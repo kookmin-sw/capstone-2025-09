@@ -52,8 +52,12 @@ class VoiceSynthesizer:
     ) -> tuple[bytes, float]:
         """음성 합성의 핵심 로직을 처리하는 내부 메소드"""
         try:
-            # 텍스트 전처리
-            sentences = convert_text(text)
+            # 텍스트 전처리 및 안전성 검사
+            is_safe, sentences = convert_text(text)
+
+            if not is_safe:
+                raise ValueError("부적절한 표현이 감지되어 음성 합성을 진행할 수 없습니다.")
+
             total_sentences = len(sentences)
             
             audio_chunks = []
