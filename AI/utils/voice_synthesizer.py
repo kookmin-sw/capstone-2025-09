@@ -188,6 +188,7 @@ class VoiceSynthesizer:
         prompt: str,
         voicepackName: str,
         userId: int,
+        jobId: int,
         speed: float = 1.0,
         emotionIndex: int = 0,
     ) -> tuple[str, float]:
@@ -209,7 +210,7 @@ class VoiceSynthesizer:
 
             # S3에 저장
             timestamp = time.strftime('%Y%m%d_%H%M%S')
-            filename = f"speech_{timestamp}.wav"
+            filename = f"speech_{jobId}_{timestamp}.wav"
             file_path = f"generated_audio/{userId}/{voicepackName}/{filename}"
 
             audio_url = self.storage_manager.save_audio(audio_data, file_path)

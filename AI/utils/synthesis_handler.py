@@ -36,6 +36,7 @@ async def process_synthesis_request(
             prompt=prompt,
             voicepackName=voicepackName,
             userId=userId,
+            jobId=jobId,
             speed=speed,
             emotionIndex=emotionIndex
         )
