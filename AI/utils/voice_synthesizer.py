@@ -183,14 +183,14 @@ class VoiceSynthesizer:
                 os.remove(temp_file_path)
 
 
-    async def synthesize_speech(
+    def synthesize_speech(
         self,
         prompt: str,
         voicepackName: str,
         userId: int,
         speed: float = 1.0,
         emotionIndex: int = 0,
-    ) -> dict:
+    ) -> tuple[str, float]:
         """베이직 보이스에 사용되는 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):
@@ -224,7 +224,7 @@ class VoiceSynthesizer:
             raise
         
             
-    async def synthesize_assistant(
+    def synthesize_assistant(
         self,
         prompt: str,
         voicepackName: str,
@@ -232,7 +232,7 @@ class VoiceSynthesizer:
         writingStyle: str,
         nowTime: str,
         speed: float = 1.0
-    ):
+    ) -> tuple[str, float]:
         """AI 비서용 음성 합성"""
         try:
             if not self.storage_manager.speaker_exists(voicepackName):
@@ -242,8 +242,8 @@ class VoiceSynthesizer:
             file_path = f"ai-assistant/{voicepackName}/{nowTime}/{category}/{writingStyle}.wav"
             
             # 파일이 이미 존재하는지 확인
-            existing_url = self.storage_manager.get_audio_url(file_path)
-            if existing_url:
+            existing_audio_url = self.storage_manager.get_audio_url(file_path)
+            if existing_audio_url:
                 logger.info(f"Found existing audio file: {file_path}")
                 return file_path, 0
                 
