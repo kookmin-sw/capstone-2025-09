@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import Landing from './pages/Landing';
 
 // Lazy-loaded 페이지 컴포넌트
-const Landing = lazy(() => import('./pages/Landing'));
 const SignIn = lazy(() => import('./pages/SignIn'));
 const SignUp = lazy(() => import('./pages/SignUp'));
 const BasicVoice = lazy(() => import('./pages/BasicVoice'));
