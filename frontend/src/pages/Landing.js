@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-new.svg';
 import BlurBackgrounds from '../components/visual/BlurBackground';
@@ -261,19 +261,21 @@ const Landing = () => {
             transition={{ duration: 1 }}
           >
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
-              <ambientLight intensity={0.3} />
-              <directionalLight
-                position={[5, 5, 5]}
-                intensity={1.2}
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
-              />
-              <WaveSphere />
-              <OrbitControls
-                enableZoom={false}
-                autoRotate
-                autoRotateSpeed={0.5}
-              />
+              <Suspense fallback={null}>
+                <ambientLight intensity={0.3} />
+                <directionalLight
+                  position={[5, 5, 5]}
+                  intensity={1.2}
+                  shadow-mapSize-width={1024}
+                  shadow-mapSize-height={1024}
+                />
+                <WaveSphere />
+                <OrbitControls
+                  enableZoom={false}
+                  autoRotate
+                  autoRotateSpeed={0.5}
+                />
+              </Suspense>
             </Canvas>
           </motion.div>
 
