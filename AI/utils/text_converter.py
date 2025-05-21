@@ -1,5 +1,5 @@
-import ast
-from typing import List
+import json
+from typing import List, Tuple
 
 from config.settings import OPENAI_CONFIG
 from openai import OpenAI
@@ -10,20 +10,46 @@ if not _API_KEY:
 client = OpenAI(api_key=_API_KEY)
 
 SYSTEM_PROMPT = """
-당신은 대한민국 뉴스 원고를 음성 합성용 대본으로 교정하는 전문가입니다.
+[prompt]
+다음 한국어 뉴스 원고를 음성 합성용 대본으로 변환하고 안전성을 평가하십시오.
 
-규칙
-1. 모든 아라비아 숫자를 한국어로 완전하게 풀어쓰십시오.
-   - 예) 2025년 5월 19일 → 이천이십오년 오월 십구일
-         8명 → 여덟명
-         50% → 오십퍼센트
-2. 숫자 뒤 단위(년·명·% 등)는 그대로 유지하되 숫자만 변환하십시오.
-3. 맞춤법·고유명사·어순은 절대로 변경하지 마십시오.
-4. 한 문장이 40음절을 넘으면 의미가 자연스러운 쉼표(,)·접속어(그리고·하지만 등) 지점에서
-   추가로 문장을 나누어 주십시오.
-5. 부가 설명이나 요약 없이 **결과 문장만** 제공하십시오.
-6. 마크다운은 사용하지 않습니다.
-7. **최종 출력은 ["문장1", "문장2", ...] 형태의 엄격한 파이썬 리스트 리터럴로만 출력**하십시오.
+작업 절차:
+1. 모든 아라비아 숫자를 한국어 완전표기(예: 2025년 5월 19일→이천이십오년 오월 십구일, 50%→오십퍼센트)로 변환하되, 단위(년·명·% 등)는 그대로 유지합니다.
+2. 맞춤법·고유명사·어순은 절대 변경하지 마십시오.
+3. 한 문장의 음절 수가 40음을 넘으면 자연스러운 쉼표(,)나 접속어(그리고·하지만 등) 지점에서 분할하십시오.
+4. 부적절한 내용(욕설·증오·불법 행위·사기·보이스피싱 등)이 포함되어 있는지 판단합니다.
+   - 욕설 검출은 반드시 ‘어절 단위’로만 수행합니다.  
+     (예: “시발”은 필터링하나 “시발점”·“시발역” 등 다른 어절 전체는 필터링하지 않음)
+5. **최종 출력은 다음 JSON 형식의 문자열로만 출력하십시오:**
+    {
+     "safe": [True/False],
+     "Text": ["문장1", "문장2", ...]
+    }
+   "safe" 키의 값은 텍스트가 안전하면 True, 그렇지 않으면 False입니다.
+   "Text" 키의 값은 규칙에 따라 변환되고 분할된 문장들의 리스트입니다. 만약 텍스트가 안전하지 않아 "safe"가 False라면, "Text"는 빈 리스트([])여야 합니다.
+
+예시 1. 욕설로 간주될 언어도 없고 숫자가 있는 텍스트  
+입력: “오늘 2025년 12월 31일에 100명이 행사에 참여했습니다.”  
+출력: {
+    "safe":true,
+    "text":["오늘 이천이십오년 십이월 삼십일일에","백명이 행사에 참여했습니다."]
+    }
+
+예시 2. 욕설 어절이 없지만 어근이 포함된 다른 어절  
+입력: “이것은 우리에게 새로운 시발점이 될 것이다.”  
+출력: {
+    "safe":true,
+    "text":["이것은 우리에게 새로운 시발점이 될 것이다."]
+    }
+
+예시 3. 욕설 어절이 포함된 경우  
+입력: “그가 순간 분노하여 시발을 외쳤다.”  
+출력: {
+    "safe":false,
+    "text":[]
+    }
+
+지금부터 입력된 텍스트를 위 규칙에 따라 처리해 주십시오.
 """
 
 def convert_text(
@@ -31,7 +57,7 @@ def convert_text(
     model: str = "gpt-4o-mini",
     *,
     temperature: float = 0.0,
-) -> List[str]:
+) -> Tuple[bool, List[str]]:
     """
     Parameters
     ----------
@@ -43,9 +69,10 @@ def convert_text(
         창의성 제어용 파라미터. 0이면 가장 일관된 결과.
 
     Returns
-    -------
-    List[str]
-        숫자 변환 및 문장 분할이 완료된 문장 리스트.
+    ------
+    Tuple[bool, List[str]]
+        (안전성 여부, 숫자 변환 및 문장 분할이 완료된 문장 리스트).
+        안전하지 않은 경우 (False, [])를 반환.
     """
     completion = client.chat.completions.create(
         model=model,
@@ -54,19 +81,39 @@ def convert_text(
             {"role": "user", "content": text},
         ],
         temperature=temperature,
+        response_format={ "type": "json_object" }
     )
 
     raw_content = completion.choices[0].message.content.strip()
     try:
-        # 모델이 반환한 리스트 리터럴을 안전하게 파싱
-        sentences: List[str] = ast.literal_eval(raw_content)
-        if not isinstance(sentences, list) or not all(isinstance(s, str) for s in sentences):
-            raise ValueError
+        parsed_response = json.loads(raw_content)
         
-    except Exception as exc:  # 파싱 실패
+        if not isinstance(parsed_response, dict) or \
+           "safe" not in parsed_response or not isinstance(parsed_response["safe"], bool) or \
+           "Text" not in parsed_response or not isinstance(parsed_response["Text"], list) or \
+           not all(isinstance(s, str) for s in parsed_response["Text"]):
+            raise ValueError("응답 형식이 올바르지 않습니다.")
+
+        is_safe = parsed_response["safe"]
+        sentences = parsed_response["Text"]
+
+        if not is_safe and sentences:
+             sentences = []
+        
+    except json.JSONDecodeError as exc:
         raise ValueError(
-            "모델 응답을 리스트로 파싱하지 못했습니다. "
+            "모델 응답을 JSON으로 파싱하지 못했습니다. "
+            f"원본 응답: {raw_content!r}"
+        ) from exc
+    except ValueError as exc:
+        raise ValueError(
+            f"모델 응답 형식이 예상과 다릅니다. {str(exc)} "
+            f"원본 응답: {raw_content!r}"
+        ) from exc
+    except Exception as exc:
+        raise ValueError(
+            "모델 응답 처리 중 알 수 없는 오류가 발생했습니다. "
             f"원본 응답: {raw_content!r}"
         ) from exc
 
-    return sentences
+    return is_safe, sentences

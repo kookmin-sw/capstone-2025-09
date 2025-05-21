@@ -39,8 +39,8 @@ async def process_synthesis_request(
         )
         
         if audio_url is None:
-            raise ValueError(f"failed to synthesize speech")
-        
+             raise ValueError(f"failed to synthesize speech, audio_url is None")
+
         logger.info(f"speech synthesized: duration={duration} seconds")
         
         await sqs_handler.send_synthesize_message(
@@ -52,21 +52,21 @@ async def process_synthesis_request(
         )
         
     except Exception as e:
-        logger.error(f"failed to synthesize speech: {str(e)}", exc_info=True)
-        # 실패 메시지 전송
+        logger.error(f"Error during speech synthesis: {str(e)}", exc_info=True)
+        error_message = str(e)
+        
         try:
             await sqs_handler.send_synthesize_message(
                 jobId=jobId,
-                success=False,
+                success=False, 
                 additional_params={
-                    "errorMessage": str(e)
+                    "errorMessage": error_message
                 }
             )
-            
         except Exception as sqs_error:
             logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True)
-            
-            
+
+
 async def process_assistant_request(
     prompt: str,
     voicepackName: str,
@@ -100,7 +100,7 @@ async def process_assistant_request(
         )     
         
         if audio_url is None:
-            raise ValueError(f"failed to synthesize assistant speech")
+             raise ValueError(f"failed to synthesize assistant speech, audio_url is None")
         
         logger.info(f"assistant synthesized: duration={duration} seconds")
         
@@ -113,14 +113,15 @@ async def process_assistant_request(
         )
         
     except Exception as e:
-        logger.error(f"failed to synthesize assistant speech: {str(e)}", exc_info=True)
-        # 실패 메시지 전송
+        logger.error(f"Error during assistant synthesis: {str(e)}", exc_info=True)
+        error_message = str(e)
+            
         try:
             await sqs_handler.send_assistant_message(
                 jobId=jobId,
                 success=False,
                 additional_params={
-                    "errorMessage": str(e)
+                    "errorMessage": error_message
                 }
             )
             
