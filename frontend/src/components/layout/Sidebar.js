@@ -9,7 +9,6 @@ import {
   Quote,
   BookUser,
 } from 'lucide-react';
-import logo from '../../assets/logo-new.svg';
 import useUserStore from '../../utils/userStore';
 
 const Sidebar = () => {
@@ -37,7 +36,7 @@ const Sidebar = () => {
           to="/"
           className="flex content-center justify-center text-center font-bold text-xl mb-20"
         >
-          <img src={logo} alt="COVOS" width={120} />
+          <img src="/assets/logo-new.svg" alt="COVOS" width={120} />
         </Link>
         <Link
           to="/voice-create"
