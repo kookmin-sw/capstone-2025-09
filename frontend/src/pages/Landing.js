@@ -261,7 +261,20 @@ const Landing = () => {
             transition={{ duration: 1 }}
           >
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
-              <Suspense fallback={null}>
+              <Suspense
+                fallback={
+                  <mesh>
+                    <torusGeometry args={[1, 0.3, 16, 100]} />
+                    <meshStandardMaterial
+                      color="#ffffff"
+                      emissive="#ffffff"
+                      emissiveIntensity={2}
+                      roughness={0.1}
+                      metalness={0.3}
+                    />
+                  </mesh>
+                }
+              >
                 <ambientLight intensity={0.3} />
                 <directionalLight
                   position={[5, 5, 5]}
@@ -330,7 +343,7 @@ const Landing = () => {
             나만의 보이스팩을 업로드하고 수익을 창출하세요
           </p>
 
-          {['top', 'bottom'].map((position, idx) => {
+          {['top', 'bottom'].map((position) => {
             const voicepackList =
               position === 'top' ? topVoicepacks : bottomVoicepacks;
 
