@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import LP from '../../assets/lp.svg';
 import VoicePackModal from './VoicePackModal';
 import useUserStore from '../../utils/userStore';
 
@@ -37,12 +38,12 @@ const VoicePack = ({ pack, type = 'voicestore', onRefresh }) => {
           } mx-auto mb-2 flex justify-center items-center`}
         >
           <img
-            src={pack.imageUrl || '/assets/lp.svg'}
+            src={pack.imageUrl || LP}
             alt="VoicePack Cover"
             className="aspect-square w-full object-cover rounded-2xl"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = '/assets/lp.svg';
+              e.currentTarget.src = LP;
             }}
           />
         </div>

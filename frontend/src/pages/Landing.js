@@ -1,15 +1,20 @@
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import logo from '../assets/logo-new.svg';
 import BlurBackgrounds from '../components/visual/BlurBackground';
 import WaveAninmation from '../components/visual/WaveAninmation';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import WaveSphere from '../components/visual/WaveSphere';
 import GradientButton from '../components/common/GradientButton';
-import LandingpageVoicepack from '../components/common/LandingpageVoicepack';
 import useUserStore from '../utils/userStore';
 import { LogOut } from 'lucide-react';
 import { motion } from 'framer-motion';
+import reportereImage from '../assets/landing-reporter.png';
+import quoteImage from '../assets/landing-quote.png';
+import basicVoiceImage from '../assets/landing-basicVoice.png';
+import rememberVoiceImage from '../assets/landing-rememberVoice.png';
+import LandingpageVoicepack from '../components/common/LandingpageVoicepack';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -52,28 +57,28 @@ const Landing = () => {
       title: '텍스트를 바로 AI 보이스로',
       description:
         '보이스팩을 선택하고 원하는 문장을 입력하면\n즉시 나만의 음성으로 변환해줍니다.\n\n광고 멘트, 스크립트 연습 등 다양한 활용 가능!',
-      image: '/assets/landing-basicVoice.png',
+      image: basicVoiceImage,
     },
     {
       badge: 'AI 리포터',
       title: '맞춤 정보를 매일 음성으로',
       description:
         '날씨, 일정, 뉴스, 주식 등 설정한 정보를\n내가 원할 때마다 선택한 보이스팩으로 들려줍니다.\n\n나만의 맞춤형 리포터를 경험해 보세요.',
-      image: '/assets/landing-reporter.png',
+      image: reportereImage,
     },
     {
       badge: '오늘의 명언',
       title: '영감을 주는 하루 한 마디',
       description:
         '매일 아침, 오늘의 명언을 당신의 AI 보이스로 들어보세요.\n\n출근길, 공부 시간, 잠들기 전…\n당신의 하루를 따뜻한 목소리로 시작하고 마무리해보세요.',
-      image: '/assets/landing-quote.png',
+      image: quoteImage,
     },
     {
       badge: '리멤버 보이스',
       title: '기억 속 목소리를 다시 만나다',
       description:
         '소중한 사람의 목소리를 AI로 되살릴 수 있어요.\n\n다시는 들을 수 없을 줄 알았던 그 목소리,\n짧은 영상만으로도 그리운 사람의 추억을 생생하게 간직해보세요.',
-      image: '/assets/landing-rememberVoice.png',
+      image: rememberVoiceImage,
     },
   ];
 
@@ -205,8 +210,10 @@ const Landing = () => {
 
   const totalCount = (topVoicepacks.length + bottomVoicepacks.length) * 2;
 
+  const shuffledGradients = shuffle(allGradients).slice(0, totalCount);
+
   // 그냥 공통으로 하나만 씀
-  const gradientList = shuffle(allGradients).slice(0, totalCount);
+  const gradientList = shuffledGradients;
 
   return (
     <div className="relative overflow-hidden">
@@ -217,7 +224,7 @@ const Landing = () => {
 
       {/* Header */}
       <header className="flex justify-between items-end h-[96px] px-28 z-10 relative">
-        <img src="/assets/logo-new.svg" alt="COVOS" width={150} />
+        <img src={logo} alt="COVOS" width={150} />
 
         {user ? (
           <button
@@ -254,7 +261,20 @@ const Landing = () => {
             transition={{ duration: 1 }}
           >
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
-              <Suspense fallback={null}>
+              <Suspense
+                fallback={
+                  <mesh>
+                    <torusGeometry args={[1, 0.3, 16, 100]} />
+                    <meshStandardMaterial
+                      color="#ffffff"
+                      emissive="#ffffff"
+                      emissiveIntensity={2}
+                      roughness={0.1}
+                      metalness={0.3}
+                    />
+                  </mesh>
+                }
+              >
                 <ambientLight intensity={0.3} />
                 <directionalLight
                   position={[5, 5, 5]}
