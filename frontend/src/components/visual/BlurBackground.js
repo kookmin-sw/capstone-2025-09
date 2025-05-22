@@ -1,7 +1,7 @@
 import React from 'react';
-import blur100 from '../../assets/blur100.svg';
 
 const BlurBackgrounds = () => {
+  const blur100 = '/assets/blur100.svg';
   return (
     <>
       {/* 왼쪽 위에 크게 */}
