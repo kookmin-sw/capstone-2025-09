@@ -3,12 +3,51 @@ import logging
 from fastapi.responses import JSONResponse
 from utils.voice_registration_handler import process_voice_registration
 from utils.synthesis_handler import process_synthesis_request, process_assistant_request
+from contextlib import asynccontextmanager
+from utils.voice_synthesizer import VoiceSynthesizer
+from zonos.utils import DEFAULT_DEVICE as device
+import torch
 
 logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+synthesizer_instance = None
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global synthesizer_instance
+    logger.info("Application startup...")
+    try:
+        logger.info("Initializing VoiceSynthesizer and performing initial synthesis...")
+        synthesizer_instance = VoiceSynthesizer()
+
+        initial_text = "애플리케이션 시작 초기화 음성입니다."
+        embedding_dim = 128
+        dummy_features = torch.randn(1, embedding_dim, dtype=torch.bfloat16).to(device)
+        initial_emotion_index = 0
+
+        audio_data, duration = synthesizer_instance._synthesize_speech_internal(
+            text=initial_text,
+            features=dummy_features,
+            speed=1.0,
+            language="ko",
+            emotionIndex=initial_emotion_index
+        )
+        if audio_data and duration > 0:
+            logger.info(f"Initial voice synthesis successful. Duration: {duration}s. Audio data length: {len(audio_data)}")
+        else:
+            logger.warning("Initial voice synthesis may have failed or produced no audio.")
+        logger.info("VoiceSynthesizer initialized and initial synthesis complete.")
+    except Exception as e:
+        logger.error(f"Error during application startup (initial synthesis): {e}")
+    
+    yield
+
+    logger.info("Application shutdown...")
+    synthesizer_instance = None
+
+app = FastAPI(lifespan=lifespan)
 logging.info("Starting server... ----------------------------------------------------------------------------")
 
 @app.post("/register_speaker")
@@ -108,7 +147,6 @@ async def assistant_endpoint(
     except Exception as e:
         logger.error(f"failed to synthesize: {str(e)}")
         raise HTTPException(status_code=500, detail="AI 비서 음성 합성 요청 처리 중 오류가 발생했습니다.")
-
 
 @app.get("/health")
 def health_check():
