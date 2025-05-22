@@ -112,7 +112,7 @@ class VoiceSynthesizer:
             logger.error(f"Error during synthesis: {e}")
             raise
 
-    async def extract_speaker_features(
+    def extract_speaker_features(
         self,
         voicepackId: str,
         file_content: bytes
