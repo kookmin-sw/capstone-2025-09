@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react';
-import LP from '../../assets/lp.svg';
 import { BadgeCent } from 'lucide-react';
 import useVoicepackDetail from '../../hooks/useVoicepackDetail';
 import useBuyVoicepack from '../../hooks/useBuyVoicepack';
@@ -158,12 +157,12 @@ const VoicePackModal = ({
 
         <div className="sm:w-1/2 flex flex-col items-center justify-center bg-violet-50 rounded-xl p-4">
           <img
-            src={pack.imageUrl || LP}
+            src={pack.imageUrl || '/assets/lp.svg'}
             alt="VoicePack Cover"
             className="w-[140px] h-[140px] aspect-square object-cover rounded-2xl mb-4"
             onError={(e) => {
               e.currentTarget.onerror = null;
-              e.currentTarget.src = LP;
+              e.currentTarget.src = '/assets/lp.svg';
             }}
           />
           {audioUrl && (
