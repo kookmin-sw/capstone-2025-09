@@ -46,7 +46,11 @@ const BasicVoice = () => {
           alert("음성 생성이 완료되었습니다.");
           setIsGenerating(false);
         } else if (result.status === "FAILED") {
-          alert("음성 생성에 실패했습니다.");
+          if (result.errorMessage === "부적절한 표현이 감지되어 음성 합성을 진행할 수 없습니다.") {
+            alert(result.errorMessage);
+          } else {
+            alert("음성 합성에 실패했습니다.");
+          }
           setIsGenerating(false);
         } else {
           setTimeout(poll, POLLING_INTERVAL);

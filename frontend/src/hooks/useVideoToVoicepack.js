@@ -74,10 +74,16 @@ const useVideoToVoicepack = () => {
         const audioRes = await fetch(result.resultUrl);
         const audioBlob = await audioRes.blob();
         return URL.createObjectURL(audioBlob);
+      } else if (result.status === 'FAILED') {
+        if (
+          result.errorMessage ===
+          '부적절한 표현이 감지되어 음성 합성을 진행할 수 없습니다.'
+        ) {
+          throw Error(result.errorMessage);
+        } else {
+          throw Error('음성 합성에 실패했습니다.');
+        }
       }
-
-      if (result.status === 'FAILED') throw new Error('음성 합성 실패');
-
       return await pollSynthesis(retry + 1);
     };
 
