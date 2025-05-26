@@ -1,4 +1,5 @@
 import logging
+from fastapi.concurrency import run_in_threadpool
 from .voice_synthesizer import VoiceSynthesizer
 from .storage_manager import StorageManager
 from .sqs_handler import SQSHandler
@@ -29,17 +30,19 @@ async def process_synthesis_request(
     try:
         logger.info(f"starting speech synthesis: voicepackName={voicepackName}, prompt={prompt}, userId={userId}, jobId={jobId}, speed={speed}")
         
-        # 음성 합성 시작
-        audio_url, duration = await voice_synthesizer.synthesize_speech(
+        # VoiceSynthesizer의 동기화된 synthesize_speech 함수를 run_in_threadpool로 실행
+        audio_url, duration = await run_in_threadpool(
+            voice_synthesizer.synthesize_speech, 
             prompt=prompt,
             voicepackName=voicepackName,
             userId=userId,
+            jobId=jobId,
             speed=speed,
             emotionIndex=emotionIndex
         )
         
-        if audio_url is None:
-             raise ValueError(f"failed to synthesize speech, audio_url is None")
+        if not audio_url:
+            raise ValueError(f"Synthesis failed, audio_url is empty or None")
 
         logger.info(f"speech synthesized: duration={duration} seconds")
         
@@ -52,7 +55,7 @@ async def process_synthesis_request(
         )
         
     except Exception as e:
-        logger.error(f"Error during speech synthesis: {str(e)}", exc_info=True)
+        logger.error(f"failed to process_synthesis_request: {str(e)}")
         error_message = str(e)
         
         try:
@@ -64,7 +67,8 @@ async def process_synthesis_request(
                 }
             )
         except Exception as sqs_error:
-            logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True)
+            logger.error(f"failed to send SQS message: {str(sqs_error)}")
+        raise
 
 
 async def process_assistant_request(
@@ -90,17 +94,19 @@ async def process_assistant_request(
     try:
         logger.info(f"starting assistant synthesis: voicepackName={voicepackName}, prompt={prompt}, jobId={jobId}, category={category}, writingStyle={writingStyle}, nowTime={nowTime}, speed={speed}")
 
-        audio_url, duration = await voice_synthesizer.synthesize_assistant(
+        # VoiceSynthesizer의 동기화된 synthesize_assistant 함수를 run_in_threadpool로 실행
+        audio_url, duration = await run_in_threadpool(
+            voice_synthesizer.synthesize_assistant,
             prompt=prompt,
             voicepackName=voicepackName,
-            speed=speed,
             category=category,
             writingStyle=writingStyle,
-            nowTime=nowTime
-        )     
+            nowTime=nowTime,
+            speed=speed
+        )
         
-        if audio_url is None:
-             raise ValueError(f"failed to synthesize assistant speech, audio_url is None")
+        if not audio_url:
+            raise ValueError(f"Assistant synthesis failed, audio_url is empty or None")
         
         logger.info(f"assistant synthesized: duration={duration} seconds")
         
@@ -113,7 +119,7 @@ async def process_assistant_request(
         )
         
     except Exception as e:
-        logger.error(f"Error during assistant synthesis: {str(e)}", exc_info=True)
+        logger.error(f"failed to process_assistant_request: {str(e)}")
         error_message = str(e)
             
         try:
@@ -126,4 +132,5 @@ async def process_assistant_request(
             )
             
         except Exception as sqs_error:
-            logger.error(f"failed to send SQS message: {str(sqs_error)}", exc_info=True)
+            logger.error(f"failed to send SQS message: {str(sqs_error)}")
+        raise

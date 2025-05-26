@@ -1,4 +1,5 @@
 import logging
+from fastapi.concurrency import run_in_threadpool
 from .voice_synthesizer import VoiceSynthesizer
 from .sqs_handler import SQSHandler
 
@@ -23,7 +24,8 @@ async def process_voice_registration(
     try:
         # 화자 특징 추출
         logger.info(f"extracting speaker features: voicepackId={voicepackId}")
-        features_result = await voice_synthesizer.extract_speaker_features(
+        features_result = await run_in_threadpool(
+            voice_synthesizer.extract_speaker_features,
             voicepackId=voicepackId,
             file_content=file_content
         )
