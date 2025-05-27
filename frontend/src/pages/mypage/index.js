@@ -57,6 +57,7 @@ const MyPage = () => {
           { key: 'payments', label: '크레딧 관리' },
         ].map((t) => (
           <button
+            aria-label="마이페이지 탭 버튼"
             key={t.key}
             onClick={() => setTab(t.key)}
             className={`px-3 py-1 rounded-t ${

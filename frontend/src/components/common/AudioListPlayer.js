@@ -175,6 +175,7 @@ const AudioListPlayer = ({ audioUrls }) => {
     <div className="w-full flex flex-col space-y-4 px-6 py-5">
       <div className="flex items-center justify-between space-x-4">
         <button
+          aria-label="Play/Pause"
           onClick={togglePlay}
           className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition"
         >

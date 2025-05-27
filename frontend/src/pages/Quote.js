@@ -138,6 +138,7 @@ const Quote = () => {
 
         <div className="mt-4 flex justify-end">
           <GradientButton
+            aria-label="생성하기 버튼"
             className="px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSynthesize}
             disabled={!selectedVoiceId || !scriptText || isGenerating}
@@ -154,6 +155,7 @@ const Quote = () => {
               <AudioPlayer audioUrl={audioUrl} />
             </div>
             <GradientButton
+              aria-label="다운로드 버튼"
               className="px-6 py-3"
               onClick={() => {
                 const fileName = prompt('저장할 파일 이름을 입력해주세요.');

@@ -228,6 +228,7 @@ const Landing = () => {
 
         {user ? (
           <button
+            aria-label="logout"
             onClick={handleLogout}
             className="flex items-center space-x-2 p-2 rounded text-gray-400 font-bold"
           >
@@ -236,6 +237,7 @@ const Landing = () => {
           </button>
         ) : (
           <GradientButton
+            aria-label="login"
             onClick={() => navigate('/sign-in')}
             className="py-2 px-8 text-base"
           >
@@ -322,6 +324,7 @@ const Landing = () => {
               transition={{ delay: 0.8, duration: 0.5 }}
             >
               <GradientButton
+                aria-label="start"
                 onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
                 className="text-lg py-3 px-8 hover:scale-105 transition-transform"
               >
@@ -433,6 +436,7 @@ const Landing = () => {
           당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
+          aria-label="start"
           onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-indigo-500 px-12 py-2 rounded font-semibold  relative z-10"
         >

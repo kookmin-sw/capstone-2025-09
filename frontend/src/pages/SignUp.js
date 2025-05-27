@@ -5,7 +5,6 @@ import axiosInstance from '../utils/axiosInstance';
 import { Eye, EyeOff } from 'lucide-react';
 import { User } from 'lucide-react';
 
-
 const SignUp = () => {
   const navigate = useNavigate();
 
@@ -101,7 +100,7 @@ const SignUp = () => {
             />
           ) : (
             <div className="w-24 h-24 mx-auto rounded-full bg-slate-50 flex items-center justify-center border mb-3">
-              <User className="w-10 h-10 text-gray-400"/>
+              <User className="w-10 h-10 text-gray-400" />
             </div>
           )}
           <label
@@ -155,11 +154,12 @@ const SignUp = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
+            aria-label="비밀번호 보기 버튼"
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute top-10 right-3 text-gray-500"
           >
-            {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </label>
 
@@ -172,17 +172,19 @@ const SignUp = () => {
             onChange={(e) => setPasswordConfirm(e.target.value)}
           />
           <button
+            aria-label="비밀번호 확인 보기 버튼"
             type="button"
             onClick={() => setShowPasswordConfirm((prev) => !prev)}
             className="absolute top-10 right-3 text-gray-500"
           >
-            {showPasswordConfirm ? <EyeOff size={18}/> : <Eye size={18}/>}
+            {showPasswordConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </label>
       </div>
 
       <div className="flex justify-center">
         <GradientButton
+          aria-label="회원가입 버튼"
           onClick={handleSignUp}
           className="w-1/2 py-2 px-4 text-sm"
           type="button"
@@ -194,6 +196,7 @@ const SignUp = () => {
       <p className="text-center text-sm text-gray-600">
         이미 계정이 있으신가요?{' '}
         <button
+          aria-label="로그인 버튼"
           onClick={() => navigate('/sign-in')}
           className="text-indigo-400 underline font-semibold"
         >

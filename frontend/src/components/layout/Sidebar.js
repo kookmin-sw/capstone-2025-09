@@ -85,6 +85,7 @@ const Sidebar = () => {
 
       {/* 하단: 로그아웃 버튼 */}
       <button
+        aria-label="로그아웃 버튼"
         onClick={handleLogout}
         className="flex items-center space-x-2 p-2 rounded text-gray-400"
       >

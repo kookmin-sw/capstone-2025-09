@@ -123,6 +123,7 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
 
       <div className="flex flex-col gap-4">
         <GradientButton
+          aria-label="오늘의 리포트 듣기 버튼"
           className="px-6 py-3"
           onClick={handleStart}
           disabled={loading || errorState || isPolling}
@@ -134,6 +135,7 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
               : '오늘의 리포트 듣기'}
         </GradientButton>
         <button
+          aria-label="설정 다시 하기 버튼"
           onClick={onEdit}
           className="text-sm underline text-slate-500 hover:text-slate-700"
         >
