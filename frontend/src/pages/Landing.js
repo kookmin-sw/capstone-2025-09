@@ -53,7 +53,7 @@ const Landing = () => {
 
   const contents = [
     {
-      badge: '베이직',
+      badge: '베이직 보이스',
       title: '텍스트를 바로 AI 보이스로',
       description:
         '보이스팩을 선택하고 원하는 문장을 입력하면\n즉시 나만의 음성으로 변환해줍니다.\n\n광고 멘트, 스크립트 연습 등 다양한 활용 가능!',
