@@ -16,9 +16,6 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
     return 'AI 리포터가 리포트를 준비했어요!';
   };
 
-  let hasLoggedStartTime = false;
-  const startTime = new Date();
-
   const handleStart = async () => {
     if (!user?.id) {
       setErrorState('no-session');
@@ -27,13 +24,6 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
 
     setLoading(true);
     try {
-      if (!hasLoggedStartTime) {
-        const hh = String(startTime.getHours()).padStart(2, '0');
-        const mm = String(startTime.getMinutes()).padStart(2, '0');
-        const ss = String(startTime.getSeconds()).padStart(2, '0');
-        hasLoggedStartTime = true;
-      }
-
       let requestId = localStorage.getItem('assistant-request-id');
 
       if (!requestId) {
