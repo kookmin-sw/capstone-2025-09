@@ -195,6 +195,7 @@ const RememberVoice = () => {
                       />
                     </div>
                     <button
+                      aria-label="영상 전체화면 보기"
                       onClick={handleFullscreen}
                       className="absolute top-1 right-1 p-1 bg-white bg-opacity-80 rounded-full hover:bg-opacity-100"
                     >
@@ -204,6 +205,7 @@ const RememberVoice = () => {
 
                   <div className="flex justify-center mt-2">
                     <button
+                      aria-label="영상 다시 선택하기"
                       onClick={() => {
                         setVideoFile(null);
                         setVideoUrl(null);
@@ -219,6 +221,7 @@ const RememberVoice = () => {
               {videoFile && (
                 <div className="w-full flex justify-end mt-2">
                   <GradientButton
+                    aria-label="영상 업로드"
                     className="px-3 py-1"
                     onClick={() => {
                       setDirection(1);
@@ -267,6 +270,7 @@ const RememberVoice = () => {
 
               <div className="flex justify-between">
                 <GradientButton
+                  aria-label="텍스트 수정하기"
                   className="px-3 py-1"
                   onClick={() => {
                     setDirection(-1);
@@ -276,6 +280,7 @@ const RememberVoice = () => {
                   이전
                 </GradientButton>
                 <GradientButton
+                  aria-label="텍스트 복원하기"
                   className="px-3 py-1"
                   onClick={handleRestore}
                   disabled={!scriptText}
@@ -310,6 +315,7 @@ const RememberVoice = () => {
                     <AudioPlayer audioUrl={audioUrl} />
                   </div>
                   <GradientButton
+                    aria-label="재생하기"
                     className="px-6 py-3"
                     onClick={() => {
                       const fileName =
@@ -328,6 +334,7 @@ const RememberVoice = () => {
               </div>
               <div className="flex justify-center space-x-4 mt-6">
                 <GradientButton
+                  aria-label="텍스트 수정하기"
                   className="px-4 py-2"
                   onClick={() => {
                     // 모든 상태 초기화
@@ -342,6 +349,7 @@ const RememberVoice = () => {
                   처음부터 다시하기
                 </GradientButton>
                 <GradientButton
+                  aria-label="텍스트 수정하기"
                   className="px-4 py-2"
                   onClick={() => {
                     setStep(2);

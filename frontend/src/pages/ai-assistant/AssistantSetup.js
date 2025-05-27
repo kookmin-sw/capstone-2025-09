@@ -98,42 +98,43 @@ const AssistantSetup = ({ setIsConfigured }) => {
         </div>
       </div>
 
-
       {/* 카테고리 */}
-        <div>
-          <p className="text-sm font-medium mb-2">카테고리 (최대 3개)</p>
-          <div className="flex gap-4 flex-wrap">
-            {CATEGORIES.map((name, i) => {
-              const selected = selectedCategories.includes(i);
-              return (
-                <button
-                  key={i}
-                  onClick={() => toggleCategory(i)}
-                  className={`px-6 py-2 rounded-md font-medium transition ${
-                    selected
-                      ? 'bg-[#A88BFF] text-white'
-                      : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {name}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 세팅 버튼 */}
-        <div className="flex justify-end">
-          <GradientButton
-            className="px-6 py-3"
-            onClick={handleSetting}
-            disabled={!isValid}
-          >
-            세팅하기
-          </GradientButton>
+      <div>
+        <p className="text-sm font-medium mb-2">카테고리 (최대 3개)</p>
+        <div className="flex gap-4 flex-wrap">
+          {CATEGORIES.map((name, i) => {
+            const selected = selectedCategories.includes(i);
+            return (
+              <button
+                aria-label="카테고리 선택 버튼"
+                key={i}
+                onClick={() => toggleCategory(i)}
+                className={`px-6 py-2 rounded-md font-medium transition ${
+                  selected
+                    ? 'bg-[#A88BFF] text-white'
+                    : 'border border-gray-300 bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                {name}
+              </button>
+            );
+          })}
         </div>
       </div>
-      );
-      };
 
-      export default AssistantSetup;
+      {/* 세팅 버튼 */}
+      <div className="flex justify-end">
+        <GradientButton
+          aria-label="세팅하기 버튼"
+          className="px-6 py-3"
+          onClick={handleSetting}
+          disabled={!isValid}
+        >
+          세팅하기
+        </GradientButton>
+      </div>
+    </div>
+  );
+};
+
+export default AssistantSetup;

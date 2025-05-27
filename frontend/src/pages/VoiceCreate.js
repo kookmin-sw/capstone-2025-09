@@ -327,12 +327,14 @@ const VoiceCreate = () => {
             )}
             <div className="flex justify-center space-x-2">
               <button
+                aria-label="보이스팩 삭제"
                 onClick={handleDelete}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
               >
                 보이스 삭제
               </button>
               <button
+                aria-label="보이스 공개"
                 onClick={async () => {
                   try {
                     await makePublic(voicepackId);
@@ -424,6 +426,7 @@ const VoiceCreate = () => {
           <div className="flex space-x-2 mb-6">
             {['남자', '여자', '기타'].map((gender) => (
               <button
+                aria-label="성별 선택"
                 key={gender}
                 type="button"
                 onClick={() => setGenderCategory(gender)}
@@ -492,6 +495,7 @@ const VoiceCreate = () => {
 
         <div className="flex items-center space-x-4">
           <button
+            aria-label="녹음 시작"
             onClick={isRecording ? handleStopRecording : handleStartRecording}
             className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg transition-colors duration-300 ${
               isRecording
@@ -504,6 +508,7 @@ const VoiceCreate = () => {
           </button>
 
           <button
+            aria-label="녹음 재생"
             onClick={togglePlay}
             className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition disabled:bg-gray-300"
             disabled={!audioBlob}
@@ -523,6 +528,7 @@ const VoiceCreate = () => {
 
       <div className="mt-6 flex justify-end">
         <GradientButton
+          aria-label="보이스팩 생성"
           className="px-6 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={handleCreateVoicePack}
           disabled={loading || !voicePackName.trim() || !audioBlob}

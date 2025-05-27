@@ -150,6 +150,7 @@ const VoicePackModal = ({
     <div className="fixed top-0 left-48 right-0 bottom-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-xl shadow-xl w-full max-w-[600px] flex flex-col sm:flex-row gap-6 relative">
         <button
+          aria-label="닫기 버튼"
           onClick={onClose}
           className="absolute top-2 right-4 text-gray-400 hover:text-black text-2xl font-light"
         >
@@ -194,6 +195,7 @@ const VoicePackModal = ({
                   [&::-webkit-slider-thumb]:cursor-pointer focus:outline-none"
               />
               <button
+                aria-label="재생/일시정지 버튼"
                 onClick={togglePlay}
                 className="w-10 h-10 rounded-full bg-indigo-500 text-white flex items-center justify-center text-lg hover:bg-indigo-600 transition"
               >
@@ -237,6 +239,7 @@ const VoicePackModal = ({
                   </p>
                 </div>
                 <button
+                  aria-label="구매 버튼"
                   className="mt-2 bg-gradient-to-r from-violet-400 to-indigo-500 text-white font-semibold text-sm sm:text-base py-1.5 sm:py-2 rounded-full hover:opacity-70 transition"
                   onClick={handlePurchase}
                 >
@@ -255,6 +258,7 @@ const VoicePackModal = ({
             {showEditDelete && (
               <>
                 <button
+                  aria-label="공개/비공개 버튼"
                   onClick={handleTogglePublic}
                   className={`relative inline-flex items-center w-20 h-8 rounded-full transition-colors duration-300 ${
                     isPublic ? 'bg-green-500' : 'bg-gray-300'
@@ -276,6 +280,7 @@ const VoicePackModal = ({
 
                 <div className="mt-4">
                   <button
+                    aria-label="삭제 버튼"
                     className="w-full bg-red-500 text-white font-semibold text-sm py-2 rounded-full hover:opacity-80 transition"
                     onClick={handleDelete}
                   >

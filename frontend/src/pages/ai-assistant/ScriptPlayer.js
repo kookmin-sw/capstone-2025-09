@@ -71,6 +71,7 @@ const ScriptPlayer = ({ onEdit }) => {
 
       <div className="flex justify-center">
         <button
+          aria-label="설정 다시 하기 버튼"
           onClick={onEdit}
           className="text-sm underline text-slate-500 hover:text-slate-700"
         >

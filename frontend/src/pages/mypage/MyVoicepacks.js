@@ -59,6 +59,7 @@ const MyVoicepacks = () => {
             <div className="flex justify-center mt-6 space-x-2">
               {Array.from({ length: totalPages }, (_, index) => (
                 <button
+                  aria-label="페이지 번호 버튼"
                   key={index}
                   onClick={() => {
                     setCurrentPage(index + 1);

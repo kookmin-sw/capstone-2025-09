@@ -14,12 +14,14 @@ const CreditTransactionTabs = ({ charges = [], usages = [] }) => {
     <div className="space-y-4 text-sm">
       <div className="flex space-x-4">
         <button
+          aria-label="유입 내역 버튼"
           onClick={() => setTab('charge')}
           className={`px-3 py-1 rounded ${tab === 'charge' ? 'bg-purple-200' : 'bg-gray-100'}`}
         >
           유입 내역
         </button>
         <button
+          aria-label="지출 내역 버튼"
           onClick={() => setTab('use')}
           className={`px-3 py-1 rounded ${tab === 'use' ? 'bg-purple-200' : 'bg-gray-100'}`}
         >

@@ -102,6 +102,7 @@ const MyPayments = () => {
             <option value={5000}>50,000원 (5000 크레딧)</option>
           </select>
           <button
+            aria-label="결제하기"
             onClick={handlePayment}
             className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
           >

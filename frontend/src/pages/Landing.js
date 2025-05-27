@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo-new.svg';
 import BlurBackgrounds from '../components/visual/BlurBackground';
@@ -53,7 +53,7 @@ const Landing = () => {
 
   const contents = [
     {
-      badge: '베이직',
+      badge: '베이직 보이스',
       title: '텍스트를 바로 AI 보이스로',
       description:
         '보이스팩을 선택하고 원하는 문장을 입력하면\n즉시 나만의 음성으로 변환해줍니다.\n\n광고 멘트, 스크립트 연습 등 다양한 활용 가능!',
@@ -228,6 +228,7 @@ const Landing = () => {
 
         {user ? (
           <button
+            aria-label="logout"
             onClick={handleLogout}
             className="flex items-center space-x-2 p-2 rounded text-gray-400 font-bold"
           >
@@ -236,6 +237,7 @@ const Landing = () => {
           </button>
         ) : (
           <GradientButton
+            aria-label="login"
             onClick={() => navigate('/sign-in')}
             className="py-2 px-8 text-base"
           >
@@ -261,19 +263,34 @@ const Landing = () => {
             transition={{ duration: 1 }}
           >
             <Canvas shadows camera={{ position: [0, 0, 6], fov: 50 }}>
-              <ambientLight intensity={0.3} />
-              <directionalLight
-                position={[5, 5, 5]}
-                intensity={1.2}
-                shadow-mapSize-width={1024}
-                shadow-mapSize-height={1024}
-              />
-              <WaveSphere />
-              <OrbitControls
-                enableZoom={false}
-                autoRotate
-                autoRotateSpeed={0.5}
-              />
+              <Suspense
+                fallback={
+                  <mesh>
+                    <torusGeometry args={[1, 0.3, 16, 100]} />
+                    <meshStandardMaterial
+                      color="#ffffff"
+                      emissive="#ffffff"
+                      emissiveIntensity={2}
+                      roughness={0.1}
+                      metalness={0.3}
+                    />
+                  </mesh>
+                }
+              >
+                <ambientLight intensity={0.3} />
+                <directionalLight
+                  position={[5, 5, 5]}
+                  intensity={1.2}
+                  shadow-mapSize-width={1024}
+                  shadow-mapSize-height={1024}
+                />
+                <WaveSphere />
+                <OrbitControls
+                  enableZoom={false}
+                  autoRotate
+                  autoRotateSpeed={0.5}
+                />
+              </Suspense>
             </Canvas>
           </motion.div>
 
@@ -307,6 +324,7 @@ const Landing = () => {
               transition={{ delay: 0.8, duration: 0.5 }}
             >
               <GradientButton
+                aria-label="start"
                 onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
                 className="text-lg py-3 px-8 hover:scale-105 transition-transform"
               >
@@ -328,7 +346,7 @@ const Landing = () => {
             나만의 보이스팩을 업로드하고 수익을 창출하세요
           </p>
 
-          {['top', 'bottom'].map((position, idx) => {
+          {['top', 'bottom'].map((position) => {
             const voicepackList =
               position === 'top' ? topVoicepacks : bottomVoicepacks;
 
@@ -418,6 +436,7 @@ const Landing = () => {
           당신의 AI 보이스를 만들어보세요.
         </h2>
         <button
+          aria-label="start"
           onClick={() => navigate(user ? '/voice-store' : '/sign-in')}
           className="bg-white text-indigo-500 px-12 py-2 rounded font-semibold  relative z-10"
         >

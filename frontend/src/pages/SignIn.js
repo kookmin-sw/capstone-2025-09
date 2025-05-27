@@ -49,6 +49,7 @@ const SignIn = () => {
             onChange={(e) => setPassword(e.target.value)}
           />
           <button
+            aria-label="비밀번호 보기 버튼"
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
             className="absolute top-10 right-3 text-gray-500"
@@ -60,6 +61,7 @@ const SignIn = () => {
 
       <div className="flex justify-center">
         <GradientButton
+          aria-label="로그인 버튼"
           onClick={handleSignIn}
           className="w-1/2 py-2 px-4 text-sm"
           type="button"
@@ -72,6 +74,7 @@ const SignIn = () => {
       <p className="text-center text-sm text-gray-600">
         계정이 없으신가요?{' '}
         <button
+          aria-label="회원가입 버튼"
           onClick={() => navigate('/join-agreement')}
           className="text-indigo-400 underline font-semibold"
         >

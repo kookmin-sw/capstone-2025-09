@@ -16,9 +16,6 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
     return 'AI 리포터가 리포트를 준비했어요!';
   };
 
-  let hasLoggedStartTime = false;
-  const startTime = new Date();
-
   const handleStart = async () => {
     if (!user?.id) {
       setErrorState('no-session');
@@ -27,13 +24,6 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
 
     setLoading(true);
     try {
-      if (!hasLoggedStartTime) {
-        const hh = String(startTime.getHours()).padStart(2, '0');
-        const mm = String(startTime.getMinutes()).padStart(2, '0');
-        const ss = String(startTime.getSeconds()).padStart(2, '0');
-        hasLoggedStartTime = true;
-      }
-
       let requestId = localStorage.getItem('assistant-request-id');
 
       if (!requestId) {
@@ -123,6 +113,7 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
 
       <div className="flex flex-col gap-4">
         <GradientButton
+          aria-label="오늘의 리포트 듣기 버튼"
           className="px-6 py-3"
           onClick={handleStart}
           disabled={loading || errorState || isPolling}
@@ -134,6 +125,7 @@ const AssistantReadyScreen = ({ onStart, onEdit }) => {
               : '오늘의 리포트 듣기'}
         </GradientButton>
         <button
+          aria-label="설정 다시 하기 버튼"
           onClick={onEdit}
           className="text-sm underline text-slate-500 hover:text-slate-700"
         >

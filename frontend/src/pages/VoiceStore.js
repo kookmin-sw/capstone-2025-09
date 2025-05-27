@@ -65,16 +65,20 @@ const VoiceStore = () => {
               value={sortOption}
               onChange={(value) => setSortOption(value)}
               options={[
-                {label: '이름순', value: 'name'},
-                {label: '최근 등록순', value: 'latest'},
-                {label: '오래된 등록순', value: 'oldest'},
+                { label: '이름순', value: 'name' },
+                { label: '최근 등록순', value: 'latest' },
+                { label: '오래된 등록순', value: 'oldest' },
               ]}
               placeholder="정렬"
             />
 
             <div className="flex w-full sm:flex-1 border border-gray-300 px-2 rounded-lg text-sm bg-white mt-1">
-              <button onClick={handleSearch} className="mr-2">
-                <Search className="w-5 h-5 text-gray-400"/>
+              <button
+                aria-label="검색 버튼"
+                onClick={handleSearch}
+                className="mr-2"
+              >
+                <Search className="w-5 h-5 text-gray-400" />
               </button>
               <input
                 type="search"
@@ -86,9 +90,7 @@ const VoiceStore = () => {
               />
             </div>
           </div>
-
         </div>
-
 
         <div className="min-h-screen">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-9 justify-center">
@@ -98,7 +100,7 @@ const VoiceStore = () => {
               </p>
             ) : (
               currentItems.map((pack) => (
-                <VoicePackCard key={pack.id} pack={pack} type="voicestore"/>
+                <VoicePackCard key={pack.id} pack={pack} type="voicestore" />
               ))
             )}
           </div>
@@ -106,12 +108,13 @@ const VoiceStore = () => {
           {/* 페이지네이션 UI */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-6 space-x-2">
-              {Array.from({length: totalPages}, (_, index) => (
+              {Array.from({ length: totalPages }, (_, index) => (
                 <button
+                  aria-label="페이지 번호 버튼"
                   key={index}
                   onClick={() => {
                     setCurrentPage(index + 1);
-                    window.scrollTo({top: 0, behavior: 'smooth'});
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   className={`px-3 py-1 rounded-md ${
                     currentPage === index + 1

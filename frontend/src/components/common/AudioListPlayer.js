@@ -1,13 +1,15 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import { Play, Pause } from 'lucide-react';
 
 const AudioListPlayer = ({ audioUrls }) => {
   const waveformRef = useRef(null);
   const wavesurfer = useRef(null);
+  const prevUrls = useRef([]);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState('00:00');
   const [duration, setDuration] = useState('00:00');
+  const [isLoading, setIsLoading] = useState(true);
 
   const formatTime = (seconds) => {
     if (isNaN(seconds)) return '00:00';
@@ -41,7 +43,7 @@ const AudioListPlayer = ({ audioUrls }) => {
     view.setUint32(offset, 16, true);
     offset += 4;
     view.setUint16(offset, 1, true);
-    offset += 2; // PCM
+    offset += 2;
     view.setUint16(offset, numChannels, true);
     offset += 2;
     view.setUint32(offset, sampleRate, true);
@@ -51,7 +53,7 @@ const AudioListPlayer = ({ audioUrls }) => {
     view.setUint16(offset, numChannels * 2, true);
     offset += 2;
     view.setUint16(offset, 16, true);
-    offset += 2; // bit depth
+    offset += 2;
     writeString(offset, 'data');
     offset += 4;
     view.setUint32(offset, length, true);
@@ -74,35 +76,34 @@ const AudioListPlayer = ({ audioUrls }) => {
   };
 
   const loadMergedAudio = async () => {
+    if (JSON.stringify(prevUrls.current) === JSON.stringify(audioUrls)) return;
+    prevUrls.current = audioUrls;
+    setIsLoading(true);
+
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const decodedBuffers = [];
 
     for (const url of audioUrls) {
       try {
         const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const arrayBuffer = await res.arrayBuffer();
         const decoded = await ctx.decodeAudioData(arrayBuffer);
-        if (decoded.numberOfChannels > 0) {
-          decodedBuffers.push(decoded);
-        } else {
-          console.warn(`⚠️ Skipped (0 channel): ${url}`);
-        }
+        if (decoded.numberOfChannels > 0) decodedBuffers.push(decoded);
       } catch (e) {
         console.warn(`❌ Failed to decode ${url}`, e);
       }
     }
 
-    if (decodedBuffers.length === 0) {
+    if (!decodedBuffers.length) {
       console.error('❌ No valid audio to merge.');
+      ctx.close();
       return;
     }
 
     const totalLength = decodedBuffers.reduce((sum, b) => sum + b.length, 0);
     const channels = Math.max(...decodedBuffers.map((b) => b.numberOfChannels));
-    if (!channels) return;
-
     const merged = ctx.createBuffer(channels, totalLength, ctx.sampleRate);
+
     let offset = 0;
     for (const buf of decodedBuffers) {
       for (let ch = 0; ch < channels; ch++) {
@@ -117,15 +118,8 @@ const AudioListPlayer = ({ audioUrls }) => {
     const blob = encodeWav(merged);
     const wavUrl = URL.createObjectURL(blob);
 
-    // 안전하게 DOM 렌더 이후에 WaveSurfer 생성
-    setTimeout(() => {
-      if (!waveformRef.current) {
-        console.warn('Waveform container not ready');
-        return;
-      }
-
-      if (wavesurfer.current) wavesurfer.current.destroy();
-
+    // WaveSurfer 초기화 또는 재사용
+    if (!wavesurfer.current) {
       wavesurfer.current = WaveSurfer.create({
         container: waveformRef.current,
         waveColor: '#c7d2fe',
@@ -136,23 +130,29 @@ const AudioListPlayer = ({ audioUrls }) => {
         barGap: 1.5,
         responsive: true,
       });
+    } else {
+      wavesurfer.current.unAll();
+      wavesurfer.current.empty();
+    }
 
-      wavesurfer.current.load(wavUrl);
+    wavesurfer.current.load(wavUrl);
+    URL.revokeObjectURL(wavUrl); // GC 최적화
 
-      wavesurfer.current.on('ready', () => {
-        setDuration(formatTime(wavesurfer.current.getDuration()));
-        setCurrentTime('00:00');
-      });
+    wavesurfer.current.on('ready', () => {
+      setDuration(formatTime(wavesurfer.current.getDuration()));
+      setCurrentTime('00:00');
+      setIsLoading(false);
+    });
 
-      wavesurfer.current.on('audioprocess', () => {
-        const t = wavesurfer.current.getCurrentTime();
-        setCurrentTime(formatTime(t));
-      });
+    wavesurfer.current.on('audioprocess', () => {
+      setCurrentTime(formatTime(wavesurfer.current.getCurrentTime()));
+    });
 
-      wavesurfer.current.on('finish', () => {
-        setIsPlaying(false);
-      });
-    }, 0);
+    wavesurfer.current.on('finish', () => {
+      setIsPlaying(false);
+    });
+
+    await ctx.close();
   };
 
   const togglePlay = () => {
@@ -168,15 +168,20 @@ const AudioListPlayer = ({ audioUrls }) => {
 
   useEffect(() => {
     loadMergedAudio();
-    return () => wavesurfer.current?.destroy();
+    return () => {
+      wavesurfer.current?.destroy();
+      wavesurfer.current = null;
+    };
   }, [audioUrls]);
 
   return (
     <div className="w-full flex flex-col space-y-4 px-6 py-5">
       <div className="flex items-center justify-between space-x-4">
         <button
+          aria-label="Play/Pause"
           onClick={togglePlay}
           className="w-12 h-12 rounded-full bg-indigo-500 text-white text-xl flex items-center justify-center shadow-md hover:bg-indigo-300 transition"
+          disabled={isLoading}
         >
           {isPlaying ? <Pause /> : <Play />}
         </button>
@@ -187,7 +192,7 @@ const AudioListPlayer = ({ audioUrls }) => {
           />
         </div>
         <span className="text-indigo-500 font-semibold whitespace-nowrap w-[120px] text-right">
-          {currentTime} / {duration}
+          {isLoading ? 'Loading...' : `${currentTime} / ${duration}`}
         </span>
       </div>
     </div>

@@ -32,15 +32,17 @@ const useVoicepackQuote = () => {
         },
       });
 
-      const location = response.headers.location;
+      const rawLocation = response.headers.location;
 
-      if (!location) {
+      if (!rawLocation) {
         throw new Error("Location 헤더가 없습니다.");
       }
 
+      const location = rawLocation.replace("http://", "https://");
+
       return {
-        ...response.data,  // 기존 데이터도 그대로 유지
-        location,          // location 추가
+        ...response.data,
+        location,
       };
     } catch (err) {
       console.error('보이스팩 quote 생성 오류:', err);

@@ -31,7 +31,6 @@ export const useSignin = () => {
           voicepacks,
         });
 
-        alert(data.message || '로그인 성공!');
         navigate('/voice-store');
       } else {
         alert('로그인 실패: 알 수 없는 오류 발생');

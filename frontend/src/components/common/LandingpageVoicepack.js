@@ -33,13 +33,13 @@ const LandingpageVoicepack = ({ name = '보이스팩 이름', gradient }) => {
           />
         </div>
         <div className="flex items-center justify-between text-indigo-500">
-          <button className="p-1 rounded">
+          <button aria-label="플레이버튼" className="p-1 rounded">
             <Play size={18} />
           </button>
           <p className="text-xs text-gray-500">
             {current} / {total}
           </p>
-          <button className="p-1 rounded">
+          <button aria-label="일시정지버튼" className="p-1 rounded">
             <Pause size={18} />
           </button>
         </div>
