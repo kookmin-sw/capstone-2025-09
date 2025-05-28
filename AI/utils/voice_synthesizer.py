@@ -56,6 +56,24 @@ class VoiceSynthesizer:
             is_safe, sentences = convert_text(text)
 
             if not is_safe:
+                detected_profanities = []
+                for sentence in sentences:
+                    start_index = 0
+                    while True:
+                        profanity_start = sentence.find("**", start_index)
+                        if profanity_start == -1:
+                            break
+                        profanity_end = sentence.find("**", profanity_start + 2)
+                        if profanity_end == -1: # 짝이 맞지 않는 경우, 오류로 간주하고 다음으로 넘어감
+                            break
+                        detected_profanities.append(sentence[profanity_start + 2:profanity_end])
+                        start_index = profanity_end + 2
+                
+                if detected_profanities:
+                    logger.warning(f"욕설 감지: {', '.join(detected_profanities)}. 음성 합성을 중단합니다. 원본 텍스트: {text}")
+                else:
+                    # 프롬프트 규칙에 따라 **로 표시된 부분이 없을 수도 있으므로, 일반적인 경고 메시지를 남깁니다.
+                    logger.warning(f"안전하지 않은 텍스트 감지 (is_safe=False), 그러나 특정 욕설 어절이 **로 표시되지 않았습니다. 음성 합성을 중단합니다. 원본 텍스트: {text}")
                 raise ValueError("부적절한 표현이 감지되어 음성 합성을 진행할 수 없습니다.")
 
             total_sentences = len(sentences)
