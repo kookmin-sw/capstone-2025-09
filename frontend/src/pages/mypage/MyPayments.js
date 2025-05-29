@@ -61,7 +61,7 @@ const MyPayments = () => {
       });
       alert(`${selectedAmount} 크레딧이 충전되었습니다.`);
       setCurrentCredit((prev) => prev + selectedAmount);
-      // 새로 고침 없이 최신 데이터 반영을 원하면 fetchAll 재호출
+      setCharged((prev) => prev + selectedAmount);
     } catch (err) {
       alert('결제에 실패했습니다. 다시 시도해주세요.');
     }

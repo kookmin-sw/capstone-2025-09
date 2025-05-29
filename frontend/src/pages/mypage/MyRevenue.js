@@ -71,12 +71,26 @@ const MyRevenue = () => {
     fetchData();
   }, [user?.id]);
 
+  const salesCountMap = new Map();
+
+  // 판매 데이터에서 보이스팩 이름별 판매 건수 집계
+  sales.forEach(({ voicepackName }) => {
+    salesCountMap.set(
+      voicepackName,
+      (salesCountMap.get(voicepackName) || 0) + 1
+    );
+  });
+
+  // labels, data 분리
+  const labels = Array.from(salesCountMap.keys());
+  const data1 = Array.from(salesCountMap.values());
+
   const salesByVoicepack = {
-    labels: sales.map((s) => s.voicepackName),
+    labels,
     datasets: [
       {
         label: '판매 건수',
-        data: sales.map(() => 1), // 각각 1건씩
+        data: data1,
         backgroundColor: 'rgba(99, 102, 241, 0.6)',
       },
     ],
@@ -115,8 +129,8 @@ const MyRevenue = () => {
     });
   }, [sales]);
 
-  const data = monthlyRevenueData.datasets[0].data;
-  const allZero = data.every((v) => v === 0);
+  const data2 = monthlyRevenueData.datasets[0].data;
+  const allZero = data2.every((v) => v === 0);
 
   const yScaleOptions = allZero
     ? {
