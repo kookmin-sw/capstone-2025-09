@@ -38,6 +38,8 @@ function App() {
               <Route path="/quote" element={<Quote />} />
               <Route path="/remember-voice" element={<RememberVoice />} />
             </Route>
+
+            <Route path="*" element={<div>잘못된 접근입니다.</div>} />
           </Routes>
         </Layout>
       </Suspense>
