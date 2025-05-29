@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Landing from './pages/Landing';
+import ProtectedRoute from './components/layout/ProtectedRoute';
 
 // Lazy-loaded 페이지 컴포넌트
 const SignIn = lazy(() => import('./pages/SignIn'));
@@ -21,17 +22,22 @@ function App() {
       <Suspense fallback={<div>로딩 중...</div>}>
         <Layout>
           <Routes>
+            {/* 비회원도 접근 가능한 라우트 */}
             <Route path="/" element={<Landing />} />
             <Route path="/sign-in" element={<SignIn />} />
             <Route path="/sign-up" element={<SignUp />} />
-            <Route path="/basic-voice" element={<BasicVoice />} />
-            <Route path="/ai-assistant" element={<Index />} />
-            <Route path="/voice-create" element={<VoiceCreate />} />
-            <Route path="/voice-store" element={<VoiceStore />} />
-            <Route path="/mypage" element={<MyPage />} />
-            <Route path="/quote" element={<Quote />} />
             <Route path="/join-agreement" element={<JoinAgreement />} />
-            <Route path="/remember-voice" element={<RememberVoice />} />
+
+            {/* 로그인 필요 라우트 */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/basic-voice" element={<BasicVoice />} />
+              <Route path="/ai-assistant" element={<Index />} />
+              <Route path="/voice-create" element={<VoiceCreate />} />
+              <Route path="/voice-store" element={<VoiceStore />} />
+              <Route path="/mypage" element={<MyPage />} />
+              <Route path="/quote" element={<Quote />} />
+              <Route path="/remember-voice" element={<RememberVoice />} />
+            </Route>
           </Routes>
         </Layout>
       </Suspense>
