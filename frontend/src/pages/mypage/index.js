@@ -1,24 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import MyDashboard from './MyDashboard';
 import MyVoicepacks from './MyVoicepacks';
 import MyRevenue from './MyRevenue';
 import MyPayments from './MyPayments';
 import useUserStore from '../../utils/userStore';
 import useVoicepackUsage from '../../hooks/useVoicepackUsage';
-import { useNavigate } from 'react-router-dom';
 
 const MyPage = () => {
   const [tab, setTab] = useState('dashboard');
-  const navigate = useNavigate();
-
   const user = useUserStore((state) => state.user);
-
-  // 로그인 안했다면 자동 리다이렉트
-  useEffect(() => {
-    if (!user) {
-      navigate('/sign-in');
-    }
-  }, [user, navigate]);
 
   const { voicepacks: boughtVoicepacks } = useVoicepackUsage('purchased');
 
