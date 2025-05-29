@@ -63,8 +63,6 @@ const MyRevenue = () => {
           },
         });
         setSales(salesRes.data.content || []);
-
-        console.log(salesRes.data.content);
       } catch (err) {
         console.error('판매 데이터 조회 실패:', err);
       }
