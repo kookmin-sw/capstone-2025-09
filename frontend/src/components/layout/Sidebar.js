@@ -23,10 +23,10 @@ const Sidebar = () => {
       : 'text-gray-400';
 
   const handleLogout = () => {
+    navigate('/', { replace: true });
     clearUser();
     sessionStorage.clear();
     localStorage.clear();
-    navigate('/'); // 랜딩 페이지로 이동
   };
 
   return (
