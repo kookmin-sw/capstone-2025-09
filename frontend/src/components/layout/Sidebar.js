@@ -22,13 +22,17 @@ const Sidebar = () => {
       ? 'bg-slate-50 text-indigo-500'
       : 'text-gray-400';
 
-  const handleLogout = () => {
-    navigate('/', { replace: true });
-    clearUser();
+  const handleLogout = async () => {
+    const store = useUserStore.getState();
+    store.setIsLoggingOut(true); // 1. 로그아웃 중 플래그 설정
+    store.clearUser(); // 2. 유저 정보 제거
     sessionStorage.clear();
     localStorage.clear();
+    navigate('/', { replace: true }); // 3. 랜딩 페이지로 이동
+    setTimeout(() => {
+      store.setIsLoggingOut(false); // 4. 잠시 후 로그아웃 상태 해제
+    }, 100);
   };
-
   return (
     <div className="fixed top-0 left-0 w-48 bg-white p-4 flex flex-col justify-between h-screen shadow-md z-20">
       {/* 상단: 로고 + 메뉴들 */}
