@@ -1,5 +1,5 @@
 # jdk17 Image Start
-FROM openjdk:17
+FROM eclipse-temurin:17-jdk-alpine
 
 # jar 파일 복제
 COPY build/libs/*.jar app.jar
